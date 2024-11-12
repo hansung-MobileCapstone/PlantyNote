@@ -1,3 +1,81 @@
+### IntelliJ IDEA ###
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+
+### Eclipse ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+### VS Code ###
+.vscode/
+
+### Mac OS ###
+.DS_Store
+
+### Flutter/Dart ###
+**/doc/api/                 # API 문서 디렉토리
+**/ios/Flutter/.last_build_id # iOS 빌드 ID 파일
+.dart_tool/                 # Dart 도구 디렉토리
+.flutter-plugins           # Flutter 플러그인 설정 파일
+.flutter-plugins-dependencies # Flutter 플러그인 종속성 파일
+.packages                  # Dart 패키지 설정 파일
+.pub-cache/               # Pub 캐시 디렉토리
+.pub/                     # Pub 디렉토리
+/build/                   # 빌드 출력 디렉토리
+coverage/                 # 테스트 커버리지 리포트
+lib/generated_plugin_registrant.dart # 생성된 플러그인 등록 파일
+
+### Android ###
+**/android/**/gradle-wrapper.jar    # Gradle 래퍼 JAR
+**/android/.gradle                  # Gradle 캐시 디렉토리
+**/android/captures/                # 안드로이드 캡처 파일
+**/android/gradlew                  # Gradle 래퍼 스크립트
+**/android/gradlew.bat             # Windows용 Gradle 래퍼 스크립트
+**/android/local.properties        # 로컬 속성 파일
+**/android/**/GeneratedPluginRegistrant.java # 생성된 플러그인 등록 파일
+
+### iOS ###
+**/ios/**/*.mode1v3       # Xcode 워크스페이스 설정
+**/ios/**/*.mode2v3
+**/ios/**/*.moved-aside
+**/ios/**/*.pbxuser
+**/ios/**/*.perspectivev3
+**/ios/**/*sync/
+**/ios/**/.sconsign.dblite
+**/ios/**/.tags*
+**/ios/**/.vagrant/
+**/ios/**/DerivedData/
+**/ios/**/Icon?
+**/ios/**/Pods/
+**/ios/**/.symlinks/
+**/ios/**/profile
+**/ios/**/xcuserdata
+**/ios/.generated/
+**/ios/Flutter/App.framework
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/app.flx
+**/ios/Flutter/app.zip
+**/ios/Flutter/flutter_assets/
+**/ios/ServiceDefinitions.json
+**/ios/Runner/GeneratedPluginRegistrant.*
+
 # Gradle files
 .gradle/
 build/
