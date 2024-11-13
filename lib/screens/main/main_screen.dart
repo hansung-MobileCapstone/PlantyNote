@@ -17,6 +17,18 @@ class MainScreen extends StatelessWidget {
             ),
           ],
         ),
+        body: SingleChildScrollView(
+          child: Center (
+            child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  _searchBar(),
+                  SizedBox(height: 18),
+                ]
+            ),
+          ),
+
+        ),
       ),
     );
   }
@@ -36,11 +48,32 @@ class MainScreen extends StatelessWidget {
           style: TextStyle(
             fontSize: 23,
             color: Color(0xFF434343),
-            fontWeight: FontWeight.bold, // Bold 적용
-            fontStyle: FontStyle.italic, // Italic 적용
+            fontWeight: FontWeight.bold,
+            fontStyle: FontStyle.italic,
           ),
         ),
       ],
+    );
+  }
+
+  // 검색 바
+  Widget _searchBar() {
+    return Container(
+      width: 360,
+      height: 35,
+      decoration: BoxDecoration(
+        color: Color(0x264B7E5B), // 투명도15%
+        borderRadius: BorderRadius.circular(15), // 15둥글게
+      ),
+      child: TextField(
+        decoration: InputDecoration(
+          hintText: '궁금한 식물을 검색해 보세요!',
+          hintStyle: TextStyle(color: Color(0xFFB3B3B3)),
+          suffixIcon: Icon(Icons.search), // 오른쪽에 배치
+          contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 20),
+          border: InputBorder.none, // 테두리 제거
+        ),
+      ),
     );
   }
 }
