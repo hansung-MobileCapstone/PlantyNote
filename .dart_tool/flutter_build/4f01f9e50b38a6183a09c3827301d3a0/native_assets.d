@@ -1,0 +1,1 @@
+ C:\\PlantyNote\\.dart_tool\\flutter_build\\4f01f9e50b38a6183a09c3827301d3a0\\native_assets.yaml: 
