@@ -20,10 +20,10 @@ class MainScreen extends StatelessWidget {
         body: SingleChildScrollView(
           child: Center (
             child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   _searchBar(),
                   SizedBox(height: 18),
+                  _mainContent()
                 ]
             ),
           ),
@@ -74,6 +74,34 @@ class MainScreen extends StatelessWidget {
           border: InputBorder.none, // 테두리 제거
         ),
       ),
+    );
+  }
+
+  // 메인 컨텐츠 (광고멘트, 이미지)
+  Widget _mainContent() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: EdgeInsets.only(left: 40),
+          child: Text(
+            '누구나 몬스테라를\n쉽고 예쁘게\n키울 수 있도록.',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+        ),
+        SizedBox(height: 25),
+        Center(
+          child: ClipRRect( // boder-radius 주기 위함
+            borderRadius: BorderRadius.circular(10),
+            child: Image.asset(
+              'assets/images/main_plant.png', // 이미지 경로
+              width: 220,
+              height: 270,
+              fit: BoxFit.fill, // 전체 채우기, cover도 가능
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
