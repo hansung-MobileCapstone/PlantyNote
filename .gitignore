@@ -78,6 +78,9 @@ lib/generated_plugin_registrant.dart # 생성된 플러그인 등록 파일
 
 # Gradle files
 .gradle/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
 build/
 
 # Local configuration file (sdk path, etc)
