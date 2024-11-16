@@ -1,8 +1,22 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import '../../widgets/components/bottom_navigation_bar.dart';
 
-class MainScreen extends StatelessWidget {
+class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
+
+  @override
+  State<MainScreen> createState() => _MainScreenState();
+}
+
+class _MainScreenState extends State<MainScreen> {
+  int _selectedIndex = 1; // 네비게이션바 인덱스
+
+  void _onItemTapped(int index) { // 인덱스 상태관리
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +47,10 @@ class MainScreen extends StatelessWidget {
               ]
           ),
         ),
-        bottomNavigationBar: BottomAppBar(), // 하단바
+        bottomNavigationBar: MyBottomNavigationBar(
+          selectedIndex: _selectedIndex,
+          onItemTapped: _onItemTapped,
+        ), // 하단바
       ),
     );
   }
