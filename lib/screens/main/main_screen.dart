@@ -35,16 +35,20 @@ class _MainScreenState extends State<MainScreen> {
             ),
           ],
         ),
-        body: SingleChildScrollView(
-          child: Column(
+        body: SafeArea(
+          bottom: false, // 네비게이션바 영역 제외
+          child: SingleChildScrollView(
+            child: Column(
               children: [
                 SizedBox(height: 5),
-                _searchBar(), // 검색바
+                _searchBar(),
                 SizedBox(height: 18),
-                _mainContent(), // 중앙콘텐츠
+                _mainContent(),
                 SizedBox(height: 50),
-                _recentPosts(), // 최근게시물
-              ]
+                _recentPosts(),
+                SizedBox(height: 10),
+              ],
+            ),
           ),
         ),
         bottomNavigationBar: MyBottomNavigationBar(
@@ -66,10 +70,11 @@ class _MainScreenState extends State<MainScreen> {
           height: 32, // 로고 크기를 조정
         ),
         SizedBox(width: 7), // 로고와 텍스트 간격
-        Text('PlantyNote',
+        Text(
+          'PlantyNote',
           style: TextStyle(
             fontSize: 23,
-            color: Color(0xFF434343),
+            color: const Color(0xFF434343),
             fontWeight: FontWeight.bold,
             fontStyle: FontStyle.italic,
           ),
@@ -80,20 +85,22 @@ class _MainScreenState extends State<MainScreen> {
 
   // 검색 바
   Widget _searchBar() {
-    return Container(
-      width: 380,
-      height: 35,
-      decoration: BoxDecoration(
-        color: Color(0x264B7E5B), // 투명도15%
-        borderRadius: BorderRadius.circular(15), // 15둥글게
-      ),
-      child: TextField(
-        decoration: InputDecoration(
-          hintText: '궁금한 식물을 검색해 보세요!',
-          hintStyle: TextStyle(color: Color(0xFFB3B3B3)),
-          suffixIcon: Icon(Icons.search), // 오른쪽에 배치
-          contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 20),
-          border: InputBorder.none, // 테두리 제거
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16), // 화면 끝과 일정한 간격 유지
+      child: Container(
+        height: 35, // 고정된 높이
+        decoration: BoxDecoration(
+          color: const Color(0x264B7E5B), // 투명도 15%
+          borderRadius: BorderRadius.circular(15), // 둥근 모서리
+        ),
+        child: TextField(
+          decoration: InputDecoration(
+            hintText: '궁금한 식물을 검색해 보세요!',
+            hintStyle: const TextStyle(color: Color(0xFFB3B3B3)),
+            suffixIcon: const Icon(Icons.search), // 오른쪽에 배치
+            contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 20),
+            border: InputBorder.none, // 테두리 제거
+          ),
         ),
       ),
     );
@@ -105,24 +112,25 @@ class _MainScreenState extends State<MainScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          padding: EdgeInsets.only(left: 40),
-          child: Text(
+          padding: const EdgeInsets.only(left: 40),
+          child: const Text(
             '누구나 몬스테라를\n쉽고 예쁘게\n키울 수 있도록.',
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
         ),
-        SizedBox(height: 25),
+        const SizedBox(height: 25),
         Center(
-          child: ClipRRect( // boder-radius 주기 위함
-            borderRadius: BorderRadius.circular(10),
+          child: ClipRRect( // border-radius 주기 위함
+            borderRadius: BorderRadius.circular(10), // 둥근 모서리
             child: Image.asset(
               'assets/images/main_plant.png', // 이미지 경로
-              width: 220,
-              height: 270,
-              fit: BoxFit.fill, // 전체 채우기, cover도 가능
+              width: MediaQuery.of(context).size.width * 0.6, // 화면 너비의 60%
+              height: (MediaQuery.of(context).size.width * 0.6) * (270 / 220), // 고정 비율
+              fit: BoxFit.fill, // 전체 채우기
             ),
           ),
         ),
+
       ],
     );
   }
@@ -132,7 +140,7 @@ class _MainScreenState extends State<MainScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
+        const Padding(
           padding: EdgeInsets.only(left: 20, right: 20),
           child: Row(
             children: [
@@ -145,64 +153,90 @@ class _MainScreenState extends State<MainScreen> {
             ],
           ),
         ),
-        SizedBox(height: 10),
+        const SizedBox(height: 15), // 간격을 화면 크기에 상관없이 고정
         _makeCarousel(), // 캐러셀
       ],
     );
   }
 
-  // 케러셀
-  Widget _makeCarousel() {
-    return Padding(
-        padding: EdgeInsets.symmetric(horizontal: 20),
-        child : CarouselSlider(
-          options: CarouselOptions(
-            height: 190, // 높이 설정
-            enlargeCenterPage: false, // 페이지 확대 안함
-            enableInfiniteScroll: false, // 무한스크롤 안함
-            autoPlay: false, // 자동슬라이드 안함
-            initialPage: 1,
-            viewportFraction: 0.4, // 각 게시물간 간격
-          ),
-
-          items: [ // 예시 게시물
-            _postItem('팥이', '몬스테라', 'assets/images/sample_post.png'),
-            _postItem('콩이', '레몬나무', 'assets/images/sample_post.png'),
-            _postItem('그루트', '금전수', 'assets/images/sample_post.png'),
-            _postItem('팥이', '몬스테라', 'assets/images/sample_post.png'),
-            _postItem('콩이', '레몬나무', 'assets/images/sample_post.png'),
-          ],
-        ),
-    );
-  }
-
   // 각 게시물
   Widget _postItem(String name, String species, String imageUrl) {
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final double maxItemWidth = 160; // 최대 아이템 너비 제한
+    final double itemWidth = (screenWidth * 0.3).clamp(100, maxItemWidth);
+    final double itemHeight = itemWidth * (120 / 130); // 고정 비율
+
     return Container(
+      width: itemWidth,
+      margin: const EdgeInsets.symmetric(horizontal: 9), // 간격 고정
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10), // 둥근 모서리
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          // 이미지
           ClipRRect(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(10), // 둥근 모서리
             child: Image.asset(
               imageUrl,
-              width: 130,
-              height: 130,
-              fit: BoxFit.fill,
+              width: itemWidth,
+              height: itemHeight,
+              fit: BoxFit.cover,
             ),
           ),
-          SizedBox(height: 5),
+          const SizedBox(height: 8), // 간격 고정
+          // 종 텍스트
           Text(
             species,
-            style: TextStyle(fontSize: 9, color: Color(0xFF757575)),
+            style: const TextStyle(fontSize: 12, color: Colors.grey), // 텍스트 스타일
           ),
+          // 이름 텍스트
           Text(
             name,
-            style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold), // 텍스트 스타일
           ),
         ],
       ),
     );
   }
+
+// 캐러셀
+  Widget _makeCarousel() {
+    const double itemSpacing = 16; // 게시물 간 간격
+    const double maxViewportFraction = 0.4; // 최대 viewportFraction 제한
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final double itemWidth = (screenWidth * 0.3).clamp(100, 160);
+    final double viewportFraction = (itemWidth + itemSpacing) / screenWidth;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20), // 캐러셀 전체 패딩
+      child: CarouselSlider.builder(
+        itemCount: 6, // 게시물 수
+        itemBuilder: (context, index, realIndex) {
+          final items = [ // 예시 데이터
+            {'name': '팥이', 'species': '몬스테라', 'imageUrl': 'assets/images/sample_post.png'},
+            {'name': '콩이', 'species': '레몬나무', 'imageUrl': 'assets/images/sample_post.png'},
+            {'name': '그루트', 'species': '금전수', 'imageUrl': 'assets/images/sample_post.png'},
+            {'name': '팥이', 'species': '몬스테라', 'imageUrl': 'assets/images/sample_post.png'},
+            {'name': '콩이', 'species': '레몬나무', 'imageUrl': 'assets/images/sample_post.png'},
+            {'name': '그루트', 'species': '금전수', 'imageUrl': 'assets/images/sample_post.png'},
+          ];
+          final item = items[index];
+          return _postItem(item['name']!, item['species']!, item['imageUrl']!);
+        },
+        options: CarouselOptions(
+          height: 200, // 캐러셀 높이
+          viewportFraction: viewportFraction.clamp(0.2, maxViewportFraction),
+          enableInfiniteScroll: false, // 무한 스크롤 비활성화
+          autoPlay: false, // 자동 스크롤 비활성화
+          enlargeCenterPage: false, // 가운데 아이템 확대 비활성화
+          initialPage: 2,
+        ),
+      ),
+    );
+  }
+
+
 
 }
