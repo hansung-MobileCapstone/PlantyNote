@@ -26,7 +26,50 @@ class _PostCreateScreenState extends State<PostCreateScreen> {
         backgroundColor: Colors.white,
         elevation: 0,
       ),
+      bottomNavigationBar: _bottomButton(),
+    );
+  }
 
+  // 취소, 완료 버튼
+  Widget _bottomButton() {
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        children: [
+          Expanded(
+            flex: 3,
+            child: ElevatedButton(
+              onPressed: () {},
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xFFE6E6E6), // 취소 버튼 배경색
+                foregroundColor: Colors.black, // 취소 버튼 텍스트 색상
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              child: Text('취소'),
+            ),
+          ),
+          SizedBox(width: 10), // 버튼 간격
+          Expanded(
+            flex: 7,
+            child: ElevatedButton(
+              onPressed: () {
+                // 완료 버튼 동작 추가
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xFF4B7E5B), // 완료 버튼 배경색
+                foregroundColor: Colors.white, // 완료 버튼 텍스트 색상
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              child: Text('완료'),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
