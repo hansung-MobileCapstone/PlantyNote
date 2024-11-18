@@ -86,9 +86,33 @@ class _MyPageScreenState extends State<MyPageEditScreen> {
                     children: [
                       Padding(
                         padding: EdgeInsets.only(left: 8.0),
-                        child: CircleAvatar(
-                          radius: 50,
-                          backgroundImage: AssetImage('assets/profile_image.png'),
+                        child: Stack(
+                          alignment: Alignment.center, // 수정 아이콘 위치 설정 (오른쪽 하단)
+                          children: [
+                            // 기존의 프로필 이미지
+                            CircleAvatar(
+                              radius: 50,
+                              backgroundImage: AssetImage('assets/images/profile_image.png'),
+                            ),
+                            // 수정 아이콘 추가
+                            Positioned(
+                              bottom: 0, // 프로필 사진의 하단
+                              right: 0, // 프로필 사진의 오른쪽
+                              child: GestureDetector(
+                                onTap: () {
+                                  print("Edit button clicked"); // 아이콘 클릭 시 동작
+                                },
+                                child: CircleAvatar(
+                                  radius: 50, // 수정 아이콘 크기 조절
+                                  child: Image.asset(
+                                    'assets/images/image_edit.png', // 수정 아이콘 경로
+                                    width: 20,
+                                    height: 20,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       SizedBox(width: 16),
