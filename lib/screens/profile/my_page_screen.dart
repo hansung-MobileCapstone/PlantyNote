@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'my_page_edit_screen.dart';
 
 class MyPageScreen extends StatefulWidget {
   @override
@@ -18,10 +19,10 @@ class _MyPageScreenState extends State<MyPageScreen> {
 
   // 이미지 경로 리스트
   final List<String> imagePaths = [
-    'assets/plant1.png',
-    'assets/plant2.png',
-    'assets/plant3.png',
-    'assets/plant4.png',
+    'assets/images/plant1.png',
+    'assets/images/plant1.png',
+    'assets/images/plant1.png',
+    'assets/images/plant1.png'
     // 추가 이미지 경로
   ];
 
@@ -29,6 +30,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+      // AppBar 설정은 이전과 동일합니다.
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -60,6 +62,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
           ),
         ],
       ),
+      // Body 설정
       body: Padding(
         padding: const EdgeInsets.only(top: 20.0, right: 25.0, left: 25.0),
         child: Column(
@@ -74,6 +77,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
               ),
               child: Stack(
                 children: [
+                  // 프로필 정보
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
@@ -110,13 +114,20 @@ class _MyPageScreenState extends State<MyPageScreen> {
                       ),
                     ],
                   ),
+                  // 프로필 수정 버튼과 식물 개수
                   Positioned(
                     bottom: 0,
                     right: 0,
                     child: Row(
                       children: [
                         ElevatedButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            // 프로필 수정 화면으로 이동
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => MyPageEditScreen()),
+                            );
+                          },
                           child: Text('프로필 수정'),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.green[800],
@@ -125,7 +136,8 @@ class _MyPageScreenState extends State<MyPageScreen> {
                         ),
                         SizedBox(width: 8),
                         Container(
-                          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding:
+                          EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(12),
@@ -148,6 +160,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
                 ],
               ),
             ),
+
             SizedBox(height: 12),
             Divider(
               color: Colors.grey,
@@ -188,6 +201,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
           ],
         ),
       ),
+
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.white,
         elevation: 0, // 경계선 제거
