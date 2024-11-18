@@ -203,62 +203,20 @@ class _MyPageScreenState extends State<MyPageEditScreen> {
         ),
       ),
 
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.white,
-        elevation: 0, // 경계선 제거
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        items: [
-          BottomNavigationBarItem(
-            icon: Column(
-              children: [
-                if (_selectedIndex == 0)
-                  Container(
-                    margin: EdgeInsets.only(bottom: 15),
-                    height: 3,
-                    width: 105,
-                    color: Colors.green[800],
-                  ),
-                Icon(Icons.eco),
-              ],
-            ),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Column(
-              children: [
-                if (_selectedIndex == 1)
-                  Container(
-                    margin: EdgeInsets.only(bottom: 15),
-                    height: 3,
-                    width: 105,
-                    color: Colors.green[800],
-                  ),
-                Icon(Icons.book),
-              ],
-            ),
-            label: '',
-          ),
-          bottomNavigationBar: MyBottomNavigationBar(
-            selectedIndex: _selectedIndex,
-            onItemTapped: (index) {
-              _onItemTapped(index);
-              // 네비게이션 로직 추가
-              if (index == 0) {
-                // Example: MainScreen으로 이동
-                Navigator.pushReplacementNamed(context, '/main');
-              } else if (index == 1) {
-                Navigator.pushReplacementNamed(context, '/plants');
-              } else if (index == 2) {
-                Navigator.pushReplacementNamed(context, '/profile');
-              }
-            },
-          ),
-        ],
-        selectedItemColor: Colors.grey,
-        unselectedItemColor: Colors.grey,
-        showSelectedLabels: false,
-        showUnselectedLabels: false,
+      bottomNavigationBar: MyBottomNavigationBar(
+        selectedIndex: _selectedIndex,
+        onItemTapped: (index) {
+          _onItemTapped(index);
+          // 네비게이션 로직 추가
+          if (index == 0) {
+            // Example: MainScreen으로 이동
+            Navigator.pushReplacementNamed(context, '/main');
+          } else if (index == 1) {
+            Navigator.pushReplacementNamed(context, '/plants');
+          } else if (index == 2) {
+            Navigator.pushReplacementNamed(context, '/profile');
+          }
+        },
       ),
     );
   }
