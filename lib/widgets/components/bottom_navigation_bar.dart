@@ -86,7 +86,7 @@ class MyBottomNavigationBar extends StatelessWidget {
     } else if (index == 1) {
       targetPage = MainScreen(); // 메인 페이지
     } else if (index == 2) {
-      targetPage = MainScreen(); // 마이 페이지 클래스명으로 바꾸시면 됩니다.
+      targetPage = MyPageScreen(); // 마이 페이지 클래스명으로 바꾸시면 됩니다.
     } else {
       return; // 예외 상황
     }
