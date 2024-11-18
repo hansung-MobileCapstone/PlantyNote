@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'my_page_edit_screen.dart';
+import 'package:plant/widgets/components/bottom_navigation_bar.dart';
 
 class MyPageScreen extends StatefulWidget {
   @override
@@ -7,7 +8,7 @@ class MyPageScreen extends StatefulWidget {
 }
 
 class _MyPageScreenState extends State<MyPageScreen> {
-  int _selectedIndex = 0;
+  int _selectedIndex = 2; // MyPageScreen의 기본 인덱스는 2
 
   void _onItemTapped(int index) {
     setState(() {
@@ -23,14 +24,12 @@ class _MyPageScreenState extends State<MyPageScreen> {
     'assets/images/plant1.png',
     'assets/images/plant1.png',
     'assets/images/plant1.png'
-    // 추가 이미지 경로
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      // AppBar 설정은 이전과 동일합니다.
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -62,7 +61,6 @@ class _MyPageScreenState extends State<MyPageScreen> {
           ),
         ],
       ),
-      // Body 설정
       body: Padding(
         padding: const EdgeInsets.only(top: 20.0, right: 25.0, left: 25.0),
         child: Column(
@@ -77,7 +75,6 @@ class _MyPageScreenState extends State<MyPageScreen> {
               ),
               child: Stack(
                 children: [
-                  // 프로필 정보
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
@@ -114,20 +111,13 @@ class _MyPageScreenState extends State<MyPageScreen> {
                       ),
                     ],
                   ),
-                  // 프로필 수정 버튼과 식물 개수
                   Positioned(
                     bottom: 0,
                     right: 0,
                     child: Row(
                       children: [
                         ElevatedButton(
-                          onPressed: () {
-                            // 프로필 수정 화면으로 이동
-                           /* Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => MyPageEditScreen()),
-                            ); */
-                          },
+                          onPressed: () {},
                           child: Text('프로필 수정'),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.green[800],
@@ -160,7 +150,6 @@ class _MyPageScreenState extends State<MyPageScreen> {
                 ],
               ),
             ),
-
             SizedBox(height: 12),
             Divider(
               color: Colors.grey,
@@ -201,63 +190,20 @@ class _MyPageScreenState extends State<MyPageScreen> {
           ],
         ),
       ),
-
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.white,
-        elevation: 0, // 경계선 제거
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        items: [
-          BottomNavigationBarItem(
-            icon: Column(
-              children: [
-                if (_selectedIndex == 0)
-                  Container(
-                    margin: EdgeInsets.only(bottom: 15),
-                    height: 3,
-                    width: 105,
-                    color: Colors.green[800],
-                  ),
-                Icon(Icons.eco),
-              ],
-            ),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Column(
-              children: [
-                if (_selectedIndex == 1)
-                  Container(
-                    margin: EdgeInsets.only(bottom: 15),
-                    height: 3,
-                    width: 105,
-                    color: Colors.green[800],
-                  ),
-                Icon(Icons.book),
-              ],
-            ),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Column(
-              children: [
-                if (_selectedIndex == 2)
-                  Container(
-                    margin: EdgeInsets.only(bottom: 15),
-                    height: 3,
-                    width: 105,
-                    color: Colors.green[800],
-                  ),
-                Icon(Icons.person),
-              ],
-            ),
-            label: '',
-          ),
-        ],
-        selectedItemColor: Colors.grey,
-        unselectedItemColor: Colors.grey,
-        showSelectedLabels: false,
-        showUnselectedLabels: false,
+      bottomNavigationBar: MyBottomNavigationBar(
+        selectedIndex: _selectedIndex,
+        onItemTapped: (index) {
+          _onItemTapped(index);
+          // 네비게이션 로직 추가
+          if (index == 0) {
+            // Example: MainScreen으로 이동
+            Navigator.pushReplacementNamed(context, '/main');
+          } else if (index == 1) {
+            Navigator.pushReplacementNamed(context, '/plants');
+          } else if (index == 2) {
+            Navigator.pushReplacementNamed(context, '/profile');
+          }
+        },
       ),
     );
   }
