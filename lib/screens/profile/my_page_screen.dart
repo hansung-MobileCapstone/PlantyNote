@@ -123,10 +123,10 @@ class _MyPageScreenState extends State<MyPageScreen> {
                         ElevatedButton(
                           onPressed: () {
                             // 프로필 수정 화면으로 이동
-                            Navigator.push(
+                           /* Navigator.push(
                               context,
                               MaterialPageRoute(builder: (context) => MyPageEditScreen()),
-                            );
+                            ); */
                           },
                           child: Text('프로필 수정'),
                           style: ElevatedButton.styleFrom(
