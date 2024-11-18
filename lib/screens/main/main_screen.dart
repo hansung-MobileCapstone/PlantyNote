@@ -1,6 +1,7 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import '../../widgets/components/bottom_navigation_bar.dart';
+import '../community/all_posts_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -140,16 +141,26 @@ class _MainScreenState extends State<MainScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.only(left: 20, right: 20),
+        Padding(
+          padding: const EdgeInsets.only(left: 20, right: 20),
           child: Row(
             children: [
-              Text(
+              const Text(
                 '최근 게시물',
                 style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
               ),
-              Spacer(),
-              Icon(Icons.arrow_forward, size: 18), // 아이콘 추가
+              const Spacer(),
+              IconButton(
+                icon: const Icon(Icons.arrow_forward, size: 18),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => AllPostsScreen(), // 전체게시물 페이지로 이동
+                    ),
+                  );
+                },
+              ),
             ],
           ),
         ),

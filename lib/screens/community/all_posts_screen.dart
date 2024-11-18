@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-//import '../../widgets/components/bottom_navigation_bar.dart';
+import '../../widgets/components/bottom_navigation_bar.dart';
 import './post_item.dart';
 
 class AllPostsScreen extends StatefulWidget {
@@ -82,7 +82,10 @@ class _AllPostsScreenState extends State<AllPostsScreen> {
             );
           },
         ),
-
+        bottomNavigationBar: MyBottomNavigationBar(
+          selectedIndex: _selectedIndex,
+          onItemTapped: _onItemTapped,
+        ),
       ),
     );
   }
