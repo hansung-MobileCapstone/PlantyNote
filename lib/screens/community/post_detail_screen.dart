@@ -19,6 +19,14 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     'assets/images/sample_post.png',
   ];
 
+  // 예제 식물 상세 정보
+  final List<Map<String, String>> details = [
+    {'식물 종': '선인장'},
+    {'물 주기': '7일에 한번'},
+    {'분갈이 주기': '3년'},
+    {'환경': '18°C'},
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -175,7 +183,52 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 30),
+
+                // 식물 상세 정보
+                Padding(
+                  padding: const EdgeInsets.only(right: 15),
+                  child: Wrap(
+                    spacing: 8, // 키-값 세트 사이 간격
+                    runSpacing: 3, // 줄 간 간격
+                    children: details.map((detail) {
+                      return Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 7, vertical: 2),
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: const Color(0x804B7E5B),
+                              ),
+                              borderRadius: BorderRadius.circular(50),
+                            ),
+                            child: Text(
+                              detail.keys.first,
+                              style: const TextStyle(
+                                fontSize: 10,
+                                color: Color(0xFF7D7D7D),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 5), // 키와 값 사이 간격
+                          Text(
+                            detail.values.first,
+                            style: const TextStyle(
+                              fontSize: 10,
+                              color: Color(0xFF616161),
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      );
+                    }).toList(),
+                  ),
+                ),
+
+                // 간격 추가
+                const SizedBox(height: 10),
               ],
             ),
           ),
