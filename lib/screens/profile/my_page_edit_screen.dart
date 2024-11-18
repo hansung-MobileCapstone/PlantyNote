@@ -8,7 +8,7 @@ class MyPageEditScreen extends StatefulWidget {
 }
 
 class _MyPageScreenState extends State<MyPageEditScreen> {
-  int _selectedIndex = 0;
+  int _selectedIndex = 2;
 
   void _onItemTapped(int index) {
     setState(() {
@@ -20,21 +20,23 @@ class _MyPageScreenState extends State<MyPageEditScreen> {
 
   // 이미지 경로 리스트
   final List<String> imagePaths = [
-    'assets/plant1.png',
-    'assets/plant2.png',
-    'assets/plant3.png',
-    'assets/plant4.png',
+    'assets/images/plant1.png',
+    'assets/images/plant1.png',
+    'assets/images/plant1.png',
+    'assets/images/plant1.png'
     // 추가 이미지 경로
   ];
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return Stack(
+      children: [
+      Scaffold(
       backgroundColor: Colors.white,
-      // AppBar 설정은 이전과 동일합니다.
-      appBar: AppBar(
+       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
+         automaticallyImplyLeading: false, // 뒤로 가기 버튼 제거
         iconTheme: IconThemeData(color: Colors.black),
         title: Padding(
           padding: const EdgeInsets.only(top: 30.0, left: 20.0),
@@ -70,7 +72,7 @@ class _MyPageScreenState extends State<MyPageEditScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              height: 150,
+              height: 160,
               padding: EdgeInsets.all(10),
               decoration: BoxDecoration(
                 color: Colors.green.withOpacity(0.2),
@@ -90,24 +92,56 @@ class _MyPageScreenState extends State<MyPageEditScreen> {
                         ),
                       ),
                       SizedBox(width: 16),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 4.0, top: 8.0),
+                      Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              '마이클',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.green[800],
+                            // 이름 텍스트를 감싸는 흰 박스
+                            Container(
+                              height: 30,
+                              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 0.1),
+                              decoration: BoxDecoration(
+                                color: Colors.white, // 흰색 배경
+                                borderRadius: BorderRadius.circular(8), // 둥근 모서리
+
+                              ),
+                              child: TextField(
+                                controller: TextEditingController()
+                                  ..text = '마이클', // 기본 텍스트
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.green[800], // 기존 텍스트 색상
+                                ),
+                                decoration: InputDecoration(
+                                  hintText: '이름 입력', // 힌트 텍스트
+                                  border: InputBorder.none,
+                                ),
                               ),
                             ),
-                            SizedBox(height: 4),
-                            Text(
-                              '안녕하세요, 초보 식집사입니다.',
-                              style: TextStyle(
-                                color: Colors.green[800],
+                            SizedBox(height: 8),
+                            // 자기소개 텍스트를 감싸는 흰 박스
+                            Container(
+                              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 1),
+                              decoration: BoxDecoration(
+                                color: Colors.white, // 흰색 배경
+                                borderRadius: BorderRadius.circular(8), // 둥근 모서리
+                              ),
+                              child: TextField(
+                                controller: TextEditingController()
+                                  ..text = '안녕하세요, 초보 식집사입니다.', // 기본 텍스트
+                                style: TextStyle(
+                                  fontSize: 12, // 기존 텍스트 크기
+                                  color: Colors.green[800], // 기존 텍스트 색상
+                                ),
+                                decoration: InputDecoration(
+                                  hintText: '자기소개 입력', // 힌트 텍스트
+                                  border: InputBorder.none, // 테두리 제거
+                                  isCollapsed: true, // 내부 패딩 해제하여 상단 정렬에 영향 없음
+                                  contentPadding: EdgeInsets.zero, // 텍스트와 상단 사이 여백 제거
+                                ),
+                                textAlignVertical: TextAlignVertical.top, // 텍스트를 상단 정렬
+                                maxLines: 3, // 텍스트가 여러 줄로 확장 가능하도록 설정
                               ),
                             ),
                           ],
@@ -115,7 +149,7 @@ class _MyPageScreenState extends State<MyPageEditScreen> {
                       ),
                     ],
                   ),
-                  // 프로필 수정 버튼과 식물 개수
+                  // 프로필 수정 버튼과 식물 개수 (원래 위치 유지)
                   Positioned(
                     bottom: 0,
                     right: 0,
@@ -123,7 +157,6 @@ class _MyPageScreenState extends State<MyPageEditScreen> {
                       children: [
                         ElevatedButton(
                           onPressed: () {
-                            // 프로필 수정 화면으로 이동
                             Navigator.push(
                               context,
                               MaterialPageRoute(builder: (context) => MyPageEditScreen()),
@@ -137,8 +170,7 @@ class _MyPageScreenState extends State<MyPageEditScreen> {
                         ),
                         SizedBox(width: 8),
                         Container(
-                          padding:
-                          EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 0),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(12),
@@ -161,7 +193,6 @@ class _MyPageScreenState extends State<MyPageEditScreen> {
                 ],
               ),
             ),
-
             SizedBox(height: 12),
             Divider(
               color: Colors.grey,
@@ -218,6 +249,24 @@ class _MyPageScreenState extends State<MyPageEditScreen> {
           }
         },
       ),
+    ),
+    Positioned(
+      bottom: 70, // 네비게이션 바 위쪽
+      left: MediaQuery.of(context).size.width / 2 - 50, // 화면 중앙 정렬 좌표 계산
+      child: TextButton(
+        onPressed: () {
+          print("");
+        },
+        child: Text(
+          '계정 탈퇴',
+          style: TextStyle(
+            color: Colors.red,
+            fontSize: 12,
+          ),
+        ),
+      ),
+    ),
+    ],
     );
   }
 }
