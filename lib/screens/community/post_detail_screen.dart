@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../widgets/components/bottom_navigation_bar.dart';
-import '../community/all_posts_screen.dart';
 
 class PostDetailScreen extends StatefulWidget {
   const PostDetailScreen({super.key});
@@ -21,7 +20,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     });
   }
 
-  // 예제 이미지 데이터 (사용자가 올린 이미지의 개수)
+  // 예제 이미지 데이터
   final List<String> images = [
     'assets/images/sample_post.png',
     'assets/images/sample_post.png',
@@ -38,28 +37,33 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // 화면 크기 비율 계산
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final scaleFactor = (screenWidth / 400 + screenHeight / 800) / 2;
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
-        elevation: 0,
+        scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(Icons.arrow_back, color: Colors.black, size: 24 * scaleFactor),
           onPressed: () {
             Navigator.pop(context);
           },
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.edit, color: const Color(0xFF7D7D7D)),
+            icon: Icon(Icons.edit, color: const Color(0xFF7D7D7D), size: 24 * scaleFactor),
             onPressed: () {
-              // 수정 기능 구현
+              // 수정 기능
             },
           ),
           IconButton(
-            icon: Icon(Icons.delete, color: const Color(0xFFDA2525)),
+            icon: Icon(Icons.delete, color: const Color(0xFFDA2525), size: 24 * scaleFactor),
             onPressed: () {
-              // 삭제 기능 구현
+              // 삭제 기능
             },
           ),
         ],
@@ -71,185 +75,22 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
               Expanded(
                 child: SingleChildScrollView(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 0, horizontal: 18),
+                    padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 18),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // 프로필 사진과 사용자 이름
-                        Center(
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              CircleAvatar(
-                                backgroundImage: AssetImage(
-                                    'assets/images/profile.png'),
-                                radius: 15,
-                              ),
-                              const SizedBox(width: 10),
-                              const Text(
-                                '마이클',
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-
-                        // 게시물 이미지 (슬라이드 기능 + BorderRadius)
-                        Center(
-                          child: Stack(
-                            alignment: Alignment.topRight,
-                            children: [
-                              SizedBox(
-                                width: 380,
-                                height: 380,
-                                child: PageView(
-                                  controller: _pageController,
-                                  onPageChanged: (index) {
-                                    setState(() {
-                                      _currentPage = index;
-                                    });
-                                  },
-                                  children: images.map((image) {
-                                    return ClipRRect(
-                                      borderRadius:
-                                      BorderRadius.circular(10),
-                                      child: Image.asset(
-                                        image,
-                                        fit: BoxFit.fill,
-                                      ),
-                                    );
-                                  }).toList(),
-                                ),
-                              ),
-                              Positioned(
-                                top: 8,
-                                right: 8,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8,
-                                    vertical: 4,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Colors.black.withOpacity(0.6),
-                                    borderRadius:
-                                    BorderRadius.circular(50),
-                                  ),
-                                  child: Text(
-                                    '${_currentPage + 1}/${images.length}',
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-
-                        // 작성 날짜, 댓글, 좋아요 버튼
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              '2024.10.04',
-                              style: const TextStyle(
-                                fontSize: 10,
-                                color: Colors.grey,
-                              ),
-                            ),
-                            Row(
-                              children: [
-                                IconButton(
-                                  icon: Icon(Icons.comment,
-                                      color: const Color(0xFF4B7E5B)),
-                                  onPressed: () {
-                                    // 댓글 기능 구현
-                                  },
-                                ),
-                                IconButton(
-                                  icon: Icon(
-                                    _isLiked
-                                        ? Icons.favorite
-                                        : Icons.favorite_border,
-                                    color: const Color(0xFF4B7E5B),
-                                  ),
-                                  onPressed: () {
-                                    setState(() {
-                                      _isLiked = !_isLiked;
-                                    });
-                                  },
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-
-                        // 글 내용
-                        const Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            '선물로 받았어요.\n식물 처음 키우는데 팁 알려주세요.',
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: Colors.black,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 30),
+                        _profileSection(scaleFactor), // 프로필
+                        SizedBox(height: 10 * scaleFactor),
+                        _postImageSlider(scaleFactor), // 이미지 슬라이더
+                        SizedBox(height: 5 * scaleFactor),
+                        _postActions(scaleFactor), // 댓글, 좋아요
+                        _postContent(scaleFactor), // 글 내용
                       ],
                     ),
                   ),
                 ),
               ),
-
-              // 식물 상세 정보
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical:10, horizontal:3), // bottomNavigationBar와 간격 유지
-                child: Wrap(
-                  spacing: 8,
-                  runSpacing: 3,
-                  children: details.map((detail) {
-                    return Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 7, vertical: 2),
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: const Color(0x804B7E5B),
-                            ),
-                            borderRadius: BorderRadius.circular(50),
-                          ),
-                          child: Text(
-                            detail.keys.first,
-                            style: const TextStyle(
-                              fontSize: 10,
-                              color: Color(0xFF7D7D7D),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 5),
-                        Text(
-                          detail.values.first,
-                          style: const TextStyle(
-                            fontSize: 10,
-                            color: Color(0xFF616161),
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    );
-                  }).toList(),
-                ),
-              ),
+              _plantDetails(scaleFactor), // 식물 상세 정보
             ],
           );
         },
@@ -257,6 +98,183 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       bottomNavigationBar: MyBottomNavigationBar(
         selectedIndex: _selectedIndex,
         onItemTapped: _onItemTapped,
+      ),
+    );
+  }
+
+  // 프로필
+  Widget _profileSection(double scaleFactor) {
+    return Center(
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          CircleAvatar(
+            backgroundImage: AssetImage('assets/images/profile.png'),
+            radius: 15 * scaleFactor,
+          ),
+          SizedBox(width: 10 * scaleFactor),
+          Text(
+            '마이클',
+            style: TextStyle(
+              fontSize: 15 * scaleFactor,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 이미지 슬라이더
+  Widget _postImageSlider(double scaleFactor) {
+    return Center(
+      child: Stack(
+        alignment: Alignment.topRight,
+        children: [
+          SizedBox(
+            width: 380 * scaleFactor,
+            height: 380 * scaleFactor,
+            child: PageView(
+              controller: _pageController,
+              onPageChanged: (index) {
+                setState(() {
+                  _currentPage = index;
+                });
+              },
+              children: images.map((image) {
+                return ClipRRect(
+                  borderRadius: BorderRadius.circular(10 * scaleFactor),
+                  child: Image.asset(
+                    image,
+                    fit: BoxFit.fill,
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+          Positioned(
+            top: 8 * scaleFactor,
+            right: 8 * scaleFactor,
+            child: Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: 8 * scaleFactor,
+                vertical: 4 * scaleFactor,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.6),
+                borderRadius: BorderRadius.circular(50 * scaleFactor),
+              ),
+              child: Text(
+                '${_currentPage + 1}/${images.length}',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 12 * scaleFactor,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 작성 날짜, 댓글, 좋아요
+  Widget _postActions(double scaleFactor) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          '2024.10.04',
+          style: TextStyle(
+            fontSize: 10 * scaleFactor,
+            color: Colors.grey,
+          ),
+        ),
+        Row(
+          children: [
+            IconButton(
+              icon: Icon(Icons.comment, color: const Color(0xFF4B7E5B), size: 24 * scaleFactor),
+              onPressed: () {
+                // 댓글 기능
+              },
+            ),
+            IconButton(
+              icon: Icon(
+                _isLiked ? Icons.favorite : Icons.favorite_border,
+                color: const Color(0xFF4B7E5B),
+                size: 24 * scaleFactor,
+              ),
+              onPressed: () {
+                setState(() {
+                  _isLiked = !_isLiked;
+                });
+              },
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  // 게시물 내용
+  Widget _postContent(double scaleFactor) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Text(
+        '선물로 받았어요.\n식물 처음 키우는데 팁 알려주세요.',
+        style: TextStyle(
+          fontSize: 13 * scaleFactor,
+          color: Colors.black,
+        ),
+      ),
+    );
+  }
+
+  // 식물 상세 정보 (종, 물주기, 분갈이주기, 환경)
+  Widget _plantDetails(double scaleFactor) {
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        vertical: 10 * scaleFactor,
+        horizontal: 3 * scaleFactor,
+      ),
+      child: Wrap(
+        spacing: 8 * scaleFactor,
+        runSpacing: 3 * scaleFactor,
+        children: details.map((detail) {
+          return Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: 7 * scaleFactor,
+                  vertical: 2 * scaleFactor,
+                ),
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: const Color(0x804B7E5B),
+                  ),
+                  borderRadius: BorderRadius.circular(50 * scaleFactor),
+                ),
+                child: Text(
+                  detail.keys.first,
+                  style: TextStyle(
+                    fontSize: 10 * scaleFactor,
+                    color: Color(0xFF7D7D7D),
+                  ),
+                ),
+              ),
+              SizedBox(width: 5 * scaleFactor),
+              Text(
+                detail.values.first,
+                style: TextStyle(
+                  fontSize: 10 * scaleFactor,
+                  color: Color(0xFF616161),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          );
+        }).toList(),
       ),
     );
   }
