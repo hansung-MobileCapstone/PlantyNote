@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+// import 'screens/community/post_create_screen.dart';
 import 'screens/plants/my_plant_collection_screen.dart';
 import 'screens/plants/my_plant_register_screen.dart';
 import 'screens/plants/my_plant_timeline_screen.dart';
@@ -17,7 +18,6 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.green,
       ),
-
       initialRoute: '/plant_collection',
       routes: {
         '/plant_collection': (context) => const MyPlantCollectionScreen(),
