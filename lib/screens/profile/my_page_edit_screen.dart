@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../widgets/profile/change_password_modal.dart';
 import 'my_page_edit_screen.dart';
 import 'package:plant/widgets/components/bottom_navigation_bar.dart';
 
@@ -17,6 +18,14 @@ class _MyPageScreenState extends State<MyPageEditScreen> {
   }
 
   final int plantCount = 2;
+
+  void _showPasswordChangeModal() {
+    showDialog(
+      context: context,
+      builder: (context) => PasswordChangeModal(), // 분리된 모달 창 호출
+    );
+  }
+
 
   // 이미지 경로 리스트
   final List<String> imagePaths = [
@@ -53,7 +62,7 @@ class _MyPageScreenState extends State<MyPageEditScreen> {
           Padding(
             padding: const EdgeInsets.only(top: 20.0, right: 16.0),
             child: TextButton(
-              onPressed: () {},
+              onPressed: _showPasswordChangeModal, // 모달 창 표시 함수 호출
               child: Text(
                 'PW변경',
                 style: TextStyle(
