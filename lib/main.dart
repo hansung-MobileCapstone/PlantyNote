@@ -17,6 +17,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.green,
       ),
+
       initialRoute: '/plant_collection',
       routes: {
         '/plant_collection': (context) => const MyPlantCollectionScreen(),
