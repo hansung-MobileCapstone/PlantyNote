@@ -1,48 +1,56 @@
 import 'package:flutter/material.dart';
 
 class CommentItem extends StatelessWidget {
+  final double scaleFactor;
+
+  const CommentItem({required this.scaleFactor});
+
   @override
   Widget build(BuildContext context) {
+    final imageSize = 17 * scaleFactor;
+    final nameFontSize = 8 * scaleFactor;
+    final commentFontSize = 10 * scaleFactor;
+
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5.0),
+      padding: EdgeInsets.symmetric(vertical: 5 * scaleFactor),
       child: Container(
         decoration: BoxDecoration(
-          color: const Color(0x99ECF7F2), // 배경색상
-          borderRadius: BorderRadius.circular(10), // BorderRadius
+          color: const Color(0x99ECF7F2),
+          borderRadius: BorderRadius.circular(10 * scaleFactor),
         ),
-        padding: const EdgeInsets.all(10.0), // 내부 패딩
+        padding: EdgeInsets.all(10 * scaleFactor),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start, // 전체 요소 위쪽 정렬
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ClipOval(
               child: Image.asset(
-                'assets/images/sample_post.png', // 프로필 사진 경로
-                width: 17, // 프로필 사진 너비
-                height: 17, // 프로필 사진 높이
-                fit: BoxFit.cover, // 이미지 크기 조정
+                'assets/images/sample_post.png', // 프로필 사진
+                width: imageSize,
+                height: imageSize,
+                fit: BoxFit.cover,
               ),
             ),
-            const SizedBox(width: 8), // 프로필 사진과 텍스트 간 간격
+            SizedBox(width: 8 * scaleFactor), // 프로필과 이름 간격
             Expanded(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start, // 텍스트 왼쪽 정렬
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     "닉네임",
-                    style: const TextStyle(
-                      fontSize: 8, // 사용자 이름 글자 크기
-                      fontWeight: FontWeight.bold, // Bold체
-                      color: Colors.black, // 글자 색상
+                    style: TextStyle(
+                      fontSize: nameFontSize,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
                     ),
                   ),
-                  const SizedBox(height: 2), // 사용자 이름과 댓글 내용 간 간격
+                  SizedBox(height: 2 * scaleFactor), // 이름과 댓글 간격
                   Text(
                     "이곳에 댓글 내용이 표시됩니다.",
-                    style: const TextStyle(
-                      fontSize: 10, // 댓글 내용 글자 크기
-                      color: Colors.black87, // 댓글 내용 글자 색상
+                    style: TextStyle(
+                      fontSize: commentFontSize,
+                      color: Colors.black87,
                     ),
-                    textAlign: TextAlign.left, // 댓글 내용 왼쪽 정렬
+                    textAlign: TextAlign.left,
                   ),
                 ],
               ),
