@@ -67,7 +67,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              height: 150,
+              height: 160,
               padding: EdgeInsets.all(10),
               decoration: BoxDecoration(
                 color: Colors.green.withOpacity(0.2),
@@ -103,6 +103,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
                             Text(
                               '안녕하세요, 초보 식집사입니다.',
                               style: TextStyle(
+                                fontSize: 12,
                                 color: Colors.green[800],
                               ),
                             ),
@@ -117,13 +118,21 @@ class _MyPageScreenState extends State<MyPageScreen> {
                     child: Row(
                       children: [
                         ElevatedButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => MyPageEditScreen(), // 이동할 페이지
+                              ),
+                            );
+                          },
                           child: Text('프로필 수정'),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.green[800],
                             foregroundColor: Colors.white,
                           ),
                         ),
+
                         SizedBox(width: 8),
                         Container(
                           padding:
