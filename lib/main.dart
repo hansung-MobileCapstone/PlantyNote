@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+//import '../screens/community/post_detail_screen.dart';
 // import 'screens/community/post_create_screen.dart';
 import 'screens/plants/my_plant_collection_screen.dart';
 import 'screens/plants/my_plant_register_screen.dart';
