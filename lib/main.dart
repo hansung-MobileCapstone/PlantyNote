@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:plant/widgets/post/comment_modal.dart';
+import '../widgets/post/comment_item.dart';
 
 void main() {
   runApp(const MyApp());
@@ -31,7 +33,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: CommentModal(),
       //home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
