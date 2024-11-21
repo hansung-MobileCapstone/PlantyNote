@@ -93,12 +93,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
     return AppBar(
       backgroundColor: Colors.white,
       elevation: 0,
-      leading: IconButton(
-        icon: Icon(Icons.arrow_back, color: Colors.black), // 뒤로가기 버튼
-        onPressed: () {
-          context.pop(); // 이전 화면으로 이동
-        },
-      ),
       title: Text(
         '알림',
         style: TextStyle(
