@@ -1,11 +1,5 @@
 import 'package:flutter/material.dart';
-//import 'package:plant/widgets/post/comment_modal.dart';
-//import '../widgets/post/comment_item.dart';
-//import '../screens/community/post_detail_screen.dart';
-// import 'screens/community/post_create_screen.dart';
-import 'screens/plants/my_plant_collection_screen.dart';
-import 'screens/plants/my_plant_register_screen.dart';
-import 'screens/plants/my_plant_timeline_screen.dart';
+import '../routes/app_router.dart';
 
 void main() {
   runApp(const MyApp());
@@ -16,17 +10,8 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'PlantyNote',
-      theme: ThemeData(
-        primarySwatch: Colors.green,
-      ),
-      initialRoute: '/plant_collection',
-      routes: {
-        '/plant_collection': (context) => const MyPlantCollectionScreen(),
-        '/plant_register': (context) => const MyPlantRegisterScreen(),
-        '/plant_timeline': (context) => const MyPlantTimelineScreen(),
-      },
+    return MaterialApp.router(
+      routerConfig: AppRouter.router, // GoRouter 설정 연결
     );
   }
 }

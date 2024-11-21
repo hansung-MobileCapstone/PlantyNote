@@ -13,52 +13,58 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 1; // 네비게이션바 인덱스
 
-  void _onItemTapped(int index) { // 인덱스 상태관리
+  void _onItemTapped(int index) {
     setState(() {
-      _selectedIndex = index;
+      _selectedIndex = index; // 인덱스 상태 업데이트
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        backgroundColor: Colors.white,
-        appBar: AppBar( // 상단바
-          scrolledUnderElevation: 0,
-          backgroundColor: Colors.white,
-          title: _logoImage(),
-          centerTitle: true, // 중앙 배치
-          actions: [
-            IconButton( // 푸시 알림 페이지
-              icon: Icon(Icons.notifications),
-              onPressed: () {},
-            ),
-          ],
-        ),
-        body: SafeArea(
-          bottom: false, // 네비게이션바 영역 제외
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                SizedBox(height: 5),
-                _searchBar(),
-                SizedBox(height: 18),
-                _mainContent(),
-                SizedBox(height: 50),
-                _recentPosts(),
-                SizedBox(height: 10),
-              ],
-            ),
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: _buildAppBar(),
+      body: SafeArea(
+        bottom: false,
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              SizedBox(height: 5),
+              _searchBar(),
+              SizedBox(height: 18),
+              _mainContent(),
+              SizedBox(height: 50),
+              _recentPosts(),
+              SizedBox(height: 10),
+            ],
           ),
         ),
-        bottomNavigationBar: MyBottomNavigationBar(
-          selectedIndex: _selectedIndex,
-          onItemTapped: _onItemTapped,
-        ), // 하단바
+      ),
+      bottomNavigationBar: MyBottomNavigationBar(
+        selectedIndex: _selectedIndex,
+        onItemTapped: _onItemTapped,
       ),
     );
   }
+
+  // 상단바
+  AppBar _buildAppBar() {
+    return AppBar(
+      scrolledUnderElevation: 0,
+      backgroundColor: Colors.white,
+      title: _logoImage(),
+      centerTitle: true,
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.notifications),
+          onPressed: () {
+            // 푸시 알림 페이지로 이동
+          },
+        ),
+      ],
+    );
+  }
+
 
   // 상단 로고 위젯
   Widget _logoImage() {
