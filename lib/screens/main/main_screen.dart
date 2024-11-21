@@ -58,7 +58,7 @@ class _MainScreenState extends State<MainScreen> {
         IconButton(
           icon: const Icon(Icons.notifications),
           onPressed: () {
-            context.go('/main/notifications'); // 푸시알림페이지로 이동
+            context.push('/main/notifications'); // 푸시알림페이지로 이동
           },
         ),
       ],
