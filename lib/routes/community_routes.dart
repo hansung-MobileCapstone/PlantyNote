@@ -11,16 +11,14 @@ class CommunityRoutes {
     GoRoute(
       path: '/community',
       builder: (context, state) => AllPostsScreen(),
-      routes: [
-        GoRoute(
-          path: 'create', // /community/create
-          builder: (context, state) => PostCreateScreen(),
-        ),
-        GoRoute(
-          path: 'detail', // /community/detail
-          builder: (context, state) => PostDetailScreen(),
-        ),
-      ],
+    ),
+    GoRoute(
+      path: '/community/create',
+      builder: (context, state) => PostCreateScreen(),
+    ),
+    GoRoute( // 되돌아가기 위해 하위 경로가 아닌 독립적인 경로로 설정
+      path: '/community/detail',
+      builder: (context, state) => PostDetailScreen(),
     ),
   ];
 }

@@ -80,7 +80,7 @@ class _PostCreateScreenState extends State<PostCreateScreen> {
         ),
       ),
       centerTitle: true,
-      elevation: 0,
+      scrolledUnderElevation: 0,
       automaticallyImplyLeading: false, // 뒤로가기버튼 숨기기
     );
   }
