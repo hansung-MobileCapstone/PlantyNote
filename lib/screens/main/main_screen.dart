@@ -180,6 +180,7 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
+  // 캐러셀 게시물 하나
   Widget _carouselItem(String name, String species, String imageUrl) {
     final double screenWidth = MediaQuery.of(context).size.width;
     final double maxItemWidth = 160; // 최대 아이템 너비 제한
@@ -188,7 +189,7 @@ class _MainScreenState extends State<MainScreen> {
 
     return GestureDetector(
       onTap: () {
-        context.go('/community/detail'); // 게시물상세페이지로 이동
+        context.go('/community/detail'); // 게시물상세페이지로 이동(/$id 추가)
       },
       child: Container(
         width: itemWidth,
