@@ -58,10 +58,11 @@ class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
             SizedBox(height: 15),
             _dDayWithBadge(), // 함께한지 뱃지
             _plantDetailsSection(), // 식물 정보
-            Container( // 가로선
-              width: MediaQuery.of(context).size.width * 0.9,
-              height: 0.7,
-              color: const Color(0xFF7D7D7D),
+            Divider(
+              color: Color(0xFF7D7D7D),
+              thickness: 0.7,
+              indent: 18,
+              endIndent: 18,
             ),
             SizedBox(height: 15),
             Text(
