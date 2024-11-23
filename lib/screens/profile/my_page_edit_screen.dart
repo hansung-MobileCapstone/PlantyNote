@@ -104,7 +104,7 @@ class _MyPageScreenState extends State<MyPageEditScreen> {
               child: InkWell(
                 onTap: () {
                   // 계정 탈퇴 로직
-                  context.go('/onboarding'); // 온보딩페이지로 이동
+                  _showWithdrawDialog(context);
                 },
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 10.0),
@@ -128,7 +128,6 @@ class _MyPageScreenState extends State<MyPageEditScreen> {
       ),
     );
   }
-
 
   // 상단 바
   AppBar _buildAppBar() {
@@ -307,6 +306,34 @@ class _MyPageScreenState extends State<MyPageEditScreen> {
           },
         ),
       ),
+    );
+  }
+
+  // 탈퇴 확인 팝업
+  void _showWithdrawDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("계정 탈퇴"),
+          content: Text("정말 탈퇴 하시겠습니까?"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                context.pop(); // 팝업 닫기
+              },
+              child: Text("아니오"),
+            ),
+            TextButton(
+              onPressed: () {
+                context.go('/onboarding'); // 온보딩페이지로 이동
+                // 탈퇴 기능 구현
+              },
+              child: Text("예"),
+            ),
+          ],
+        );
+      },
     );
   }
 }
