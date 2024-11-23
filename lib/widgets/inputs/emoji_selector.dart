@@ -24,7 +24,7 @@ class EmojiSelector extends StatelessWidget {
           child: Text(
             emojis[index],
             style: TextStyle(
-              fontSize: 24,
+              fontSize: 20,
               color: selectedIndex == index ? Colors.blue : Colors.grey,
             ),
           ),

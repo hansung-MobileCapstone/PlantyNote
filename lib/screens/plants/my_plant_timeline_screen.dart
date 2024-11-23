@@ -1,5 +1,5 @@
-// my_plant_timeline_screen.dart    # 4-2번 화면
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../modals/notification_setting_modal.dart';
 import '../modals/memo_create_modal.dart';
 import '../modals/timeline_modal.dart';
@@ -141,17 +141,46 @@ class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
         IconButton( // 수정 버튼
           icon: Icon(Icons.edit, color: const Color(0xFF7D7D7D), size: 24),
           onPressed: () {
-            //context.push('/community/create'); // 게시물작성페이지로 이동
+            context.push('/plants/register'); // 내식물등록페이지로 이동
             // 게시물작성페이지에 현재 데이터 전달 필요 (extra)
           },
         ),
         IconButton( // 삭제 버튼
           icon: Icon(Icons.delete, color: const Color(0xFFDA2525), size: 24),
           onPressed: () {
-            //_showDeleteDialog(context); // 삭제 팝업 표시
+            _showDeleteDialog(context); // 삭제 팝업 표시
           },
         ),
       ],
+    );
+  }
+
+  // 삭제 확인 팝업
+  void _showDeleteDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("내 식물 삭제"),
+          content: Text("정말 삭제하시겠습니까?"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                context.pop(); // 팝업 닫기
+              },
+              child: Text("아니오"),
+            ),
+            TextButton(
+              onPressed: () {
+                context.pop(); // 팝업 닫기
+                context.go('/plants'); // 내식물모음페이지로 이동
+                // 삭제 기능 구현
+              },
+              child: Text("예"),
+            ),
+          ],
+        );
+      },
     );
   }
 
