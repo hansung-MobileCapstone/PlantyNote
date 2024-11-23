@@ -23,7 +23,7 @@ class _MemoCreateModalState extends State<MemoCreateModal> {
           mainAxisSize: MainAxisSize.min,
           children: [
             EmojiSelector(
-              emojis: ['😀', '😐', '😢'],
+              emojis: ['😆', '😊', '😐', '😞', '😭'],
               selectedIndex: selectedEmojiIndex,
               onEmojiSelected: (index) {
                 setState(() {

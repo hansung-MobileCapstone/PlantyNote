@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../widgets/components/bottom_navigation_bar.dart';
-import '../../widgets/post/comment_modal.dart';
+import '../modals/comment_modal.dart';
 
 class PostDetailScreen extends StatefulWidget {
   const PostDetailScreen({super.key});
@@ -244,9 +244,6 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true, // 모달의 크기 조정을 위해
-      // shape: RoundedRectangleBorder(
-      //   borderRadius: BorderRadius.circular(20.0),
-      // ),
       builder: (BuildContext context) {
         return FractionallySizedBox(
           heightFactor: 0.85, // 화면 높이의 85%로 설정

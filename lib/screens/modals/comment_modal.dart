@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../components/comment_item.dart';
+import '../../widgets/components/comment_item.dart';
 
 class CommentModal extends StatelessWidget {
   @override

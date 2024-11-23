@@ -59,7 +59,6 @@ class _MyPlantRegisterScreenState extends State<MyPlantRegisterScreen> {
               GestureDetector(
                 onTap: () {
                   FocusScope.of(context).unfocus();
-                  // 사진 업로드 로직 추가
                   setState(() {
                     isImageUploaded = true;
                   });
@@ -153,23 +152,16 @@ class _MyPlantRegisterScreenState extends State<MyPlantRegisterScreen> {
   // 사진 등록 ImagePicker
   Widget _imagePicker() {
     return GestureDetector(
-      onTap: _pickImage, // 클릭 시 새로운 사진 선택 가능
-      child: Container(
-        width: 150,
-        height: 150,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: Colors.grey[200],
-          image: _image != null
-              ? DecorationImage(
-            image: FileImage(File(_image!.path)),
-            fit: BoxFit.cover,
-          )
-              : null,
-        ),
+      onTap: _pickImage, // 새로운 사진 선택 가능
+      child: CircleAvatar(
+        radius: 75,
+        backgroundColor: Colors.grey[200],
+        backgroundImage: _image != null
+            ? FileImage(File(_image!.path)) // 이미지가 있으면 표시
+            : null,
         child: _image == null
             ? Icon(
-          Icons.add,
+          Icons.add, // 이미지가 없을 때 추가 아이콘 표시
           color: Colors.grey[400],
           size: 30,
         )
