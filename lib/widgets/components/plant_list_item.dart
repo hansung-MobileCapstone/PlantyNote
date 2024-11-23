@@ -1,65 +1,35 @@
-// my_plant_collection_screen.dart  # 4번 화면
+// plant_list_item.dart             # 식물 항목 리스트 UI
 import 'package:flutter/material.dart';
 
-class MyPlantCollectionScreen extends StatelessWidget {
-  const MyPlantCollectionScreen({super.key});
+class PlantListItem extends StatelessWidget {
+  final String plantName;
+  final String imageUrl;
+  final int dDayWater;
+  final int dDayFertilizer;
+  final VoidCallback onTap;
+
+  const PlantListItem({
+    super.key,
+    required this.plantName,
+    required this.imageUrl,
+    required this.dDayWater,
+    required this.dDayFertilizer,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('MY 정원'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () {
-              Navigator.pushNamed(context, '/plant_register');
-            },
-          ),
-        ],
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          _plantListItem(
-            context,
-            plantName: '팥이',
-            imageUrl: 'assets/images/sample_plant.png',
-            dDayWater: 1,
-            dDayFertilizer: 220,
-          ),
-          const SizedBox(height: 16),
-          _plantListItem(
-            context,
-            plantName: '콩콩이',
-            imageUrl: 'assets/images/sample_plant.png',
-            dDayWater: 3,
-            dDayFertilizer: 34,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _plantListItem(
-      BuildContext context, {
-        required String plantName,
-        required String imageUrl,
-        required int dDayWater,
-        required int dDayFertilizer,
-      }) {
     return GestureDetector(
-      onTap: () {
-        Navigator.pushNamed(context, '/plant_timeline');
-      },
+      onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(16),
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(10),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.3),
+              color: Colors.grey.withOpacity(0.2),
               blurRadius: 4,
               offset: const Offset(0, 2),
             ),
@@ -113,6 +83,7 @@ class MyPlantCollectionScreen extends StatelessWidget {
         style: TextStyle(
           color: color,
           fontWeight: FontWeight.bold,
+          fontSize: 12,
         ),
       ),
     );
