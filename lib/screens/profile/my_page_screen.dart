@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'my_page_edit_screen.dart';
 import 'package:plant/widgets/components/bottom_navigation_bar.dart';
 
 class MyPageScreen extends StatefulWidget {
@@ -24,7 +23,8 @@ class _MyPageScreenState extends State<MyPageScreen> {
     'assets/images/plant1.png',
     'assets/images/plant1.png',
     'assets/images/plant1.png',
-    'assets/images/plant1.png'
+    'assets/images/plant1.png',
+    'assets/images/plant1.png',
   ];
 
   @override
@@ -226,7 +226,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
     );
   }
 
-  // 나의 개시물 개수
+  // 나의 게시물 개수
   Widget _myPostsNumber() {
     return Padding(
       padding: const EdgeInsets.only(left: 6.0),

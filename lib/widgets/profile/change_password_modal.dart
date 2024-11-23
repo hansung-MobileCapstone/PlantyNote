@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class PasswordChangeModal extends StatelessWidget {
   @override
@@ -75,7 +76,7 @@ class PasswordChangeModal extends StatelessWidget {
               children: [
                 ElevatedButton(
                   onPressed: () {
-                    Navigator.pop(context); // 모달 닫기
+                    context.pop(); // 모달 닫기
                   },
                   child: Text(
                     '취소',
@@ -93,7 +94,7 @@ class PasswordChangeModal extends StatelessWidget {
                 ElevatedButton(
                   onPressed: () {
                     // 비밀번호 변경 로직 추가
-                    Navigator.pop(context);
+                    context.go('/login'); // 로그인페이지로 이동
                   },
                   child: Text(
                     '완료',
