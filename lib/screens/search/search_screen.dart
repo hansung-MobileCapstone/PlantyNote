@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../widgets/components/bottom_navigation_bar.dart';
+import 'package:go_router/go_router.dart';
 
 class SearchScreen extends StatefulWidget {
   @override
@@ -6,6 +8,7 @@ class SearchScreen extends StatefulWidget {
 }
 
 class _SearchScreenState extends State<SearchScreen> {
+  int _selectedIndex = 1; // 네비게이션바 인덱스
   int selectedTab = 0; // 실시간, 일간, 주간, 월간 탭 상태
   String? selectedRecentSearch; // 선택된 최근 검색어
   final List<String> recentSearches = ["고목나무", "알라비", "레몬 나무"];
@@ -18,148 +21,204 @@ class _SearchScreenState extends State<SearchScreen> {
   ];
   final List<String> tabs = ["실시간", "일간", "주간", "월간"];
 
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index; // 인덱스 상태 업데이트
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+      appBar: _buildAppBar(),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(height: 10), // 화면 상단 여백
-            Row(
-              children: [
-                IconButton(
-                  icon: Icon(Icons.arrow_back, color: Colors.black), // 뒤로가기 버튼
-                  onPressed: () {
-                    Navigator.pop(context); // 이전 화면으로 이동
-                  },
-                ),
-                Expanded(
-                  child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: Colors.green.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(20), // 검색창 둥글게
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            decoration: InputDecoration(
-                              border: InputBorder.none,
-                              hintText: '검색어를 입력하세요',
-                            ),
-                          ),
-                        ),
-                        Icon(Icons.search, color: Colors.black54), // 오른쪽 끝에 배치
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
+            _searchBar(), // 검색 바
             SizedBox(height: 20),
             Text(
               "최근 검색어",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 10),
-            Wrap(
-              spacing: 8,
-              children: recentSearches
-                  .map(
-                    (search) => GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      selectedRecentSearch = search;
-                    });
-                  },
-                  child: Container(
-                    padding:
-                    EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: selectedRecentSearch == search
-                          ? Colors.grey[300] // 선택 시 회색
-                          : Colors.white, // 기본 흰색
-                      border: Border.all(color: Colors.grey[400]!),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Text(
-                      search,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.black,
-                      ),
-                    ),
-                  ),
-                ),
-              )
-                  .toList(),
-            ),
+            _recentSearch(), // 최근 검색어 목록
             SizedBox(height: 20),
             Text(
               "인기 검색어",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: tabs
-                  .asMap()
-                  .entries
-                  .map(
-                    (entry) => GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      selectedTab = entry.key;
-                    });
-                  },
-                  child: Container(
-                    margin: EdgeInsets.only(right: 10),
-                    padding:
-                    EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: selectedTab == entry.key
-                          ? Colors.green[800] // 터치 시 초록색
-                          : Colors.white, // 기본은 흰색
-                      border: Border.all(
-                        color: Colors.grey[300]!, // 테두리 색상
-                      ),
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                    child: Text(
-                      entry.value,
-                      style: TextStyle(
-                        color: selectedTab == entry.key
-                            ? Colors.white
-                            : Colors.black, // 터치 전 검정색 텍스트
-                      ),
-                    ),
-                  ),
-                ),
-              )
-                  .toList(),
-            ),
+            _popularSearchTap(), // 인기 검색어 탭
             SizedBox(height: 20),
+            _popularSearch(), // 인기 검색어 목록
+          ],
+        ),
+      ),
+      bottomNavigationBar: MyBottomNavigationBar(
+        selectedIndex: _selectedIndex,
+        onItemTapped: _onItemTapped,
+      ),
+    );
+  }
+
+  // 상단 바
+  AppBar _buildAppBar() {
+    return AppBar(
+      backgroundColor: Colors.white,
+      title: Text(
+        '게시물 검색',
+        style: TextStyle(
+          color: Colors.black,
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      centerTitle: true,
+      elevation: 0,
+    );
+  }
+
+  // 검색 바
+  Widget _searchBar() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 1),
+      child: Container(
+        height: 35,
+        decoration: BoxDecoration(
+          color: const Color(0x264B7E5B),
+          borderRadius: BorderRadius.circular(15),
+        ),
+        child: Row(
+          children: [
+            SizedBox(width: 16),
             Expanded(
-              child: ListView.builder(
-                itemCount: popularSearches.length,
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4.0),
-                    child: Text(
-                      "${index + 1}. ${popularSearches[index]}",
-                      style: TextStyle(fontSize: 16),
-                    ),
-                  );
+              child: TextField(
+                decoration: InputDecoration(
+                  hintText: '궁금한 식물을 검색해 보세요!',
+                  hintStyle: TextStyle(color: Color(0xFFB3B3B3)),
+                  border: InputBorder.none,
+                ),
+                style: TextStyle(color: Colors.black),
+                onChanged: (value) {
+                  // 검색 입력값 처리
                 },
               ),
             ),
+            SizedBox(width: 8),
+            GestureDetector(
+              onTap: () {
+                // 검색 필터 로직
+                context.push('/community'); // 전체게시물페이지로 이동
+              },
+              child: Icon(Icons.search, color: Color(0xFFB3B3B3)),
+            ),
+            SizedBox(width: 16), // 우측 패딩
           ],
         ),
       ),
     );
   }
+
+  // 최근 검색어 목록
+  Widget _recentSearch() {
+    return Wrap(
+      spacing: 8,
+      children: recentSearches
+          .map(
+            (search) =>
+            GestureDetector(
+              onTap: () {
+                setState(() {
+                  selectedRecentSearch = search;
+                });
+              },
+              child: Container(
+                padding:
+                EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: selectedRecentSearch == search
+                      ? Colors.grey[300] // 선택 시 회색
+                      : Colors.white, // 기본 흰색
+                  border: Border.all(color: Colors.grey[400]!),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Text(
+                  search,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+            ),
+      )
+          .toList(),
+    );
+  }
+
+  // 인기 검색어 탭 (실시간, 일간, 주간, 월간)
+  Widget _popularSearchTap() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: tabs
+          .asMap()
+          .entries
+          .map(
+            (entry) =>
+            GestureDetector(
+              onTap: () {
+                setState(() {
+                  selectedTab = entry.key;
+                });
+              },
+              child: Container(
+                margin: EdgeInsets.only(right: 10),
+                padding:
+                EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: selectedTab == entry.key
+                      ? Colors.green[800] // 터치 시 초록색
+                      : Colors.white, // 기본은 흰색
+                  border: Border.all(
+                    color: Colors.grey[300]!, // 테두리 색상
+                  ),
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                child: Text(
+                  entry.value,
+                  style: TextStyle(
+                    color: selectedTab == entry.key
+                        ? Colors.white
+                        : Colors.black, // 터치 전 검정색
+                  ),
+                ),
+              ),
+            ),
+      )
+          .toList(),
+    );
+  }
+
+  // 인기 검색어 목록
+  Widget _popularSearch() {
+    return Expanded(
+      child: ListView.builder(
+        itemCount: popularSearches.length,
+        itemBuilder: (context, index) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4.0),
+            child: Text(
+              "${index + 1}. ${popularSearches[index]}",
+              style: TextStyle(fontSize: 16),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
 }

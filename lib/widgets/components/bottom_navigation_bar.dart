@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
-
-import '../../screens/main/main_screen.dart';
-import '../../screens/plants/my_plant_collection_screen.dart';
-import '../../screens/profile/my_page_screen.dart';
+import 'package:go_router/go_router.dart';
 
 class MyBottomNavigationBar extends StatelessWidget {
   final int selectedIndex; // 현재 인덱스
-  final Function(int) onItemTapped; // 인덱스 변경 시
+  final Function(int) onItemTapped; // 탭 변경
 
   const MyBottomNavigationBar({
     Key? key,
@@ -20,8 +17,8 @@ class MyBottomNavigationBar extends StatelessWidget {
       backgroundColor: Colors.white,
       elevation: 0, // 그림자 제거
       currentIndex: selectedIndex,
-      onTap: (index) { // 페이지 이동
-        _navigatePage(context, index);
+      onTap: (index) {
+        _navigatePage(context, index); // 페이지 이동
         onItemTapped(index); // 상태 업데이트
       },
       items: [
@@ -41,7 +38,7 @@ class MyBottomNavigationBar extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               _greenBar(visible: selectedIndex == 1),
-              Icon(Icons.book, size: 32,
+              Icon(Icons.menu_book, size: 32,
                   color: selectedIndex == 1 ? Colors.grey : Colors.grey[400]),
             ],
           ),
@@ -77,23 +74,20 @@ class MyBottomNavigationBar extends StatelessWidget {
     );
   }
 
-  // 페이지 이동 로직 함수
+  // 페이지 이동
   void _navigatePage(BuildContext context, int index) {
-    Widget targetPage;
-
-    if (index == 0) {
-      targetPage = MainScreen(); // 식물 모음 페이지 클래스명으로 바꾸시면 됩니다.
-    } else if (index == 1) {
-      targetPage = MainScreen(); // 메인 페이지
-    } else if (index == 2) {
-      targetPage = MyPageScreen(); // 마이 페이지 클래스명으로 바꾸시면 됩니다.
-    } else {
-      return; // 예외 상황
+    switch (index) {
+      case 0:
+        context.go('/plants'); // 내 식물 모음 페이지
+        break;
+      case 1:
+        context.go('/main'); // 메인 페이지
+        break;
+      case 2:
+        context.go('/profile'); // 마이 페이지
+        break;
+      default:
+        break;
     }
-
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => targetPage),
-    );
   }
 }

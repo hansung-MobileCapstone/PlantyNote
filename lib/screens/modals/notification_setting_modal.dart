@@ -1,5 +1,5 @@
-// notification_setting_modal.dart  # 4-2-1번 화면
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class NotificationSettingModal extends StatefulWidget {
   const NotificationSettingModal({super.key});
@@ -47,7 +47,7 @@ class _NotificationSettingModalState extends State<NotificationSettingModal> {
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () {
-                Navigator.pop(context, selectedTime);
+                context.pop();
               },
               child: const Text('완료'),
             ),

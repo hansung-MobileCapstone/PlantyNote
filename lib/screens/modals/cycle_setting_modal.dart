@@ -1,5 +1,5 @@
-// cycle_setting_modal.dart         # 4-1-1번 화면
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class CycleSettingModal extends StatefulWidget {
   const CycleSettingModal({super.key});
@@ -39,11 +39,7 @@ class _CycleSettingModalState extends State<CycleSettingModal> {
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () {
-                Navigator.pop(context, {
-                  'waterCycle': waterCycle,
-                  'fertilizerCycle': fertilizerCycle,
-                  'repottingCycle': repottingCycle,
-                });
+                context.pop();
               },
               child: const Text('완료'),
             ),

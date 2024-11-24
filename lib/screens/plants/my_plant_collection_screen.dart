@@ -1,36 +1,41 @@
-// my_plant_collection_screen.dart  # 4번 화면
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import '../../widgets/components/bottom_navigation_bar.dart';
+import '../../widgets/components/plant_list_item.dart';
 
-class MyPlantCollectionScreen extends StatelessWidget {
+class MyPlantCollectionScreen extends StatefulWidget {
   const MyPlantCollectionScreen({super.key});
+  @override
+  State<MyPlantCollectionScreen> createState() => _MyPlantCollectionScreenState();
+}
+
+class _MyPlantCollectionScreenState extends State<MyPlantCollectionScreen> {
+  int _selectedIndex = 0; // 네비게이션바 인덱스
+
+  void _onItemTapped(int index) { // 인덱스 상태관리
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('MY 정원'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () {
-              Navigator.pushNamed(context, '/plant_register');
-            },
-          ),
-        ],
-      ),
+      backgroundColor: Colors.white,
+      appBar: _buildAppBar(),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          _plantListItem(
-            context,
+          PlantListItem(
+            //context,
             plantName: '팥이',
             imageUrl: 'assets/images/sample_plant.png',
             dDayWater: 1,
             dDayFertilizer: 220,
           ),
           const SizedBox(height: 16),
-          _plantListItem(
-            context,
+          PlantListItem(
+            //context,
             plantName: '콩콩이',
             imageUrl: 'assets/images/sample_plant.png',
             dDayWater: 3,
@@ -38,82 +43,58 @@ class MyPlantCollectionScreen extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _plantListItem(
-      BuildContext context, {
-        required String plantName,
-        required String imageUrl,
-        required int dDayWater,
-        required int dDayFertilizer,
-      }) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.pushNamed(context, '/plant_timeline');
-      },
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(10),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.3),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            CircleAvatar(
-              radius: 30,
-              backgroundImage: AssetImage(imageUrl),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    plantName,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      _dDayBadge('D-$dDayFertilizer', Colors.red),
-                      const SizedBox(width: 8),
-                      _dDayBadge('D-$dDayWater', Colors.blue),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            const Icon(Icons.chevron_right, color: Colors.grey),
-          ],
-        ),
+      bottomNavigationBar: MyBottomNavigationBar(
+        selectedIndex: _selectedIndex,
+        onItemTapped: _onItemTapped,
       ),
     );
   }
 
-  Widget _dDayBadge(String text, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Text(
-        text,
+  // 상단 바
+  AppBar _buildAppBar() {
+    return AppBar(
+      scrolledUnderElevation: 0,
+      backgroundColor: Colors.white,
+      title: Text(
+        'MY 정원',
         style: TextStyle(
-          color: color,
+          color: Colors.black,
+          fontSize: 16,
           fontWeight: FontWeight.bold,
         ),
+      ),
+      actions: [ // 오른쪽 끝 배치
+        _writeButton(), // 식물 등록 버튼
+      ],
+    );
+  }
+
+  // 식물 등록 버튼 위젯
+  Widget _writeButton() {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(0, 8, 5, 0),
+      child:
+      Row(
+        children: [
+          Text(
+            '추가',
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          IconButton(
+            onPressed: () {
+              context.push('/plants/register'); // 내식물등록페이지로 이동
+            },
+            icon: Icon(
+              Icons.add_circle,
+              color: Color(0xFF4B7E5B),
+              size: 35,
+            ),
+          ),
+        ],
       ),
     );
   }
