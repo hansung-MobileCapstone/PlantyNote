@@ -63,6 +63,7 @@ class LoginStartScreen extends StatelessWidget {
     );
   }
 
+  // 텍스트 박스
   Widget _textBox(double screenWidth) {
     return Container(
       width: screenWidth * 0.8,
