@@ -11,10 +11,10 @@ import './onboarding_routes.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
-    initialLocation: '/plants', // 앱 실행 시 처음 표시될 경로
+    initialLocation: '/onboarding', // 앱 실행 시 처음 표시될 경로
     routes: [
-      //...OnboardingRoutes.getRoutes(),
-      //...AuthRoutes.getRoutes(),
+      ...OnboardingRoutes.getRoutes(),
+      ...AuthRoutes.getRoutes(),
       ...MainRoutes.getRoutes(),
       ...PlantsRoutes.getRoutes(),
       ...CommunityRoutes.getRoutes(),
