@@ -7,6 +7,7 @@ class PlantOnboardingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFFF7FBF1),
       body: Stack(
         children: [
           _treeImage(context), // 트리 이미지
