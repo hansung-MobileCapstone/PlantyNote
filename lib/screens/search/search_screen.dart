@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../widgets/components/bottom_navigation_bar.dart';
+import 'package:go_router/go_router.dart';
 
 class SearchScreen extends StatefulWidget {
   @override
@@ -6,6 +8,7 @@ class SearchScreen extends StatefulWidget {
 }
 
 class _SearchScreenState extends State<SearchScreen> {
+  int _selectedIndex = 1; // 네비게이션바 인덱스
   int selectedTab = 0; // 실시간, 일간, 주간, 월간 탭 상태
   String? selectedRecentSearch; // 선택된 최근 검색어
   final List<String> recentSearches = ["고목나무", "알라비", "레몬 나무"];
@@ -17,6 +20,12 @@ class _SearchScreenState extends State<SearchScreen> {
     "유칼립투스"
   ];
   final List<String> tabs = ["실시간", "일간", "주간", "월간"];
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index; // 인덱스 상태 업데이트
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,6 +58,10 @@ class _SearchScreenState extends State<SearchScreen> {
           ],
         ),
       ),
+      bottomNavigationBar: MyBottomNavigationBar(
+        selectedIndex: _selectedIndex,
+        onItemTapped: _onItemTapped,
+      ),
     );
   }
 
@@ -76,21 +89,18 @@ class _SearchScreenState extends State<SearchScreen> {
       child: Container(
         height: 35,
         decoration: BoxDecoration(
-          color: const Color(0x264B7E5B), // 배경색
+          color: const Color(0x264B7E5B),
           borderRadius: BorderRadius.circular(15),
         ),
         child: Row(
           children: [
-            SizedBox(width: 16), // 좌측 패딩
-            Icon(Icons.search, color: Color(0xFFB3B3B3)),
-            SizedBox(width: 8),
+            SizedBox(width: 16),
             Expanded(
               child: TextField(
                 decoration: InputDecoration(
                   hintText: '궁금한 식물을 검색해 보세요!',
                   hintStyle: TextStyle(color: Color(0xFFB3B3B3)),
                   border: InputBorder.none,
-                  //contentPadding: EdgeInsets.symmetric(vertical: 12),
                 ),
                 style: TextStyle(color: Colors.black),
                 onChanged: (value) {
@@ -98,7 +108,15 @@ class _SearchScreenState extends State<SearchScreen> {
                 },
               ),
             ),
-
+            SizedBox(width: 8),
+            GestureDetector(
+              onTap: () {
+                // 검색 필터 로직
+                context.push('/community'); // 전체게시물페이지로 이동
+              },
+              child: Icon(Icons.search, color: Color(0xFFB3B3B3)),
+            ),
+            SizedBox(width: 16), // 우측 패딩
           ],
         ),
       ),

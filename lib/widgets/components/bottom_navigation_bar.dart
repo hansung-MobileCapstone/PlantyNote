@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../screens/main/main_screen.dart';
-import '../../screens/plants/my_plant_collection_screen.dart';
-import '../../screens/profile/my_page_screen.dart';
-
 class MyBottomNavigationBar extends StatelessWidget {
   final int selectedIndex; // 현재 인덱스
   final Function(int) onItemTapped; // 탭 변경

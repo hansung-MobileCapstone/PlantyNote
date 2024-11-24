@@ -77,7 +77,7 @@ class LoginStartScreen extends StatelessWidget {
         ),
       ),
       child: const Text(
-        'The best\napp for\nyour plants',
+        'The best\nApp for\nyour plants',
         textAlign: TextAlign.left,
         style: TextStyle(
           fontSize: 50,
