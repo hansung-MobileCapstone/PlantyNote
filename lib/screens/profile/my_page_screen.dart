@@ -139,7 +139,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
             ),
             TextButton(
               onPressed: () {
-                context.go('/login'); // 로그인페이지로 이동
+                context.go('/start/login'); // 로그인페이지로 이동
                 // 로그인 기능 구현
               },
               child: Text("예"),

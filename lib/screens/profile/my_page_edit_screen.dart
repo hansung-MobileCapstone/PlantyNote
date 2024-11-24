@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter/services.dart';
 import '../../widgets/profile/change_password_modal.dart';
 import 'package:plant/widgets/components/bottom_navigation_bar.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 
 class MyPageEditScreen extends StatefulWidget {
   @override
@@ -11,6 +13,8 @@ class MyPageEditScreen extends StatefulWidget {
 
 class _MyPageScreenState extends State<MyPageEditScreen> {
   int _selectedIndex = 2;
+  XFile? _image; // 이미지 저장 변수
+  final ImagePicker _picker = ImagePicker();
   late TextEditingController _nameController;
   late TextEditingController _introController;
 
@@ -18,6 +22,16 @@ class _MyPageScreenState extends State<MyPageEditScreen> {
     setState(() {
       _selectedIndex = index;
     });
+  }
+
+  // 사진 선택 함수
+  void _pickImage() async {
+    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      setState(() {
+        _image = image;
+      });
+    }
   }
 
   @override
@@ -68,7 +82,7 @@ class _MyPageScreenState extends State<MyPageEditScreen> {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      _profileImage(), // 프로필 이미지
+                      _imagePicker(), // 프로필 이미지 선택
                       SizedBox(width: 16),
                       Expanded(
                         child: _editProfileInfo(), // 닉네임, 소개글 편집
@@ -164,13 +178,23 @@ class _MyPageScreenState extends State<MyPageEditScreen> {
     );
   }
 
-  // 프로필 사진
-  Widget _profileImage() {
-    return Padding(
-      padding: EdgeInsets.only(left: 8.0),
+  // 사진 등록 ImagePicker
+  Widget _imagePicker() {
+    return GestureDetector(
+      onTap: _pickImage, // 새로운 사진 선택 가능
       child: CircleAvatar(
-        radius: 50,
-        backgroundImage: AssetImage('assets/profile_image.png'),
+        radius: 50, // 동그란 모양의 크기 (지름의 절반)
+        backgroundColor: Colors.grey[200], // 배경색
+        backgroundImage: _image != null
+            ? FileImage(File(_image!.path)) // 이미지가 있을 때 표시
+            : null, // 이미지가 없을 때
+        child: _image == null
+            ? Icon(
+          Icons.add, // 이미지가 없을 때 추가 아이콘 표시
+          color: Colors.grey[400],
+          size: 30,
+        )
+            : null, // 이미지가 있으면 아이콘 표시 안함
       ),
     );
   }

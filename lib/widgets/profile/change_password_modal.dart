@@ -94,7 +94,7 @@ class PasswordChangeModal extends StatelessWidget {
                 ElevatedButton(
                   onPressed: () {
                     // 비밀번호 변경 로직 추가
-                    context.go('/login'); // 로그인페이지로 이동
+                    context.go('/start/login'); // 로그인페이지로 이동
                   },
                   child: Text(
                     '완료',

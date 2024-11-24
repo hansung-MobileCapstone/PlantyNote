@@ -1,5 +1,5 @@
-// calendar_modal.dart              # 4-1-2번 화면
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class CalendarModal extends StatelessWidget {
   const CalendarModal({super.key});
@@ -21,7 +21,7 @@ class CalendarModal extends StatelessWidget {
           const SizedBox(height: 8),
           ElevatedButton(
             onPressed: () {
-              Navigator.pop(context);
+              context.pop();
             },
             child: const Text('선택'),
           ),

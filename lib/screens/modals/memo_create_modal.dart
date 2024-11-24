@@ -121,15 +121,15 @@ class _MemoCreateModalState extends State<MemoCreateModal> {
     return GestureDetector(
       onTap: _pickImage, // 새로운 사진 선택 가능
       child: Container(
-        width: 100, // CircleAvatar의 직경 (2 * radius)
+        width: 100,
         height: 100,
         decoration: BoxDecoration(
           color: Colors.grey[200], // 배경색
-          borderRadius: BorderRadius.circular(10), // 둥근 모서리 (10px 반경)
+          borderRadius: BorderRadius.circular(10),
           image: _image != null
               ? DecorationImage(
             image: FileImage(File(_image!.path)), // 이미지가 있을 때 표시
-            fit: BoxFit.cover, // 이미지 크기 맞춤
+            fit: BoxFit.cover,
           )
               : null,
         ),

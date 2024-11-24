@@ -189,7 +189,7 @@ class _MainScreenState extends State<MainScreen> {
 
     return GestureDetector(
       onTap: () {
-        context.go('/community/detail'); // 게시물상세페이지로 이동(/$id 추가)
+        context.push('/community/detail'); // 게시물상세페이지로 이동(/$id 추가)
       },
       child: Container(
         width: itemWidth,
