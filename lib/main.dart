@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'screens/auth/login_screen.dart';
+import 'screens/auth/login_start_screen.dart';
+import 'screens/auth/signup_screen.dart';
+import 'screens/onboarding/plant_onboarding_screen.dart';
+import 'screens/main/main_screen.dart';
 //import 'package:plant/widgets/post/comment_modal.dart';
 //import '../widgets/post/comment_item.dart';
 //import '../screens/community/post_detail_screen.dart';
@@ -14,18 +19,23 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
+  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'PlantyNote',
       theme: ThemeData(
-        primarySwatch: Colors.green,
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
+        fontFamily: 'Roboto',
+        useMaterial3: true,
       ),
-      initialRoute: '/plant_collection',
+      initialRoute: '/',
       routes: {
-        '/plant_collection': (context) => const MyPlantCollectionScreen(),
-        '/plant_register': (context) => const MyPlantRegisterScreen(),
-        '/plant_timeline': (context) => const MyPlantTimelineScreen(),
+        '/': (context) => const PlantOnboardingScreen(),
+        '/loginStart': (context) => const LoginStartScreen(),
+        '/login': (context) => const LoginScreen(),
+        '/signup': (context) => const SignupScreen(),
       },
     );
   }
