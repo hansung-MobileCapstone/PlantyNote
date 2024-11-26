@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import '../modals/cycle_setting_modal.dart';
 
 class MyPlantRegisterScreen extends StatefulWidget {
   const MyPlantRegisterScreen({super.key});
@@ -18,6 +19,10 @@ class _MyPlantRegisterScreenState extends State<MyPlantRegisterScreen> {
   final _plantSpeciesController = TextEditingController();
   bool isError = false;
   bool isImageUploaded = false;
+  // 초기값 설정
+  int waterCycle = 40; // 물 주기
+  int nutrientCycle = 3; // 영양제 주기
+  int repottingCycle = 12; // 분갈이 주기
 
   @override
   void dispose() {
@@ -54,76 +59,19 @@ class _MyPlantRegisterScreenState extends State<MyPlantRegisterScreen> {
         padding: const EdgeInsets.all(16),
         child: Form(
           key: _formKey,
-          child: Column(
-            children: [
-              GestureDetector(
-                onTap: () {
-                  FocusScope.of(context).unfocus();
-                  setState(() {
-                    isImageUploaded = true;
-                  });
-                },
-                child: SingleChildScrollView(
-                  padding: EdgeInsets.symmetric(horizontal: 18),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _imagePicker(),
-                      SizedBox(height: 10),
-                      SizedBox(height: 10),
-                      //_inputField(),
-                    ],
-                  ),
-                ),
-                // child: Container(
-                //   width: double.infinity,
-                //   height: 150,
-                //   decoration: BoxDecoration(
-                //     border: Border.all(color: Colors.grey),
-                //     borderRadius: BorderRadius.circular(8),
-                //   ),
-                //   child: Center(
-                //     child: isImageUploaded
-                //         ? const Icon(Icons.check, size: 32, color: Colors.green)
-                //         : const Text('사진 추가 (10MB 이하)'),
-                //   ),
-                // ),
-              ),
-              if (!isImageUploaded && isError)
-                const Text(
-                  '사진 용량 초과',
-                  style: TextStyle(color: Colors.red),
-                ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _plantNameController,
-                decoration: const InputDecoration(
-                  labelText: '식물 이름',
-                  hintText: '애칭을 정해주세요.',
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return '식물의 이름을 입력하세요.';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _plantSpeciesController,
-                decoration: const InputDecoration(
-                  labelText: '식물 종',
-                  hintText: '식물의 종을 입력하세요.',
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return '식물의 종을 입력하세요.';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 10),
-            ],
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 18),
+            child: Column(
+
+              children: [
+                _imagePicker(), // 식물 사진 선택
+                const SizedBox(height: 25),
+                _plantNameForm(), // 식물 이름 입력폼
+                const SizedBox(height: 16),
+                _plantSpeciesForm(), // 식물 종 입력폼
+                const SizedBox(height: 16),
+              ],
+            ),
           ),
         ),
       ),
@@ -167,6 +115,108 @@ class _MyPlantRegisterScreenState extends State<MyPlantRegisterScreen> {
         )
             : null, // 이미지가 있으면 아이콘 표시 안함
       ),
+    );
+  }
+
+  // 식물 이름 입력
+  Widget _plantNameForm() {
+    return TextFormField(
+      controller: _plantNameController,
+      decoration: InputDecoration(
+        labelText: '식물 이름',
+        hintText: '애칭을 정해주세요. (5자 이내)',
+        labelStyle: TextStyle( // labelText 스타일
+          color: Color(0xFF697386), // labelText 색상 설정
+          fontSize: 14, // 글자 크기
+          fontWeight: FontWeight.bold, // 글자 굵기
+        ),
+        hintStyle: TextStyle( // hintText 스타일
+          color: Color(0xFFB3B3B3), // hintText 색상 설정
+          fontSize: 14, // 글자 크기
+        ),
+        border: OutlineInputBorder( // 기본 테두리
+          borderRadius: BorderRadius.circular(50.0),
+          borderSide: BorderSide(
+            color: Color(0xFFE6E6E6),
+            width: 2.0,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder( // 포커스
+          borderRadius: BorderRadius.circular(50.0),
+          borderSide: BorderSide(
+            color: Color(0xFF4B7E5B), // 포커스 시에도 회색 테두리
+            width: 2.0, // 두께를 더 두껍게 설정 가능
+          ),
+        ),
+        enabledBorder: OutlineInputBorder( // 비활성화
+          borderRadius: BorderRadius.circular(50.0),
+          borderSide: BorderSide(
+            color: Color(0xFFE6E6E6),
+            width: 2.0,
+          ),
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 8.0,
+          horizontal: 15.0,
+        ),
+      ),
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return '식물의 이름을 입력하세요.';
+        }
+        return null;
+      },
+    );
+  }
+
+  // 식물 종 입력
+  Widget _plantSpeciesForm() {
+    return TextFormField(
+      controller: _plantSpeciesController,
+      decoration: InputDecoration(
+        labelText: '식물 종',
+        hintText: '식물의 종을 입력하세요.',
+        labelStyle: TextStyle( // labelText 스타일
+          color: Color(0xFF697386), // labelText 색상 설정
+          fontSize: 14, // 글자 크기
+          fontWeight: FontWeight.bold, // 글자 굵기
+        ),
+        hintStyle: TextStyle( // hintText 스타일
+          color: Color(0xFFB3B3B3), // hintText 색상 설정
+          fontSize: 14, // 글자 크기
+        ),
+        border: OutlineInputBorder( // 기본 테두리
+          borderRadius: BorderRadius.circular(50.0),
+          borderSide: BorderSide(
+            color: Color(0xFFE6E6E6),
+            width: 2.0,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder( // 포커스
+          borderRadius: BorderRadius.circular(50.0),
+          borderSide: BorderSide(
+            color: Color(0xFF4B7E5B), // 포커스 시에도 회색 테두리
+            width: 2.0, // 두께를 더 두껍게 설정 가능
+          ),
+        ),
+        enabledBorder: OutlineInputBorder( // 비활성화
+          borderRadius: BorderRadius.circular(50.0),
+          borderSide: BorderSide(
+            color: Color(0xFFE6E6E6),
+            width: 2.0,
+          ),
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 8.0,
+          horizontal: 15.0,
+        ),
+      ),
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return '식물의 종을 입력하세요.';
+        }
+        return null;
+      },
     );
   }
 
