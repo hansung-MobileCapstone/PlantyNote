@@ -20,9 +20,9 @@ class _MyPlantRegisterScreenState extends State<MyPlantRegisterScreen> {
   bool isError = false;
   bool isImageUploaded = false;
   // 초기값 설정
-  int waterCycle = 40; // 물 주기
-  int nutrientCycle = 3; // 영양제 주기
-  int repottingCycle = 12; // 분갈이 주기
+  double waterCycle = 40; // 물 주기
+  double fertilizerCycle = 3; // 영양제 주기
+  double repottingCycle = 12; // 분갈이 주기
 
   @override
   void dispose() {
@@ -70,6 +70,7 @@ class _MyPlantRegisterScreenState extends State<MyPlantRegisterScreen> {
                 const SizedBox(height: 16),
                 _plantSpeciesForm(), // 식물 종 입력폼
                 const SizedBox(height: 16),
+                _cycleModalButton(), // 주기설정 입력폼
               ],
             ),
           ),
@@ -126,13 +127,13 @@ class _MyPlantRegisterScreenState extends State<MyPlantRegisterScreen> {
         labelText: '식물 이름',
         hintText: '애칭을 정해주세요. (5자 이내)',
         labelStyle: TextStyle( // labelText 스타일
-          color: Color(0xFF697386), // labelText 색상 설정
-          fontSize: 14, // 글자 크기
-          fontWeight: FontWeight.bold, // 글자 굵기
+          color: Color(0xFF697386),
+          fontSize: 14,
+          fontWeight: FontWeight.bold,
         ),
         hintStyle: TextStyle( // hintText 스타일
-          color: Color(0xFFB3B3B3), // hintText 색상 설정
-          fontSize: 14, // 글자 크기
+          color: Color(0xFFB3B3B3),
+          fontSize: 14,
         ),
         border: OutlineInputBorder( // 기본 테두리
           borderRadius: BorderRadius.circular(50.0),
@@ -144,8 +145,8 @@ class _MyPlantRegisterScreenState extends State<MyPlantRegisterScreen> {
         focusedBorder: OutlineInputBorder( // 포커스
           borderRadius: BorderRadius.circular(50.0),
           borderSide: BorderSide(
-            color: Color(0xFF4B7E5B), // 포커스 시에도 회색 테두리
-            width: 2.0, // 두께를 더 두껍게 설정 가능
+            color: Color(0xFF4B7E5B),
+            width: 2.0,
           ),
         ),
         enabledBorder: OutlineInputBorder( // 비활성화
@@ -177,12 +178,12 @@ class _MyPlantRegisterScreenState extends State<MyPlantRegisterScreen> {
         labelText: '식물 종',
         hintText: '식물의 종을 입력하세요.',
         labelStyle: TextStyle( // labelText 스타일
-          color: Color(0xFF697386), // labelText 색상 설정
+          color: Color(0xFF697386),
           fontSize: 14, // 글자 크기
-          fontWeight: FontWeight.bold, // 글자 굵기
+          fontWeight: FontWeight.bold,
         ),
         hintStyle: TextStyle( // hintText 스타일
-          color: Color(0xFFB3B3B3), // hintText 색상 설정
+          color: Color(0xFFB3B3B3),
           fontSize: 14, // 글자 크기
         ),
         border: OutlineInputBorder( // 기본 테두리
@@ -196,7 +197,7 @@ class _MyPlantRegisterScreenState extends State<MyPlantRegisterScreen> {
           borderRadius: BorderRadius.circular(50.0),
           borderSide: BorderSide(
             color: Color(0xFF4B7E5B), // 포커스 시에도 회색 테두리
-            width: 2.0, // 두께를 더 두껍게 설정 가능
+            width: 2.0,
           ),
         ),
         enabledBorder: OutlineInputBorder( // 비활성화
@@ -217,6 +218,49 @@ class _MyPlantRegisterScreenState extends State<MyPlantRegisterScreen> {
         }
         return null;
       },
+    );
+  }
+
+  // 주기 모달창 버튼
+  Widget _cycleModalButton() {
+    return Center(
+      child: GestureDetector(
+        onTap: () {
+          showDialog(
+            context: context,
+            builder: (context) => CycleSettingModal( // 주기 모달창 호출
+              initialWaterCycle: waterCycle, // 물
+              initialFertilizerCycle: fertilizerCycle, // 영양체
+              initialRepottingCycle: repottingCycle, // 분갈이
+              onSave: (double newWaterCycle, double newFertilizerCycle, double newRepottingCycle) {
+                setState(() {
+                  waterCycle = newWaterCycle;
+                  fertilizerCycle = newFertilizerCycle;
+                  repottingCycle = newRepottingCycle;
+                });
+              },
+            ),
+          );
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 15),
+          decoration: BoxDecoration(
+            color: Color(0xFFECF7F2),
+            borderRadius: BorderRadius.circular(50),
+            border: Border.all(
+              color: Color(0xFFE6E6E6),
+              width: 2.0,
+            ),
+          ),
+          child: Text(
+            '물: $waterCycle일 영양제: $fertilizerCycle개월 분갈이: $repottingCycle개월',
+            style: const TextStyle(
+              fontSize: 14,
+              color: Color(0xFF697386),
+            ),
+          ),
+        ),
+      ),
     );
   }
 
