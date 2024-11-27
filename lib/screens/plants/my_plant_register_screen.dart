@@ -27,6 +27,9 @@ class _MyPlantRegisterScreenState extends State<MyPlantRegisterScreen> {
   double repottingCycle = 12; // 분갈이 주기
   DateTime meetingDate = DateTime.now(); // 처음 만난 날
   DateTime waterDate = DateTime.now(); // 마지막 물 준 날
+  int sunlightLevel = 3; // 일조량
+  int waterLevel = 3; // 물 주는 양
+  double temperature = 15.0; // 온도
 
   @override
   void dispose() {
@@ -66,36 +69,91 @@ class _MyPlantRegisterScreenState extends State<MyPlantRegisterScreen> {
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 18),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center, // 기본 중앙 정렬
               children: [
                 _imagePicker(), // 식물 사진 선택
                 const SizedBox(height: 25),
                 _plantNameForm(), // 식물 이름 입력폼
-                const SizedBox(height: 16),
+                const SizedBox(height: 20),
                 _plantSpeciesForm(), // 식물 종 입력폼
-                const SizedBox(height: 16),
+                const SizedBox(height: 25),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: const Text(
+                    "물, 영양제, 분갈이 주기",
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF697386),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
                 _cycleModalButton(), // 주기설정 입력 모달
-                const SizedBox(height: 16),
+                const SizedBox(height: 25),
+                
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: const Text(
+                    "식물이 좋아하는 환경",
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF697386),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                _plantInfoButton(),
+                const SizedBox(height: 25),
+
                 Row(
                   children: [
-                    _calendarModalButton( // 처음 만난 날
-                      selectedDate: meetingDate,
-                      onDateSelected: (newDate) {
-                        setState(() {
-                          meetingDate = newDate;
-                        });
-                      },
+                    Column( // 처음 만난 날
+                      children: [
+                        const Text(
+                          "처음 만난 날",
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF697386),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        _calendarModalButton(
+                          selectedDate: meetingDate,
+                          onDateSelected: (newDate) {
+                            setState(() {
+                              meetingDate = newDate;
+                            });
+                          },
+                        ),
+                      ],
                     ),
-                    const Spacer(), // 양옆에 붙이기
-                    _calendarModalButton( // 마지막 물준 날
-                      selectedDate: waterDate,
-                      onDateSelected: (newDate) {
-                        setState(() {
-                          waterDate = newDate;
-                        });
-                      },
+                    const Spacer(),
+                    Column( // 마지막 물 준 날 섹션
+                      children: [
+                        const Text(
+                          "마지막 물 준 날",
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF697386),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        _calendarModalButton(
+                          selectedDate: waterDate,
+                          onDateSelected: (newDate) {
+                            setState(() {
+                              waterDate = newDate;
+                            });
+                          },
+                        ),
+                      ],
                     ),
-                  ]
-                )
+                  ],
+                ),
               ],
             ),
           ),
@@ -285,6 +343,168 @@ class _MyPlantRegisterScreenState extends State<MyPlantRegisterScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  // 일조량, 물주는양, 온도 설정 버튼
+  Widget _plantInfoButton() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // 일조량
+          Column(
+            children: [
+              const Text(
+                "일조량",
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Color(0xFF697386),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    "적음",
+                    style: TextStyle(fontSize: 12, color: Color(0xFFB3B3B3)),
+                  ),
+                  const SizedBox(width: 10), // 간격 조절
+                  Row(
+                    children: List.generate(5, (index) {
+                      return IconButton(
+                        icon: Icon(
+                          Icons.wb_sunny,
+                          color: index < sunlightLevel
+                              ? Color(0xFFFDD941)
+                              : Color(0x4DFDD941),
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            sunlightLevel = index + 1;
+                          });
+                        },
+                      );
+                    }),
+                  ),
+                  const SizedBox(width: 10),
+                  const Text(
+                    "많음",
+                    style: TextStyle(fontSize: 12, color: Color(0xFFB3B3B3)),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+
+          // 물 주는 양
+          Column(
+            children: [
+              const Text(
+                "물 주는 양",
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Color(0xFF697386),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    "적음",
+                    style: TextStyle(fontSize: 12, color: Color(0xFFB3B3B3)),
+                  ),
+                  const SizedBox(width: 10),
+                  Row(
+                    children: List.generate(5, (index) {
+                      return IconButton(
+                        icon: Icon(
+                          Icons.water_drop,
+                          color: index < waterLevel
+                              ? Color(0xFF8FD7FF)
+                              : Color(0x4D8FD7FF),
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            waterLevel = index + 1;
+                          });
+                        },
+                      );
+                    }),
+                  ),
+                  const SizedBox(width: 10),
+                  const Text(
+                    "많음",
+                    style: TextStyle(fontSize: 12, color: Color(0xFFB3B3B3)),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+
+          // 온도 슬라이더
+          Column(
+            children: [
+              Text(
+                "온도: ${temperature.toStringAsFixed(1)}°C",
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: Color(0xFF697386),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    "-10",
+                    style: TextStyle(fontSize: 12, color: Color(0xFFB3B3B3)),
+                  ),
+                  SizedBox(
+                    width: 250, // 슬라이더 크기
+                    child: SliderTheme(
+                      data: SliderThemeData(
+                        activeTrackColor: const Color(0xFFE6E6E6),
+                        inactiveTrackColor: const Color(0xFFE6E6E6),
+                        thumbColor: const Color(0xFF4B7E5B),
+                        trackHeight: 3.0,
+                        thumbShape: const RoundSliderThumbShape(
+                          enabledThumbRadius: 6.0,
+                        ),
+                        valueIndicatorShape: const PaddleSliderValueIndicatorShape(),
+                        valueIndicatorColor: const Color(0xFF4B7E5B),
+                        valueIndicatorTextStyle: const TextStyle(
+                          color: Colors.white,
+                        ),
+                      ),
+                      child: Slider(
+                        value: temperature,
+                        min: -10,
+                        max: 40,
+                        divisions: 50,
+                        label: '${temperature.toStringAsFixed(1)}°C',
+                        onChanged: (value) {
+                          setState(() {
+                            temperature = value;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                  const Text(
+                    "40",
+                    style: TextStyle(fontSize: 12, color: Color(0xFFB3B3B3)),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
