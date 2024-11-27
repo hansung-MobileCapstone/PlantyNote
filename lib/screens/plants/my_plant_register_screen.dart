@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import '../modals/cycle_setting_modal.dart';
+import '../modals/calendar_modal.dart';
 
 class MyPlantRegisterScreen extends StatefulWidget {
   const MyPlantRegisterScreen({super.key});
@@ -19,10 +20,13 @@ class _MyPlantRegisterScreenState extends State<MyPlantRegisterScreen> {
   final _plantSpeciesController = TextEditingController();
   bool isError = false;
   bool isImageUploaded = false;
+
   // 초기값 설정
   double waterCycle = 40; // 물 주기
   double fertilizerCycle = 3; // 영양제 주기
   double repottingCycle = 12; // 분갈이 주기
+  DateTime meetingDate = DateTime.now(); // 처음 만난 날
+  DateTime waterDate = DateTime.now(); // 마지막 물 준 날
 
   @override
   void dispose() {
@@ -62,7 +66,6 @@ class _MyPlantRegisterScreenState extends State<MyPlantRegisterScreen> {
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 18),
             child: Column(
-
               children: [
                 _imagePicker(), // 식물 사진 선택
                 const SizedBox(height: 25),
@@ -70,7 +73,29 @@ class _MyPlantRegisterScreenState extends State<MyPlantRegisterScreen> {
                 const SizedBox(height: 16),
                 _plantSpeciesForm(), // 식물 종 입력폼
                 const SizedBox(height: 16),
-                _cycleModalButton(), // 주기설정 입력폼
+                _cycleModalButton(), // 주기설정 입력 모달
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    _calendarModalButton( // 처음 만난 날
+                      selectedDate: meetingDate,
+                      onDateSelected: (newDate) {
+                        setState(() {
+                          meetingDate = newDate;
+                        });
+                      },
+                    ),
+                    const Spacer(), // 양옆에 붙이기
+                    _calendarModalButton( // 마지막 물준 날
+                      selectedDate: waterDate,
+                      onDateSelected: (newDate) {
+                        setState(() {
+                          waterDate = newDate;
+                        });
+                      },
+                    ),
+                  ]
+                )
               ],
             ),
           ),
@@ -259,6 +284,55 @@ class _MyPlantRegisterScreenState extends State<MyPlantRegisterScreen> {
               color: Color(0xFF697386),
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  // 캘린더 모달 버튼
+  Widget _calendarModalButton({
+    required DateTime selectedDate,
+    required Function(DateTime) onDateSelected,
+  }) {
+
+    return GestureDetector(
+      onTap: () {
+        // 캘린더 모달 열기
+        showDialog(
+          context: context,
+          builder: (context) => CalendarModal(
+            initialDate: selectedDate,
+            onDateSelected: onDateSelected,
+          ),
+        );
+      },
+      child: Container(
+        width: 210,
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 15),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(50),
+          border: Border.all(
+            color: const Color(0xFFE6E6E6),
+            width: 2.0,
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              '${selectedDate.year}.${selectedDate.month.toString().padLeft(2, '0')}.${selectedDate.day.toString().padLeft(2, '0')}',
+              style: const TextStyle(
+                fontSize: 15,
+                color: Colors.black,
+              ),
+            ),
+            const Icon(
+              Icons.calendar_today, // 캘린더 아이콘
+              size: 16,
+              color: Color(0xFF697386),
+            ),
+          ],
         ),
       ),
     );

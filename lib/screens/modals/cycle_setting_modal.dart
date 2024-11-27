@@ -76,7 +76,7 @@ class _CycleSettingModalState extends State<CycleSettingModal> {
               ),
               child: const Text(
                 '완료',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
               ),
             ),
           ],
