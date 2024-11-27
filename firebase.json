@@ -1,0 +1,29 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "plantynote",
+          "appId": "1:223736267695:android:bdd4b939eb57f06064655a",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "plantynote",
+          "configurations": {
+            "android": "1:223736267695:android:bdd4b939eb57f06064655a",
+            "ios": "1:223736267695:ios:f050c87d1b6e105d64655a"
+          }
+        }
+      }
+    }
+  },
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "storage": {
+    "rules": "storage.rules"
+  }
+}

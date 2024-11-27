@@ -76,6 +76,10 @@ lib/generated_plugin_registrant.dart # 생성된 플러그인 등록 파일
 **/ios/ServiceDefinitions.json
 **/ios/Runner/GeneratedPluginRegistrant.*
 
+# Firebase 설정 파일
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+
 # Gradle files
 .gradle/
 .dart_tool/
