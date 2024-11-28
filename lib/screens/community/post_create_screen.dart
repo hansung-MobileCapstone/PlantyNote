@@ -4,11 +4,13 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
 class PostCreateScreen extends StatefulWidget {
+  const PostCreateScreen({super.key});
+
   @override
-  _PostCreateScreenState createState() => _PostCreateScreenState();
+  PostCreateScreenState createState() => PostCreateScreenState();
 }
 
-class _PostCreateScreenState extends State<PostCreateScreen> {
+class PostCreateScreenState extends State<PostCreateScreen> {
   final List<XFile?> _images = [];
   final ImagePicker _picker = ImagePicker();
   final TextEditingController _textController = TextEditingController();

@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 import '../../widgets/components/comment_item.dart';
 
 class CommentModal extends StatelessWidget {
+  const CommentModal({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Container(

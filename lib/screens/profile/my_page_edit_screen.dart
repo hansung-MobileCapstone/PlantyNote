@@ -7,11 +7,13 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
 class MyPageEditScreen extends StatefulWidget {
+  const MyPageEditScreen({super.key});
+
   @override
-  _MyPageScreenState createState() => _MyPageScreenState();
+  MyPageScreenState createState() => MyPageScreenState();
 }
 
-class _MyPageScreenState extends State<MyPageEditScreen> {
+class MyPageScreenState extends State<MyPageEditScreen> {
   int _selectedIndex = 2;
   XFile? _image; // 이미지 저장 변수
   final ImagePicker _picker = ImagePicker();
@@ -266,11 +268,11 @@ class _MyPageScreenState extends State<MyPageEditScreen> {
       onPressed: () {
         context.pop(); // 마이페이지로 이동
       },
-      child: Text('수정 완료'),
       style: ElevatedButton.styleFrom(
         backgroundColor: Color(0xFF4B7E5B),
         foregroundColor: Colors.white,
       ),
+      child: Text('수정 완료'),
     );
   }
 

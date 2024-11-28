@@ -3,11 +3,13 @@ import 'package:go_router/go_router.dart';
 import 'package:plant/widgets/components/bottom_navigation_bar.dart';
 
 class MyPageScreen extends StatefulWidget {
+  const MyPageScreen({super.key});
+
   @override
-  _MyPageScreenState createState() => _MyPageScreenState();
+  MyPageScreenState createState() => MyPageScreenState();
 }
 
-class _MyPageScreenState extends State<MyPageScreen> {
+class MyPageScreenState extends State<MyPageScreen> {
   int _selectedIndex = 2; // 네비게이션 인덱스
 
   void _onItemTapped(int index) {
@@ -195,11 +197,11 @@ class _MyPageScreenState extends State<MyPageScreen> {
       onPressed: () {
         context.push('/profile/edit'); // 마이페이지수정페이지로 이동
       },
-      child: Text('프로필 수정'),
       style: ElevatedButton.styleFrom(
         backgroundColor: Color(0xFF4B7E5B),
         foregroundColor: Colors.white,
       ),
+      child: Text('프로필 수정'),
     );
   }
 

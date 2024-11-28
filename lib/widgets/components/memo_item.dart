@@ -8,7 +8,7 @@ class MemoItem extends StatelessWidget {
   //final String imageUrl;
   //final VoidCallback onTap;
 
-  const MemoItem(
+  const MemoItem({super.key}
     //super.key,
     //required this.date,
     //required this.content,
