@@ -527,8 +527,8 @@ class _MyPlantRegisterScreenState extends State<MyPlantRegisterScreen> {
         );
       },
       child: Container(
-        width: 210,
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 15),
+
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 35),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(50),
@@ -547,6 +547,7 @@ class _MyPlantRegisterScreenState extends State<MyPlantRegisterScreen> {
                 color: Colors.black,
               ),
             ),
+            const SizedBox(width: 10),
             const Icon(
               Icons.calendar_today, // 캘린더 아이콘
               size: 16,
