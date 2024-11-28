@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 class PasswordChangeModal extends StatelessWidget {
+  const PasswordChangeModal({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Dialog(
@@ -78,10 +80,6 @@ class PasswordChangeModal extends StatelessWidget {
                   onPressed: () {
                     context.pop(); // 모달 닫기
                   },
-                  child: Text(
-                    '취소',
-                    style: TextStyle(fontSize: 16, color: Colors.green[800]),
-                  ),
                   style: ElevatedButton.styleFrom(
                     padding: EdgeInsets.symmetric(horizontal: 30, vertical: 14), // 버튼 크기 증가
                     backgroundColor: Colors.grey[200],
@@ -90,16 +88,16 @@ class PasswordChangeModal extends StatelessWidget {
                       borderRadius: BorderRadius.circular(40),
                     ),
                   ),
+                  child: Text(
+                    '취소',
+                    style: TextStyle(fontSize: 16, color: Colors.green[800]),
+                  ),
                 ),
                 ElevatedButton(
                   onPressed: () {
                     // 비밀번호 변경 로직 추가
                     context.go('/start/login'); // 로그인페이지로 이동
                   },
-                  child: Text(
-                    '완료',
-                    style: TextStyle(fontSize: 16),
-                  ),
                   style: ElevatedButton.styleFrom(
                     padding: EdgeInsets.symmetric(horizontal: 30, vertical: 14), // 버튼 크기 증가
                     foregroundColor: Colors.white,
@@ -107,6 +105,10 @@ class PasswordChangeModal extends StatelessWidget {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(40),
                     ),
+                  ),
+                  child: Text(
+                    '완료',
+                    style: TextStyle(fontSize: 16),
                   ),
                 ),
               ],

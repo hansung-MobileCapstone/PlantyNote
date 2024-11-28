@@ -106,7 +106,7 @@ class _MainScreenState extends State<MainScreen> {
             borderRadius: BorderRadius.circular(15),
           ),
           child: Row(
-            children: [
+            children: const[
               SizedBox(width: 16), // 좌측 패딩
               Icon(Icons.search, color: Color(0xFFB3B3B3)),
               SizedBox(width: 8),

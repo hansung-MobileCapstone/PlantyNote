@@ -38,7 +38,7 @@ class _MyPlantRegisterScreenState extends State<MyPlantRegisterScreen> {
     super.dispose();
   }
 
-  void _submitForm() {
+ /* void _submitForm() {
     setState(() {
       isError = !_formKey.currentState!.validate();
     });
@@ -46,7 +46,7 @@ class _MyPlantRegisterScreenState extends State<MyPlantRegisterScreen> {
       // 완료 처리
     }
   }
-
+*/
   // 사진 선택 함수
   void _pickImage() async {
     final XFile? image = await _picker.pickImage(source: ImageSource.gallery);

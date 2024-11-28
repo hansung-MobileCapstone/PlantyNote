@@ -3,11 +3,13 @@ import '../../widgets/components/bottom_navigation_bar.dart';
 import 'package:go_router/go_router.dart';
 
 class SearchScreen extends StatefulWidget {
+  const SearchScreen({super.key});
+
   @override
-  _SearchScreenState createState() => _SearchScreenState();
+  SearchScreenState createState() => SearchScreenState();
 }
 
-class _SearchScreenState extends State<SearchScreen> {
+class SearchScreenState extends State<SearchScreen> {
   int _selectedIndex = 1; // 네비게이션바 인덱스
   int selectedTab = 0; // 실시간, 일간, 주간, 월간 탭 상태
   String? selectedRecentSearch; // 선택된 최근 검색어

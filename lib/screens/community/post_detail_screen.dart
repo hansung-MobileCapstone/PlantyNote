@@ -133,7 +133,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     return Center(
       child: Row(
         mainAxisSize: MainAxisSize.min,
-        children: [
+        children: const[
           CircleAvatar(
             backgroundImage: AssetImage('assets/images/profile.png'),
             radius: 15,

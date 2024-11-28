@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 import '../../widgets/components/memo_item.dart';
 
 class TimelineModal extends StatelessWidget {
+  const TimelineModal({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Container(

@@ -6,7 +6,7 @@ import '../modals/timeline_modal.dart';
 import '../../widgets/components/memo_item.dart';
 
 class MyPlantTimelineScreen extends StatefulWidget {
-  const MyPlantTimelineScreen({super.key});
+  MyPlantTimelineScreen({super.key});
 
   @override
   State<MyPlantTimelineScreen> createState() => _MyPlantTimelineScreenState();
