@@ -286,6 +286,7 @@ class LoginScreenState extends State<LoginScreen> {
         );
 
         // 로그인 성공 시 메인 페이지로 이동
+        if (!mounted) return;
         context.go('/main');
 
       } on FirebaseAuthException catch (e) {
