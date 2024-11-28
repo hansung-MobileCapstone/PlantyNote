@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 class LoginStartScreen extends StatelessWidget {
-  const LoginStartScreen({Key? key}) : super(key: key);
+  const LoginStartScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

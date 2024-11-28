@@ -9,12 +9,12 @@ class PostItem extends StatelessWidget {
   final List<Map<String, String>> details;
 
   const PostItem({
-    Key? key,
+    super.key,
     required this.name,
     required this.contents,
     required this.imageUrls,
     required this.details,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -29,8 +29,8 @@ class PostItem extends StatelessWidget {
           elevation: 4,
           color: const Color(0xFFF5F5F5),
           margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
-          child: Padding(
-            padding: const EdgeInsets.all(10),
+          child: SizedBox(
+            height: 10,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -55,7 +55,7 @@ class PostItem extends StatelessWidget {
 
   // 올린 이미지
   Widget _postImage() {
-    return Container(
+    return SizedBox(
       width: 100,
       child: Stack(
         children: [

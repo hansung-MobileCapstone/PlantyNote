@@ -6,10 +6,10 @@ class MyBottomNavigationBar extends StatelessWidget {
   final Function(int) onItemTapped; // 탭 변경
 
   const MyBottomNavigationBar({
-    Key? key,
+    super.key,
     required this.selectedIndex,
     required this.onItemTapped,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

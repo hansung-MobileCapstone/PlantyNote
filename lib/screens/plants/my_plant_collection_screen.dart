@@ -25,7 +25,7 @@ class _MyPlantCollectionScreenState extends State<MyPlantCollectionScreen> {
       appBar: _buildAppBar(),
       body: ListView(
         padding: const EdgeInsets.all(16),
-        children: [
+        children: const[
           PlantListItem(
             //context,
             plantName: '팥이',
@@ -33,7 +33,7 @@ class _MyPlantCollectionScreenState extends State<MyPlantCollectionScreen> {
             dDayWater: 1,
             dDayFertilizer: 220,
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           PlantListItem(
             //context,
             plantName: '콩콩이',

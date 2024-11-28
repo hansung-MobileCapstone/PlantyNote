@@ -4,13 +4,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class SignupScreen extends StatefulWidget {
-  const SignupScreen({Key? key}) : super(key: key);
+  const SignupScreen({super.key});
 
   @override
-  _SignupScreenState createState() => _SignupScreenState();
+  SignupScreenState createState() => SignupScreenState();
 }
 
-class _SignupScreenState extends State<SignupScreen> {
+class SignupScreenState extends State<SignupScreen> {
   final TextEditingController _nicknameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -321,6 +321,7 @@ class _SignupScreenState extends State<SignupScreen> {
       final List<DocumentSnapshot> documents = result.docs;
       if (documents.isNotEmpty) {
         // 닉네임이 이미 존재함
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('중복된 닉네임입니다.', style: TextStyle(color: Colors.red)),
@@ -344,6 +345,7 @@ class _SignupScreenState extends State<SignupScreen> {
       });
 
       // 회원가입 성공 처리
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('회원가입이 완료되었습니다.', style: TextStyle(color: Colors.green)),
@@ -351,6 +353,7 @@ class _SignupScreenState extends State<SignupScreen> {
         ),
       );
       // 로그인 페이지로 이동
+      if (!mounted) return;
       context.go('/start/login');
 
     } on FirebaseAuthException catch (e) {
@@ -362,6 +365,7 @@ class _SignupScreenState extends State<SignupScreen> {
       } else {
         message = '회원가입에 실패했습니다. (${e.code})';
       }
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(message, style: TextStyle(color: Colors.red)),
@@ -369,6 +373,7 @@ class _SignupScreenState extends State<SignupScreen> {
         ),
       );
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('회원가입에 실패했습니다: $e'),
