@@ -57,9 +57,9 @@ class LoginScreenState extends State<LoginScreen> {
                     _pWInput(), // PW 입력 필드
                     if (_errorMessage.isNotEmpty)
                       Padding(
-                        padding: const EdgeInsets.only(top: 5, right: 0), // 오른쪽으로 여백 추가
+                        padding: const EdgeInsets.only(top: 5, left: 0),
                         child: Align(
-                          alignment: Alignment.centerRight, // 오른쪽 정렬
+                          alignment: Alignment.centerLeft, // 오른쪽 정렬
                           child: Text(
                             _errorMessage,
                             style: const TextStyle(color: Colors.red),
