@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - "**"
+  pull_request:
+    branches:
+      - "main"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. 리포지토리 체크아웃
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      # 2. Flutter 설정
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.4'  # 사용하고 있는 Flutter 버전 지정
+          channel: 'stable'
+
+      # 3. Android SDK 설정
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v2
+        with:
+          api-levels: 33
+          build-tools: 33.0.0
+
+      # 4. 의존성 캐싱
+      - name: Cache Flutter dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.pub-cache
+          key: ${{ runner.os }}-pub-cache-${{ hashFiles('pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pub-cache-
+
+      # 5. 의존성 설치
+      - name: Install dependencies
+        run: flutter pub get
+
+      # 6. 코드 분석 (Lint)
+      - name: Analyze code
+        run: flutter analyze
+
+      # 7. 테스트 실행
+      - name: Run tests
+        run: flutter test
+
+      # 8. 앱 빌드
+      - name: Build app
+        run: flutter build apk --release
+
+      # 9. 빌드된 APK 업로드
+      - name: Upload APK
+        uses: actions/upload-artifact@v3
+        with:
+          name: app-release.apk
+          path: build/app/outputs/flutter-apk/app-release.apk
