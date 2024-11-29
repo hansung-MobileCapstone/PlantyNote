@@ -1,12 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-class PasswordChangeModal extends StatelessWidget {
+class PasswordChangeModal extends StatefulWidget {
   const PasswordChangeModal({super.key});
+
+  @override
+  State<PasswordChangeModal> createState() => _PasswordChangeModalState();
+}
+
+class _PasswordChangeModalState extends State<PasswordChangeModal> {
+  final _currentPwController = TextEditingController();
+  final _newPwController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Dialog(
+      backgroundColor: Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
       ),
@@ -20,60 +29,31 @@ class PasswordChangeModal extends StatelessWidget {
               '비밀번호 변경',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 22,
+                fontSize: 16,
               ),
             ),
             SizedBox(height: 20),
             // 현재 비밀번호 입력 필드
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 12),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                border: Border.all(color: Colors.green[800]!, width: 3.5), // 초록색 선 굵기 설정
-                borderRadius: BorderRadius.circular(40),
-              ),
-              child: TextField(
-                decoration: InputDecoration(
-                  hintText: '현재PW : 현재 비밀번호를 입력하세요.',
-                  hintStyle: TextStyle(fontSize: 12, color: Colors.green[800]),
-                  border: InputBorder.none,
-                ),
-              ),
-            ),
+            _currentPwForm(),
             SizedBox(height: 16),
             // 변경 비밀번호 입력 필드 + 안내 텍스트
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 12),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    border: Border.all(color: Colors.green[800]!, width: 3.5), // 초록색 선 굵기 설정
-                    borderRadius: BorderRadius.circular(40),
-                  ),
-                  child: TextField(
-
-                    decoration: InputDecoration(
-                      hintText: '변경PW : 새로운 비밀번호를 입력하세요.',
-                      hintStyle: TextStyle(fontSize: 12, color: Colors.green[800]),
-                      border: InputBorder.none,
-                    ),
-                  ),
-                ),
-                SizedBox(height: 4), // 필드와 안내 텍스트 간격
+                _newPwForm(),
+                SizedBox(height: 4),
                 Align(
-                  alignment: Alignment.centerRight, // 텍스트를 오른쪽으로 정렬
+                  alignment: Alignment.centerRight,
                   child: Text(
                     '영문 대소문자, 숫자, 특수문자 가능.',
-                    style: TextStyle(fontSize: 10, color: Colors.green[800]),
+                    style: TextStyle(fontSize: 10, color: Color(0xFF4B7E5B)),
                   ),
                 ),
               ],
             ),
             SizedBox(height: 20),
-            // 버튼들
-            Row(
+
+            Row( // 취소, 완료 버튼
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 ElevatedButton(
@@ -81,16 +61,16 @@ class PasswordChangeModal extends StatelessWidget {
                     context.pop(); // 모달 닫기
                   },
                   style: ElevatedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(horizontal: 30, vertical: 14), // 버튼 크기 증가
-                    backgroundColor: Colors.grey[200],
-                    foregroundColor: Colors.green[800],
+                    backgroundColor: Color(0xFFE6E6E6),
+                    foregroundColor: Colors.black,
+                    padding: EdgeInsets.symmetric(horizontal: 30, vertical: 10),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(40),
+                      borderRadius: BorderRadius.circular(50),
                     ),
                   ),
                   child: Text(
                     '취소',
-                    style: TextStyle(fontSize: 16, color: Colors.green[800]),
+                    style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
                 ElevatedButton(
@@ -99,16 +79,16 @@ class PasswordChangeModal extends StatelessWidget {
                     context.go('/start/login'); // 로그인페이지로 이동
                   },
                   style: ElevatedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(horizontal: 30, vertical: 14), // 버튼 크기 증가
+                    backgroundColor: Color(0xFF4B7E5B),
                     foregroundColor: Colors.white,
-                    backgroundColor: Colors.green[800],
+                    padding: EdgeInsets.symmetric(horizontal: 30, vertical: 10),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(40),
+                      borderRadius: BorderRadius.circular(50),
                     ),
                   ),
                   child: Text(
                     '완료',
-                    style: TextStyle(fontSize: 16),
+                    style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
               ],
@@ -116,6 +96,108 @@ class PasswordChangeModal extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  // 현재 비밀번호 입력
+  Widget _currentPwForm() {
+    return TextFormField(
+      controller: _currentPwController,
+      decoration: InputDecoration(
+        labelText: '현재 PW',
+        hintText: '현재 비밀번호를 입력하세요.',
+        labelStyle: TextStyle( // labelText 스타일
+          color: Color(0xFF697386),
+          fontSize: 14,
+          fontWeight: FontWeight.bold,
+        ),
+        hintStyle: TextStyle( // hintText 스타일
+          color: Color(0xFFB3B3B3),
+          fontSize: 14,
+        ),
+        border: OutlineInputBorder( // 기본 테두리
+          borderRadius: BorderRadius.circular(50.0),
+          borderSide: BorderSide(
+            color: Color(0xFF4B7E5B),
+            width: 2.0,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder( // 포커스
+          borderRadius: BorderRadius.circular(50.0),
+          borderSide: BorderSide(
+            color: Color(0xFF4B7E5B),
+            width: 2.0,
+          ),
+        ),
+        enabledBorder: OutlineInputBorder( // 비활성화
+          borderRadius: BorderRadius.circular(50.0),
+          borderSide: BorderSide(
+            color: Color(0xFF4B7E5B),
+            width: 2.0,
+          ),
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 8.0,
+          horizontal: 15.0,
+        ),
+      ),
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return '현재 비밀번호를 올바르게 입력하세요.';
+        }
+        return null;
+      },
+    );
+  }
+
+  // 현재 비밀번호 입력
+  Widget _newPwForm() {
+    return TextFormField(
+      controller: _newPwController,
+      decoration: InputDecoration(
+        labelText: '변경 PW',
+        hintText: '새로운 비밀번호를 입력하세요.',
+        labelStyle: TextStyle( // labelText 스타일
+          color: Color(0xFF697386),
+          fontSize: 14,
+          fontWeight: FontWeight.bold,
+        ),
+        hintStyle: TextStyle( // hintText 스타일
+          color: Color(0xFFB3B3B3),
+          fontSize: 14,
+        ),
+        border: OutlineInputBorder( // 기본 테두리
+          borderRadius: BorderRadius.circular(50.0),
+          borderSide: BorderSide(
+            color: Color(0xFF4B7E5B),
+            width: 2.0,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder( // 포커스
+          borderRadius: BorderRadius.circular(50.0),
+          borderSide: BorderSide(
+            color: Color(0xFF4B7E5B),
+            width: 2.0,
+          ),
+        ),
+        enabledBorder: OutlineInputBorder( // 비활성화
+          borderRadius: BorderRadius.circular(50.0),
+          borderSide: BorderSide(
+            color: Color(0xFF4B7E5B),
+            width: 2.0,
+          ),
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 8.0,
+          horizontal: 15.0,
+        ),
+      ),
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return '새로운 비밀번호를 입력하세요.';
+        }
+        return null;
+      },
     );
   }
 }
