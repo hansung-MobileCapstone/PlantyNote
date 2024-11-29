@@ -114,7 +114,7 @@ class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
         backgroundColor: Colors.white, // 배경색 변경
         elevation: 4, // 그림자 높이
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(100), // 모서리 반경 조정
+          borderRadius: BorderRadius.circular(100),
         ),
         child: Icon(
           Icons.add_circle,
@@ -141,14 +141,14 @@ class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
       centerTitle: true,
       actions: [
         IconButton( // 수정 버튼
-          icon: Icon(Icons.edit, color: const Color(0xFF7D7D7D), size: 24),
+          icon: Icon(Icons.edit_outlined, color: const Color(0xFF7D7D7D), size: 24),
           onPressed: () {
             context.push('/plants/register'); // 내식물등록페이지로 이동
             // 게시물작성페이지에 현재 데이터 전달 필요 (extra)
           },
         ),
         IconButton( // 삭제 버튼
-          icon: Icon(Icons.delete, color: const Color(0xFFDA2525), size: 24),
+          icon: Icon(Icons.delete_outlined, color: const Color(0xFFDA2525), size: 24),
           onPressed: () {
             _showDeleteDialog(context); // 삭제 팝업 표시
           },
@@ -395,8 +395,21 @@ class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
   Widget _toggleButton() {
     return Row(
       children: [
-        const Text('물 주기 알림', style: TextStyle(fontSize: 16)),
+        const Text('  물 주기 알림',
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF697386)),
+        ),
         const Spacer(),
+        IconButton(
+          icon: const Icon(Icons.alarm_outlined, color: Color(0xFF4B7E5B)),
+          onPressed: () {
+            showDialog(
+              context: context,
+              builder: (context) => const NotificationSettingModal(),
+            );
+          },
+        ),
+        const SizedBox(width: 10),
         Switch(
           value: isNotificationEnabled,
           onChanged: (value) {
@@ -404,15 +417,10 @@ class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
               isNotificationEnabled = value;
             });
           },
-        ),
-        IconButton(
-          icon: const Icon(Icons.timer),
-          onPressed: () {
-            showDialog(
-              context: context,
-              builder: (context) => const NotificationSettingModal(),
-            );
-          },
+          activeColor: Color(0xFFFFFFFF), // 활성 상태의 thumb 색상
+          activeTrackColor: Color(0xFF4B7E5B), // 활성 상태의 track 색상
+          inactiveThumbColor: Color(0xFFFFFFFF), // 비활성 상태의 thumb 색상
+          inactiveTrackColor: Color(0xFFB3B3B3), // 비활성 상태의 track 색상
         ),
       ],
     );
