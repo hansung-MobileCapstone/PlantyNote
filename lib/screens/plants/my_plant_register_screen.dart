@@ -336,7 +336,7 @@ class _MyPlantRegisterScreenState extends State<MyPlantRegisterScreen> {
             ),
           ),
           child: Text(
-            '물: $waterCycle일 영양제: $fertilizerCycle개월 분갈이: $repottingCycle개월',
+            '물: ${waterCycle.toInt()}일  영양제: ${fertilizerCycle.toInt()}개월  분갈이: ${repottingCycle.toInt()}개월',
             style: const TextStyle(
               fontSize: 14,
               color: Color(0xFF697386),
