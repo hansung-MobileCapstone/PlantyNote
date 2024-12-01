@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -283,6 +284,16 @@ class LoginScreenState extends State<LoginScreen> {
         await FirebaseAuth.instance.signInWithEmailAndPassword(
           email: _emailController.text.trim(),
           password: _passwordController.text.trim(),
+        );
+
+        // 로그인 성공 시 토스트 메시지 표시
+        Fluttertoast.showToast(
+          msg: "로그인 성공!",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: Colors.green, // 배경색
+          textColor: Colors.white, // 글자 색
+          fontSize: 16.0,
         );
 
         // 로그인 성공 시 메인 페이지로 이동
