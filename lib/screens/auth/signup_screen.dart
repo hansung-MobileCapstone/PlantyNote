@@ -397,7 +397,7 @@ class SignupScreenState extends State<SignupScreen> {
         msg: "회원가입 성공!",
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.green, // 배경색 설정
+        backgroundColor: Color(0xFF4B7E5B), // 배경색 설정
         textColor: Colors.white, // 글자 색 설정
         fontSize: 16.0,
       );

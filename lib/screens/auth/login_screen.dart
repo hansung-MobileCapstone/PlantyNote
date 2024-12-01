@@ -291,7 +291,7 @@ class LoginScreenState extends State<LoginScreen> {
           msg: "로그인 성공!",
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM,
-          backgroundColor: Colors.green, // 배경색
+          backgroundColor: Color(0xFF4B7E5B), // 배경색
           textColor: Colors.white, // 글자 색
           fontSize: 16.0,
         );
