@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:flutter/services.dart';
 import '../../widgets/profile/change_password_modal.dart';
 import 'package:plant/widgets/components/bottom_navigation_bar.dart';
@@ -271,7 +270,8 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
   AppBar _buildAppBar() {
     return AppBar(
       scrolledUnderElevation: 0,
-      automaticallyImplyLeading: false, // 뒤로가기 버튼 숨기기
+      automaticallyImplyLeading: false,
+      // 뒤로가기 버튼 숨기기
       backgroundColor: Colors.white,
       title: Text(
         'MY 프로필',
@@ -504,54 +504,25 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
     );
   }
 
-  // 탈퇴 확인 팝업
+/// 탈퇴 확인 팝업
   void _showWithdrawDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (BuildContext context) {
+      builder: (BuildContext dialogContext) { // 다른 변수명 사용
         return AlertDialog(
           title: Text("계정 탈퇴"),
           content: Text("정말 탈퇴 하시겠습니까?"),
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // 팝업 닫기
+                Navigator.of(dialogContext).pop(); // 팝업 닫기
               },
               child: Text("아니오"),
             ),
             TextButton(
-              onPressed: () async {
-                try {
-                  // 계정 탈퇴 로직 구현
-                  await _auth.currentUser?.delete();
-                  await _firestore.collection('users').doc(_user!.uid).delete();
-                  await _firestore.collection('public_users').doc(_user!.uid).delete();
-                  await FirebaseStorage.instance
-                      .ref()
-                      .child('profile_images')
-                      .child('${_user!.uid}.jpg')
-                      .delete();
-                  Navigator.of(context).pop(); // 팝업 닫기
-                  context.go('/onboarding'); // 온보딩페이지로 이동
-                  Fluttertoast.showToast(
-                    msg: "계정이 성공적으로 탈퇴되었습니다.",
-                    toastLength: Toast.LENGTH_SHORT,
-                    gravity: ToastGravity.BOTTOM,
-                    backgroundColor: Colors.green,
-                    textColor: Colors.white,
-                    fontSize: 16.0,
-                  );
-                } catch (e) {
-                  print('계정 탈퇴 실패: $e');
-                  Fluttertoast.showToast(
-                    msg: "계정 탈퇴 실패: $e",
-                    toastLength: Toast.LENGTH_SHORT,
-                    gravity: ToastGravity.BOTTOM,
-                    backgroundColor: Colors.red,
-                    textColor: Colors.white,
-                    fontSize: 16.0,
-                  );
-                }
+              onPressed: () {
+                Navigator.of(dialogContext).pop(); // 팝업 닫기 (먼저 실행)
+                _deleteAccount(); // 비동기 함수 호출
               },
               child: Text("예"),
             ),
@@ -559,5 +530,39 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
         );
       },
     );
+  }
+
+  Future<void> _deleteAccount() async {
+    try {
+      // 계정 탈퇴 로직
+      await _auth.currentUser?.delete();
+      await _firestore.collection('users').doc(_user!.uid).delete();
+      await _firestore.collection('public_users').doc(_user!.uid).delete();
+      await FirebaseStorage.instance
+          .ref()
+          .child('profile_images')
+          .child('${_user!.uid}.jpg')
+          .delete();
+
+      Fluttertoast.showToast(
+        msg: "계정이 성공적으로 탈퇴되었습니다.",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.green,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+
+    } catch (e) {
+      print('계정 탈퇴 실패: $e');
+      Fluttertoast.showToast(
+        msg: "계정 탈퇴 실패: $e",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+    }
   }
 }
