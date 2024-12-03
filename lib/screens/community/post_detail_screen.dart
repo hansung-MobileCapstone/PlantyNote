@@ -83,14 +83,14 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       scrolledUnderElevation: 0,
       actions: [
         IconButton( // 수정 버튼
-          icon: Icon(Icons.edit, color: const Color(0xFF7D7D7D), size: 24),
+          icon: Icon(Icons.edit_outlined, color: const Color(0xFF7D7D7D), size: 24),
           onPressed: () {
             context.push('/community/create'); // 게시물작성페이지로 이동
             // 게시물작성페이지에 현재 데이터 전달 필요 (extra)
           },
         ),
         IconButton( // 삭제 버튼
-          icon: Icon(Icons.delete, color: const Color(0xFFDA2525), size: 24),
+          icon: Icon(Icons.delete_outlined, color: const Color(0xFFDA2525), size: 24),
           onPressed: () {
             _showDeleteDialog(context); // 삭제 팝업 표시
           },
