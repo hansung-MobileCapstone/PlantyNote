@@ -88,6 +88,8 @@ class _MyPlantCollectionScreenState extends State<MyPlantCollectionScreen> {
                     imageUrl: imageUrl, // 이미지 URL
                     dDayWater: dDayWater, // 물 주는 D-Day
                     dDayFertilizer: dDayTogether, // 함께한 D-Day
+                    plantId: plant.id, // Firestore 식물 고유 id
+                    waterCycle: plant['waterCycle'], // 물 주기
                   ),
                   const SizedBox(height: 16),
                 ],

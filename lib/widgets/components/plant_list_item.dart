@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'dart:io';
 
 // 내 식물 하나
-class PlantListItem extends StatelessWidget {
+class PlantListItem extends StatefulWidget  {
   final String plantName;
   final String imageUrl;
   final int dDayWater;
   final int dDayFertilizer;
+  final String plantId; // Firestore의 식물 고유 id
+  final int waterCycle; // 물 주기
 
   const PlantListItem({
     super.key,
@@ -16,7 +20,22 @@ class PlantListItem extends StatelessWidget {
     required this.imageUrl,
     required this.dDayWater,
     required this.dDayFertilizer,
+    required this.plantId,
+    required this.waterCycle,
   });
+
+  @override
+  State<PlantListItem> createState() => _PlantListItemState();
+}
+
+class _PlantListItemState extends State<PlantListItem> {
+  late int dDayWater; // 물주기 버튼을 누르면 바뀜
+
+  @override
+  void initState() {
+    super.initState();
+    dDayWater = widget.dDayWater; // 초기값 설정
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +78,7 @@ class PlantListItem extends StatelessWidget {
     return Container(
       alignment: Alignment.center,
       child: Text(
-        plantName,
+        widget.plantName,
         style: const TextStyle(
           fontSize: 18,
         ),
@@ -71,7 +90,7 @@ class PlantListItem extends StatelessWidget {
 
   // 식물 이미지, 물주기 버튼 (중앙)
   Widget _plantImage(BuildContext context) {
-    final file = File(imageUrl);
+    final file = File(widget.imageUrl);
 
     return Container(
       alignment: Alignment.center, // 이미지 항상 가운데
@@ -81,8 +100,8 @@ class PlantListItem extends StatelessWidget {
           // 중앙: 식물 이미지
           CircleAvatar(
             radius: 55,
-            backgroundImage: imageUrl.isNotEmpty && File(imageUrl).existsSync()
-                ? FileImage(File(imageUrl)) // 로컬 파일 이미지
+            backgroundImage: widget.imageUrl.isNotEmpty && file.existsSync()
+                ? FileImage(file) // 로컬 파일 이미지
                 : AssetImage('assets/images/default_post.png') as ImageProvider, // 기본 이미지
           ),
           Positioned(
@@ -129,7 +148,7 @@ class PlantListItem extends StatelessWidget {
           shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12)),
           title: Text("물 주기"),
-          content: Text("$plantName에게 물을 주시겠습니까?"),
+          content: Text("${widget.plantName}에게 물을 주시겠습니까?"),
           actions: [
             // 아니오 버튼
             TextButton(
@@ -138,10 +157,14 @@ class PlantListItem extends StatelessWidget {
             ),
             // 예 버튼
             TextButton(
-              onPressed: () {
+              onPressed: () async {
                 context.pop(); // 팝업 닫기
-                // 물주기 로직 추가
-                _showToast("$plantName에게 물을 주었습니다!");
+                try {
+                  await _updateWaterDate(); // 물 주기 로직
+                  _showToast("${widget.plantName}에게 물을 주었습니다!");
+                } catch (e) {
+                  _showToast("물 주기 실패..");
+                }
               },
               child: const Text("예"),
             ),
@@ -150,6 +173,34 @@ class PlantListItem extends StatelessWidget {
       },
     );
   }
+
+  Future<void> _updateWaterDate() async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      throw Exception("로그인된 사용자가 없습니다.");
+    }
+
+    try {
+      // Firestore에서 마지막 물 준 날짜를 오늘로 업데이트
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .collection('plants')
+          .doc(widget.plantId) // Firestore 문서 ID
+          .update({
+        'waterDate': DateTime.now().toIso8601String(), // 오늘 날짜로 업데이트
+      });
+
+      // dDayWater를 물 주기로 갱신
+      setState(() {
+        dDayWater = widget.waterCycle; // 물 주기 값으로 설정
+      });
+    } catch (e) {
+      _showToast("업데이트 실패: $e");
+    }
+  }
+
 
   // 토스트 메시지 표시 함수
   void _showToast(String message) {
@@ -169,7 +220,7 @@ class PlantListItem extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        _dDayBadge('D+$dDayFertilizer', Color(0xFFE7B4BA)),
+        _dDayBadge('D+${widget.dDayFertilizer}', Color(0xFFE7B4BA)),
         const SizedBox(height: 8),
         _dDayBadge('D-$dDayWater', Color(0xFF95CED5)),
       ],
