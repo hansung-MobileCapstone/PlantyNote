@@ -144,8 +144,8 @@ class PlantListItem extends StatelessWidget {
       msg: message,
       toastLength: Toast.LENGTH_SHORT, // 지속 시간
       gravity: ToastGravity.CENTER, // 위치
-      backgroundColor: Color(0xFF4B7E5B),
-      textColor: Colors.white,
+      backgroundColor: Color(0xFFECF7F2),
+      textColor: Colors.black,
       fontSize: 13.0,
     );
   }
