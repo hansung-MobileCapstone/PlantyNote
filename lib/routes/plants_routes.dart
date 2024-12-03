@@ -16,8 +16,11 @@ class PlantsRoutes {
           builder: (context, state) => MyPlantRegisterScreen(),
         ),
         GoRoute(
-          path: 'timeline', // /plants/timeline
-          builder: (context, state) => MyPlantTimelineScreen(),
+          path: 'timeline/:plantId', // /plants/timeline/식물고유ID
+          builder: (context, state) {
+            final plantId = state.pathParameters['plantId']!;
+            return MyPlantTimelineScreen(plantId: plantId);
+          },
         ),
       ],
     ),

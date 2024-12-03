@@ -1,19 +1,46 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../modals/notification_setting_modal.dart';
 import '../modals/memo_create_modal.dart';
 import '../modals/timeline_modal.dart';
 import '../../widgets/components/memo_item.dart';
+import 'dart:io';
 
 class MyPlantTimelineScreen extends StatefulWidget {
-  MyPlantTimelineScreen({super.key});
+  final String plantId;
+
+  MyPlantTimelineScreen({super.key, required this.plantId});
 
   @override
   State<MyPlantTimelineScreen> createState() => _MyPlantTimelineScreenState();
 }
 
 class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
+  late Future<DocumentSnapshot<Map<String, dynamic>>> plantDataFuture;
   bool isNotificationEnabled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    plantDataFuture = _fetchPlantData();
+  }
+
+  Future<DocumentSnapshot<Map<String, dynamic>>> _fetchPlantData() async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      throw Exception("로그인된 사용자가 없습니다."); // 사용자가 로그인되지 않은 경우 예외 발생
+    }
+
+    return FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid) // 로그인된 사용자의 UID를 사용
+        .collection('plants')
+        .doc(widget.plantId)
+        .get();
+  }
 
   // Memo 예시 데이터
   final List<Map<String, dynamic>> memos = [
@@ -49,60 +76,125 @@ class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
     return Scaffold(
       appBar: _buildAppBar(),
       backgroundColor: Colors.white,
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            CircleAvatar( // 식물 이미지
-              radius: 75,
-            ),
-            SizedBox(height: 15),
-            _dDayWithBadge(), // 함께한지 뱃지
-            SizedBox(height: 15),
-            _plantDetailsSection(), // 식물 정보
-            Divider(
-              color: Color(0xFF7D7D7D),
-              thickness: 0.7,
-              indent: 18,
-              endIndent: 18,
-            ),
-            SizedBox(height: 15),
-            Text(
-              '타임라인',
-              style: TextStyle(
-                color: Colors.black,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            // 타임라인 리스트
-            ListView(
-              padding: const EdgeInsets.all(16),
-              physics: NeverScrollableScrollPhysics(), // 내부 스크롤 비활성화
-              shrinkWrap: true,
-              children: memos.take(3).map((memo) { // 최근 3개의 Memo만 보이기
-                return MemoItem(
-                  //date: memo['date'],
-                  //content: memo['content'],
-                  //imageUrl: memo['imageUrl'],
-                );
-              }).toList(),
-            ),
-            InkWell( // 더보기 버튼
-              onTap: () {
-                _showTimeLineModal(context);
-              },
-              child: Text(
-                '더보기',
-                style: TextStyle(
-                  color: Color(0xFF4B7E5B),
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
+      body: FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+        future: plantDataFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (!snapshot.hasData || snapshot.data == null) {
+            return const Center(child: Text('데이터를 불러올 수 없습니다.'));
+          }
+
+          final plantData = snapshot.data!.data()!;
+          final plantName = plantData['plantname'] ?? '식물 이름 없음';
+          final imageUrl = plantData['imageUrl'] ?? '';
+          final meetingDate = DateTime.parse(plantData['meetingDate']);
+          final sunlightLevel = plantData['sunlightLevel'] ?? 0;
+          final waterLevel = plantData['waterLevel'] ?? 0;
+          final temperature = plantData['temperature'] ?? 0.0;
+          final waterDate = DateTime.parse(plantData['waterDate']) ?? DateTime.now();
+          final waterCycle = plantData['waterCycle'] ?? 0;
+          final fertilizerCycle = plantData['fertilizerCycle'] ?? 0;
+          final repottingCycle = plantData['repottingCycle'] ?? 0;
+
+          final file = File(imageUrl);
+
+
+          // 함께한 D-Day 계산
+          final dDayTogether =
+              DateTime.now().difference(meetingDate).inDays + 1;
+
+          // 물 D-Day 계산
+          final nextWaterDate = DateTime(
+            waterDate.year,
+            waterDate.month,
+            waterDate.day,
+          ).add(Duration(days: waterCycle));
+          final dDayWater = nextWaterDate.difference(DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day)).inDays;
+
+          // 영양제 D-Day 계산
+          final nextFertilizerDate = DateTime(
+            waterDate.year,
+            waterDate.month,
+            waterDate.day,
+          ).add(Duration(days: fertilizerCycle*30));
+          final dDayFertilizer = nextFertilizerDate.difference(DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day)).inDays;
+
+          // 분갈이 D-Day 계산
+          final nextRepottingDate = DateTime(
+            waterDate.year,
+            waterDate.month,
+            waterDate.day,
+          ).add(Duration(days: repottingCycle*30));
+          final dDayRepotting = nextRepottingDate.difference(DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day)).inDays;
+
+          return SingleChildScrollView(
+            child: Column(
+              children: [
+                CircleAvatar(
+                  radius: 75,
+                  backgroundImage: imageUrl.isNotEmpty
+                      ? FileImage(file)
+                      : const AssetImage('assets/images/default_post.png')
+                  as ImageProvider,
                 ),
-              ),
+                const SizedBox(height: 15),
+                _dDayWithBadge(plantName, dDayTogether),
+                const SizedBox(height: 15),
+                _plantDetailsSection(
+                  sunlightLevel: sunlightLevel,
+                  waterLevel: waterLevel,
+                  temperature: temperature,
+                  dDayWater: dDayWater,
+                  dDayFertilizer: dDayFertilizer,
+                    dDayRepotting: dDayRepotting
+                ),
+                const Divider(
+                  color: Color(0xFF7D7D7D),
+                  thickness: 0.7,
+                  indent: 18,
+                  endIndent: 18,
+                ),
+                const SizedBox(height: 15),
+                Text(
+                  '타임라인',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                // 타임라인 리스트
+                ListView(
+                  padding: const EdgeInsets.all(16),
+                  physics: NeverScrollableScrollPhysics(), // 내부 스크롤 비활성화
+                  shrinkWrap: true,
+                  children: memos.take(3).map((memo) { // 최근 3개의 Memo만 보이기
+                    return MemoItem(
+                      //date: memo['date'],
+                      //content: memo['content'],
+                      //imageUrl: memo['imageUrl'],
+                    );
+                  }).toList(),
+                ),
+                InkWell( // 더보기 버튼
+                  onTap: () {
+                    _showTimeLineModal(context);
+                  },
+                  child: Text(
+                    '더보기',
+                    style: TextStyle(
+                      color: Color(0xFF4B7E5B),
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                SizedBox(height: 20),
+              ],
             ),
-            SizedBox(height: 20),
-          ],
-        ),
+          );
+        },
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -120,7 +212,7 @@ class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
           Icons.add_circle,
           color: Color(0xFF4B7E5B),
           size: 40,
-      ),
+        ),
       ),
     );
   }
@@ -130,25 +222,54 @@ class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
     return AppBar(
       backgroundColor: Colors.white,
       scrolledUnderElevation: 0,
-      title: Text(
-        '팥이',
-        style: TextStyle(
-          color: Colors.black,
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
-        ),
+      title: FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+        future: plantDataFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Text(
+              '...',
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            );
+          } else if (!snapshot.hasData || snapshot.data == null) {
+            return const Text(
+              '식물 이름 없음',
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            );
+          }
+
+          final plantData = snapshot.data!.data()!;
+          final plantName = plantData['plantname'] ?? '식물 이름 없음';
+
+          return Text(
+            plantName,
+            style: const TextStyle(
+              color: Colors.black,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          );
+        },
       ),
       centerTitle: true,
       actions: [
-        IconButton( // 수정 버튼
-          icon: Icon(Icons.edit_outlined, color: const Color(0xFF7D7D7D), size: 24),
+        IconButton(
+          icon: const Icon(
+              Icons.edit_outlined, color: Color(0xFF7D7D7D), size: 24),
           onPressed: () {
             context.push('/plants/register'); // 내식물등록페이지로 이동
-            // 게시물작성페이지에 현재 데이터 전달 필요 (extra)
           },
         ),
-        IconButton( // 삭제 버튼
-          icon: Icon(Icons.delete_outlined, color: const Color(0xFFDA2525), size: 24),
+        IconButton(
+          icon: const Icon(
+              Icons.delete_outlined, color: Color(0xFFDA2525), size: 24),
           onPressed: () {
             _showDeleteDialog(context); // 삭제 팝업 표시
           },
@@ -186,7 +307,7 @@ class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
   }
 
   // 함께한지 D+Day 뱃지
-  Widget _dDayWithBadge() {
+  Widget _dDayWithBadge(String plantName, int dDayTogether) {
     return IntrinsicWidth (
       child: Container(
         padding: const EdgeInsets.symmetric(vertical:4, horizontal:30),
@@ -196,7 +317,7 @@ class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
         ),
         alignment: Alignment.center,
         child: Text(
-          "♥ 팥이와 함께한지 220일 ♥",
+          "♥ $plantName와 함께한지 $dDayTogether일 ♥",
           style: TextStyle(
             color: Color(0xFFE7B4BA),
             fontWeight: FontWeight.bold,
@@ -208,7 +329,14 @@ class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
   }
 
   // 식물 정보
-  Widget _plantDetailsSection() {
+  Widget _plantDetailsSection({
+    required int sunlightLevel,
+    required int waterLevel,
+    required double temperature,
+    required int dDayWater,
+    required int dDayFertilizer,
+    required int dDayRepotting
+  }) {
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -227,7 +355,7 @@ class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
               borderRadius: BorderRadius.circular(10),
             ),
             child:
-            _plantLike(),
+            _plantLike(sunlightLevel, waterLevel, temperature),
           ),
           const SizedBox(height: 16),
           const Text(
@@ -243,7 +371,7 @@ class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
               borderRadius: BorderRadius.circular(10),
             ),
             child:
-            _plantDday(),
+            _plantDday(dDayWater, dDayFertilizer, dDayRepotting),
           ),
           const SizedBox(height: 16),
           _toggleButton(),
@@ -253,7 +381,7 @@ class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
   }
 
   // LIKE 부분
-  Widget _plantLike() {
+  Widget _plantLike(int sunlightLevel, int waterLevel, double temperature) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -336,11 +464,11 @@ class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
                       ),
                     ),
                     child: Slider(
-                      value: 15, // my_plant_register에서 선택한 온도
+                      value: temperature, // my_plant_register에서 선택한 온도
                       min: -10,
                       max: 40,
                       divisions: 50,
-                      label: '15°C',
+                      label: '${temperature}°C',
                       onChanged: (value) {}, // 고정
                     ),
                   ),
@@ -355,21 +483,21 @@ class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
   }
 
   // D-DAY 부분
-  Widget _plantDday() {
+  Widget _plantDday(int dDayWater, int dDayFertilizer, int dDayRepotting) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text('물', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF697386))),
         const SizedBox(width: 10),
-        _dDayBadge('D-1', Color(0xFF95CED5)),
+        _dDayBadge('D-$dDayWater', Color(0xFF95CED5)),
         const SizedBox(width: 20),
         Text('영양제', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF697386))),
         const SizedBox(width: 10),
-        _dDayBadge('D-75', Color(0xFFEAC7A8)),
+        _dDayBadge('D-$dDayFertilizer', Color(0xFFEAC7A8)),
         const SizedBox(width: 20),
         Text('분갈이', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF697386))),
         const SizedBox(width: 10),
-        _dDayBadge('D-300', Color(0xFFCABECE)),
+        _dDayBadge('D-$dDayRepotting', Color(0xFFCABECE)),
       ],
     );
   }
