@@ -67,9 +67,9 @@ class _MyPlantRegisterScreenState extends State<MyPlantRegisterScreen> {
           .add({
         'plantname': _plantNameController.text.trim(),
         'species': _plantSpeciesController.text.trim(),
-        'waterCycle': waterCycle,
-        'fertilizerCycle': fertilizerCycle,
-        'repottingCycle': repottingCycle,
+        'waterCycle': waterCycle.toInt(),
+        'fertilizerCycle': fertilizerCycle.toInt(),
+        'repottingCycle': repottingCycle.toInt(),
         'sunlightLevel': sunlightLevel,
         'waterLevel': waterLevel,
         'temperature': temperature,

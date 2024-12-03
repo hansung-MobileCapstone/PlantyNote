@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'dart:io';
 
 // 내 식물 하나
 class PlantListItem extends StatelessWidget {
@@ -36,9 +37,15 @@ class PlantListItem extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                _plantName(), // 식물 이름
+                Expanded(
+                  child: _plantName(), // 식물 이름
+                ),
+                const SizedBox(width: 8), // 이름과 이미지 사이 간격
                 _plantImage(context), // 식물 이미지
-                _dDay(), // D-Day
+                const SizedBox(width: 8), // 이미지와 D-Day 사이 간격
+                Expanded(
+                  child: _dDay(), // D-Day
+                ),
               ],
             ),
           ),
@@ -54,8 +61,7 @@ class PlantListItem extends StatelessWidget {
       child: Text(
         plantName,
         style: const TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
+          fontSize: 18,
         ),
         textAlign: TextAlign.center,
         softWrap: true, // 개행 허용
@@ -65,45 +71,52 @@ class PlantListItem extends StatelessWidget {
 
   // 식물 이미지, 물주기 버튼 (중앙)
   Widget _plantImage(BuildContext context) {
-    return Stack(
-      alignment: Alignment.center, // 기본 정렬: 중앙
-      children: [
-        // 중앙: 식물 이미지
-        CircleAvatar(
-          radius: 55,
-          backgroundImage: AssetImage(imageUrl),
-        ),
-        Positioned( // 물주기 버튼
-          bottom: 5,
-          right: 5,
-          child: Container(
-            width: 30, // 버튼 크기
-            height: 30,
-            decoration: BoxDecoration(
-              color: Color(0xFFFFFFFF), // 배경색
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.5),
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: IconButton(
-              icon: Icon(
-                Icons.water_drop,
-                color: Color(0xFF8FD7FF),
-                size: 20,
+    final file = File(imageUrl);
+
+    return Container(
+      alignment: Alignment.center, // 이미지 항상 가운데
+      child: Stack(
+        alignment: Alignment.center, // 기본 정렬: 중앙
+        children: [
+          // 중앙: 식물 이미지
+          CircleAvatar(
+            radius: 55,
+            backgroundImage: imageUrl.isNotEmpty && File(imageUrl).existsSync()
+                ? FileImage(File(imageUrl)) // 로컬 파일 이미지
+                : AssetImage('assets/images/default_post.png') as ImageProvider, // 기본 이미지
+          ),
+          Positioned(
+            bottom: 5,
+            right: 5,
+            child: Container(
+              width: 30, // 버튼 크기
+              height: 30,
+              decoration: BoxDecoration(
+                color: Color(0xFFFFFFFF), // 배경색
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.5),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
-              padding: EdgeInsets.zero,
-              onPressed: () {
-                _showWateringDialog(context); // 팝업창
-              },
+              child: IconButton(
+                icon: Icon(
+                  Icons.water_drop,
+                  color: Color(0xFF8FD7FF),
+                  size: 20,
+                ),
+                padding: EdgeInsets.zero,
+                onPressed: () {
+                  _showWateringDialog(context); // 팝업창
+                },
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
