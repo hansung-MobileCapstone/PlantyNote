@@ -4,6 +4,8 @@ import 'package:plant/widgets/components/bottom_navigation_bar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import 'my_page_edit_screen.dart';
+
 
 class MyPageScreen extends StatefulWidget {
   const MyPageScreen({super.key});
@@ -18,6 +20,7 @@ class MyPageScreenState extends State<MyPageScreen> {
   // 사용자 정보 변수
   String _nickname = ''; // 이름 (닉네임)
   String _bio = '';      // 소개문
+  String? _profileImageUrl; // 프로필 이미지 URL 추가
 
   void _onItemTapped(int index) {
     setState(() {
@@ -25,7 +28,7 @@ class MyPageScreenState extends State<MyPageScreen> {
     });
   }
 
-  final int plantCount = 2;
+  final int plantCount = 1;
 
   // 이미지 경로 리스트
   final List<String> imagePaths = [
@@ -49,6 +52,7 @@ class MyPageScreenState extends State<MyPageScreen> {
           setState(() {
             _nickname = userDoc.get('nickname') ?? '';
             _bio = userDoc.get('bio') ?? '';
+            _profileImageUrl = userDoc.get('profileImage') as String?;
           });
         }
       }
@@ -56,7 +60,6 @@ class MyPageScreenState extends State<MyPageScreen> {
       print('Error fetching user data: $e');
     }
   }
-
 
   @override
   void initState() {
@@ -193,10 +196,14 @@ class MyPageScreenState extends State<MyPageScreen> {
       padding: EdgeInsets.only(left: 8.0),
       child: CircleAvatar(
         radius: 50,
-        backgroundImage: AssetImage('assets/profile_image.png'),
+        backgroundColor: Colors.grey[200],
+        backgroundImage: _profileImageUrl != null && _profileImageUrl!.startsWith('http')
+            ? NetworkImage(_profileImageUrl!)
+            : AssetImage('assets/images/basic_profile.png') as ImageProvider,
       ),
     );
   }
+
 
 // 닉네임, 소개글
   Widget _profileInfo() {
@@ -226,12 +233,18 @@ class MyPageScreenState extends State<MyPageScreen> {
     );
   }
 
-
   // 프로필 수정 버튼
   Widget _editProfileButton() {
     return ElevatedButton(
       onPressed: () {
-        context.push('/profile/edit'); // 마이페이지수정페이지로 이동
+        Navigator.push<bool>(
+          context,
+          MaterialPageRoute(builder: (context) => MyPageEditScreen()),
+        ).then((isUpdated) {
+          if (isUpdated == true) {
+            _fetchUserData(); // 데이터 다시 가져오기
+          }
+        });
       },
       style: ElevatedButton.styleFrom(
         backgroundColor: Color(0xFF4B7E5B),
@@ -240,6 +253,7 @@ class MyPageScreenState extends State<MyPageScreen> {
       child: Text('프로필 수정'),
     );
   }
+
 
   // 내식물모음페이지에 있는 식물 개수
   Widget _plantsNumber() {

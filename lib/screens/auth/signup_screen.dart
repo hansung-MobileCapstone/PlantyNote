@@ -375,14 +375,25 @@ class SignupScreenState extends State<SignupScreen> {
       UserCredential userCredential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password);
 
-      // 추가 정보 Firestore에 저장
+      // 회원가입시 비교용
+      await FirebaseFirestore.instance
+          .collection('public_users')
+          .doc(userCredential.user!.uid)
+          .set({
+        'nickname': nickname,
+        'email': email,
+        'bio': '안녕하세요',
+      });
+
+      // 개인 유저용
       await FirebaseFirestore.instance
           .collection('users')
           .doc(userCredential.user!.uid)
           .set({
         'nickname': nickname,
         'email': email,
-        'bio': '안녕하세요', // 소개문은 '안녕하세요'로 저장
+        'bio': '안녕하세요',
+        'profileImage': 'assets/images/basic_profile.png',
       });
 
       // 회원가입 성공 시 에러 메시지 초기화
