@@ -270,7 +270,7 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
   AppBar _buildAppBar() {
     return AppBar(
       scrolledUnderElevation: 0,
-      automaticallyImplyLeading: false,
+      automaticallyImplyLeading: true,
       // 뒤로가기 버튼 숨기기
       backgroundColor: Colors.white,
       title: Text(
