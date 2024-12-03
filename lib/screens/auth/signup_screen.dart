@@ -382,6 +382,7 @@ class SignupScreenState extends State<SignupScreen> {
           .set({
         'nickname': nickname,
         'email': email,
+        'bio': '안녕하세요', // 소개문은 '안녕하세요'로 저장
       });
 
       // 회원가입 성공 시 에러 메시지 초기화

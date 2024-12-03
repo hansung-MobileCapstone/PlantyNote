@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:plant/widgets/components/bottom_navigation_bar.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 
 class MyPageScreen extends StatefulWidget {
   const MyPageScreen({super.key});
@@ -11,6 +14,10 @@ class MyPageScreen extends StatefulWidget {
 
 class MyPageScreenState extends State<MyPageScreen> {
   int _selectedIndex = 2; // 네비게이션 인덱스
+
+  // 사용자 정보 변수
+  String _nickname = ''; // 이름 (닉네임)
+  String _bio = '';      // 소개문
 
   void _onItemTapped(int index) {
     setState(() {
@@ -28,6 +35,34 @@ class MyPageScreenState extends State<MyPageScreen> {
     'assets/images/plant1.png',
     'assets/images/plant1.png',
   ];
+
+  Future<void> _fetchUserData() async {
+    try {
+      User? user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        DocumentSnapshot userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .get();
+
+        if (userDoc.exists) {
+          setState(() {
+            _nickname = userDoc.get('nickname') ?? '';
+            _bio = userDoc.get('bio') ?? '';
+          });
+        }
+      }
+    } catch (e) {
+      print('Error fetching user data: $e');
+    }
+  }
+
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserData(); // 사용자 데이터 가져오기
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -163,7 +198,7 @@ class MyPageScreenState extends State<MyPageScreen> {
     );
   }
 
-  // 닉네임, 소개글
+// 닉네임, 소개글
   Widget _profileInfo() {
     return Padding(
       padding: const EdgeInsets.only(left: 4.0, top: 8.0),
@@ -171,7 +206,7 @@ class MyPageScreenState extends State<MyPageScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text( // 닉네임
-            '마이클',
+            _nickname.isNotEmpty ? _nickname : '이름 없음',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -180,7 +215,7 @@ class MyPageScreenState extends State<MyPageScreen> {
           ),
           SizedBox(height: 4),
           Text( // 소개 글
-            '안녕하세요, 초보 식집사입니다.',
+            _bio.isNotEmpty ? _bio : '소개문을 입력해주세요.',
             style: TextStyle(
               fontSize: 12,
               color: Color(0xFF4B7E5B),
@@ -190,6 +225,7 @@ class MyPageScreenState extends State<MyPageScreen> {
       ),
     );
   }
+
 
   // 프로필 수정 버튼
   Widget _editProfileButton() {
