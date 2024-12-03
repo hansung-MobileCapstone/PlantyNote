@@ -57,6 +57,7 @@ class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
             ),
             SizedBox(height: 15),
             _dDayWithBadge(), // 함께한지 뱃지
+            SizedBox(height: 15),
             _plantDetailsSection(), // 식물 정보
             Divider(
               color: Color(0xFF7D7D7D),
@@ -113,7 +114,7 @@ class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
         backgroundColor: Colors.white, // 배경색 변경
         elevation: 4, // 그림자 높이
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(100), // 모서리 반경 조정
+          borderRadius: BorderRadius.circular(100),
         ),
         child: Icon(
           Icons.add_circle,
@@ -140,14 +141,14 @@ class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
       centerTitle: true,
       actions: [
         IconButton( // 수정 버튼
-          icon: Icon(Icons.edit, color: const Color(0xFF7D7D7D), size: 24),
+          icon: Icon(Icons.edit_outlined, color: const Color(0xFF7D7D7D), size: 24),
           onPressed: () {
             context.push('/plants/register'); // 내식물등록페이지로 이동
             // 게시물작성페이지에 현재 데이터 전달 필요 (extra)
           },
         ),
         IconButton( // 삭제 버튼
-          icon: Icon(Icons.delete, color: const Color(0xFFDA2525), size: 24),
+          icon: Icon(Icons.delete_outlined, color: const Color(0xFFDA2525), size: 24),
           onPressed: () {
             _showDeleteDialog(context); // 삭제 팝업 표시
           },
@@ -173,7 +174,6 @@ class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
             ),
             TextButton(
               onPressed: () {
-                context.pop(); // 팝업 닫기
                 context.go('/plants'); // 내식물모음페이지로 이동
                 // 삭제 기능 구현
               },
@@ -212,15 +212,16 @@ class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           const Text(
             'LIKE',
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF697386)),
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF697386)),
           ),
           const SizedBox(height: 8),
           Container(
-            padding: EdgeInsets.all(16.0),
+            padding: EdgeInsets.fromLTRB(40,20,40,10),
             decoration: BoxDecoration(
               color: Color(0xFFF5F5F5),
               borderRadius: BorderRadius.circular(10),
@@ -231,7 +232,8 @@ class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
           const SizedBox(height: 16),
           const Text(
             'D-DAY',
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF697386)),
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF697386)),
           ),
           const SizedBox(height: 8),
           Container(
@@ -254,21 +256,29 @@ class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
   Widget _plantLike() {
     return Column(
       mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         // 첫 번째 Row (햇빛)
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('햇빛', style: TextStyle(fontSize: 16)),
+            Text('햇빛', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF697386))),
             Row(
               children: [
-                Text('적음', style: TextStyle(fontSize: 14)),
-                SizedBox(width: 8),
-                for (int i = 0; i < 5; i++)
-                  Icon(Icons.wb_sunny, color: Color(0xFFFDD941)),
-                SizedBox(width: 8),
-                Text('많음', style: TextStyle(fontSize: 14)),
+                Text('적음', style: TextStyle(fontSize: 12, color: Color(0xFFB3B3B3))),
+                SizedBox(width: 10),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: List.generate(
+                    5,
+                        (index) => Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                      child: Icon(Icons.wb_sunny, color: Color(0xFFFDD941)),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 10),
+                Text('많음', style: TextStyle(fontSize: 12, color: Color(0xFFB3B3B3))),
               ],
             ),
           ],
@@ -278,15 +288,23 @@ class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('물', style: TextStyle(fontSize: 16)),
+            Text('물', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF697386))),
             Row(
               children: [
-                Text('적음', style: TextStyle(fontSize: 14)),
-                SizedBox(width: 8),
-                for (int i = 0; i < 5; i++)
-                  Icon(Icons.water_drop, color: Color(0xFF8FD7FF)),
-                SizedBox(width: 8),
-                Text('많음', style: TextStyle(fontSize: 14)),
+                Text('적음', style: TextStyle(fontSize: 12, color: Color(0xFFB3B3B3))),
+                SizedBox(width: 10),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: List.generate(
+                    5,
+                        (index) => Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                      child: Icon(Icons.water_drop, color: Color(0xFF8FD7FF)),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 10),
+                Text('많음', style: TextStyle(fontSize: 12, color: Color(0xFFB3B3B3))),
               ],
             ),
           ],
@@ -296,24 +314,38 @@ class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('온도', style: TextStyle(fontSize: 16)),
+            Text('온도', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF697386))),
             Row(
               children: [
-                Text('-10', style: TextStyle(fontSize: 14)),
-                SliderTheme(
-                  data: SliderThemeData(
-                    thumbShape: RoundSliderThumbShape(enabledThumbRadius: 10.0),
-                  ),
-                  child: Slider(
-                    value: 20.0,
-                    min: -10,
-                    max: 40,
-                    onChanged: (value) {},
-                    activeColor: Colors.orange,
-                    inactiveColor: Colors.grey,
+                Text('-10', style: TextStyle(fontSize: 12, color: Color(0xFFB3B3B3))),
+                SizedBox(
+                  width: 205, // 슬라이더 크기
+                  child: SliderTheme(
+                    data: SliderThemeData(
+                      activeTrackColor: const Color(0xFFE6E6E6),
+                      inactiveTrackColor: const Color(0xFFE6E6E6),
+                      thumbColor: const Color(0xFF4B7E5B),
+                      trackHeight: 3.0,
+                      thumbShape: const RoundSliderThumbShape(
+                        enabledThumbRadius: 6.0,
+                      ),
+                      valueIndicatorShape: const PaddleSliderValueIndicatorShape(),
+                      valueIndicatorColor: const Color(0xFF4B7E5B),
+                      valueIndicatorTextStyle: const TextStyle(
+                        color: Colors.white,
+                      ),
+                    ),
+                    child: Slider(
+                      value: 15, // my_plant_register에서 선택한 온도
+                      min: -10,
+                      max: 40,
+                      divisions: 50,
+                      label: '15°C',
+                      onChanged: (value) {}, // 고정
+                    ),
                   ),
                 ),
-                Text('40', style: TextStyle(fontSize: 14)),
+                Text('40', style: TextStyle(fontSize: 12, color: Color(0xFFB3B3B3))),
               ],
             ),
           ],
@@ -325,11 +357,18 @@ class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
   // D-DAY 부분
   Widget _plantDday() {
     return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
+        Text('물', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF697386))),
+        const SizedBox(width: 10),
         _dDayBadge('D-1', Color(0xFF95CED5)),
-        const SizedBox(width: 8),
+        const SizedBox(width: 20),
+        Text('영양제', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF697386))),
+        const SizedBox(width: 10),
         _dDayBadge('D-75', Color(0xFFEAC7A8)),
-        const SizedBox(width: 8),
+        const SizedBox(width: 20),
+        Text('분갈이', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF697386))),
+        const SizedBox(width: 10),
         _dDayBadge('D-300', Color(0xFFCABECE)),
       ],
     );
@@ -356,8 +395,21 @@ class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
   Widget _toggleButton() {
     return Row(
       children: [
-        const Text('물 주기 알림', style: TextStyle(fontSize: 16)),
+        const Text('  물 주기 알림',
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF697386)),
+        ),
         const Spacer(),
+        IconButton(
+          icon: const Icon(Icons.alarm_outlined, color: Color(0xFF4B7E5B)),
+          onPressed: () {
+            showDialog(
+              context: context,
+              builder: (context) => const NotificationSettingModal(),
+            );
+          },
+        ),
+        const SizedBox(width: 10),
         Switch(
           value: isNotificationEnabled,
           onChanged: (value) {
@@ -365,15 +417,10 @@ class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
               isNotificationEnabled = value;
             });
           },
-        ),
-        IconButton(
-          icon: const Icon(Icons.timer),
-          onPressed: () {
-            showDialog(
-              context: context,
-              builder: (context) => const NotificationSettingModal(),
-            );
-          },
+          activeColor: Color(0xFFFFFFFF), // 활성 상태의 thumb 색상
+          activeTrackColor: Color(0xFF4B7E5B), // 활성 상태의 track 색상
+          inactiveThumbColor: Color(0xFFFFFFFF), // 비활성 상태의 thumb 색상
+          inactiveTrackColor: Color(0xFFB3B3B3), // 비활성 상태의 track 색상
         ),
       ],
     );

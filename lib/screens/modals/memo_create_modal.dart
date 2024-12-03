@@ -31,6 +31,7 @@ class _MemoCreateModalState extends State<MemoCreateModal> {
   Widget build(BuildContext context) {
     return Dialog(
       insetPadding: EdgeInsets.symmetric(horizontal: 60),
+      backgroundColor: Colors.white,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -44,16 +45,8 @@ class _MemoCreateModalState extends State<MemoCreateModal> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(height: 10),
-            EmojiSelector(
-              emojis: ['😆', '😊', '😐', '😞', '😭'],
-              selectedIndex: selectedEmojiIndex,
-              onEmojiSelected: (index) {
-                setState(() {
-                  selectedEmojiIndex = index;
-                });
-              },
-            ),
+            SizedBox(height: 20),
+            _EmojiSelect(),
             SizedBox(height: 10),
             _inputField(), // 메모 입력
             SizedBox(height: 10),
@@ -68,7 +61,7 @@ class _MemoCreateModalState extends State<MemoCreateModal> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Color(0xFF4B7E5B), // 배경색
                 foregroundColor: Colors.white, // 글자색
-                padding: EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+                padding: EdgeInsets.symmetric(horizontal: 30, vertical: 10),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(50),
                 ),
@@ -77,6 +70,29 @@ class _MemoCreateModalState extends State<MemoCreateModal> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _EmojiSelect() {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical:5, horizontal:1),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(50),
+        border: Border.all(
+          color: Color(0xFFB3B3B3),
+          width: 1,
+        ),
+      ),
+      child: EmojiSelector(
+        emojis: ['😆', '😊', '😐', '😞', '😭'],
+        selectedIndex: selectedEmojiIndex,
+        onEmojiSelected: (index) {
+          setState(() {
+            selectedEmojiIndex = index;
+          });
+        },
       ),
     );
   }
