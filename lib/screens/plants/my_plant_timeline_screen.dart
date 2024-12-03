@@ -401,7 +401,10 @@ class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
                     5,
                         (index) => Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 5.0),
-                      child: Icon(Icons.wb_sunny, color: Color(0xFFFDD941)),
+                      child: Icon(
+                        Icons.wb_sunny,
+                        color: index < sunlightLevel ? Color(0xFFFDD941) : Color(0x4DFDD941),
+                      ),
                     ),
                   ),
                 ),
@@ -427,7 +430,10 @@ class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
                     5,
                         (index) => Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 5.0),
-                      child: Icon(Icons.water_drop, color: Color(0xFF8FD7FF)),
+                      child: Icon(
+                        Icons.water_drop,
+                        color: index < waterLevel ? Color(0xFF8FD7FF) : Color(0x4D8FD7FF),
+                      ),
                     ),
                   ),
                 ),
