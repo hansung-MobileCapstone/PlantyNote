@@ -75,7 +75,7 @@ class TimelineModal extends StatelessWidget {
                     IconButton(
                       icon: const Icon(Icons.close, color: Colors.black, size: 24),
                       onPressed: () {
-                        Navigator.pop(context); // 모달창 닫기
+                        context.pop(); // 모달창 닫기
                       },
                     ),
                   ],
@@ -89,6 +89,7 @@ class TimelineModal extends StatelessWidget {
                     itemBuilder: (context, index) {
                       final memo = memos[index];
                       final data = memo.data() as Map<String, dynamic>;
+                      final memoId = memo.id;
 
                       return MemoItem(
                         date: (data['createdAt'] as Timestamp?)
@@ -99,6 +100,8 @@ class TimelineModal extends StatelessWidget {
                         content: data['content'] ?? '내용 없음',
                         imageUrl: data['imageUrl'] ?? '',
                         emojiIndex: data['emoji'] ?? 0,
+                        memoId: memoId,
+                        plantId: plantId,
                       );
                     },
                   ),

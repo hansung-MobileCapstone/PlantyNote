@@ -31,12 +31,12 @@ class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
     final user = FirebaseAuth.instance.currentUser;
 
     if (user == null) {
-      throw Exception("로그인된 사용자가 없습니다."); // 사용자가 로그인되지 않은 경우 예외 발생
+      throw Exception("로그인된 사용자가 없습니다.");
     }
 
     return FirebaseFirestore.instance
         .collection('users')
-        .doc(user.uid) // 로그인된 사용자의 UID를 사용
+        .doc(user.uid) // 로그인된 사용자의 UID
         .collection('plants')
         .doc(widget.plantId)
         .get();
@@ -570,12 +570,15 @@ class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
           itemBuilder: (context, index) {
             final memo = memos[index];
             final data = memo.data() as Map<String, dynamic>;
+            final memoId = memo.id;
 
             return MemoItem(
               date: (data['createdAt'] as Timestamp?)?.toDate().toString().substring(0, 10) ?? '-',
               content: data['content'] ?? '내용 없음',
               imageUrl: data['imageUrl'] ?? '',
               emojiIndex: data['emoji'] ?? 0,
+              memoId: memoId,
+              plantId: widget.plantId,
             );
           },
         );
