@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import '../modals/notification_setting_modal.dart';
 import '../modals/memo_create_modal.dart';
 import '../modals/timeline_modal.dart';
@@ -224,7 +225,7 @@ class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
             }
           },
         ),
-        IconButton(
+        IconButton( // 삭제 버튼
           icon: const Icon(
               Icons.delete_outlined, color: Color(0xFFDA2525), size: 24),
           onPressed: () {
@@ -252,8 +253,7 @@ class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
             ),
             TextButton(
               onPressed: () {
-                context.go('/plants'); // 내식물모음페이지로 이동
-                // 삭제 기능 구현
+                _deletePlant(context);
               },
               child: Text("예"),
             ),
@@ -261,6 +261,46 @@ class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
         );
       },
     );
+  }
+
+  // firebase에서 삭제
+  Future<void> _deletePlant(BuildContext context) async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        throw Exception("로그인된 사용자가 없습니다.");
+      }
+
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .collection('plants')
+          .doc(widget.plantId)
+          .delete();
+
+      // 삭제 성공 메시지
+      Fluttertoast.showToast(
+        msg: "식물 삭제 완료",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+        backgroundColor: Color(0xFF4B7E5B),
+        textColor: Colors.white,
+        fontSize: 13.0,
+      );
+
+      // 식물 모음 페이지로 이동
+      context.go('/plants');
+    } catch (e) {
+      // 삭제 실패 메시지 표시
+      Fluttertoast.showToast(
+        msg: "삭제 실패..",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Color(0xFFE81010),
+        textColor: Colors.white,
+        fontSize: 13.0,
+      );
+    }
   }
 
   // 함께한지 D+Day 뱃지
