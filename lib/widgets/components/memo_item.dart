@@ -1,23 +1,28 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
 
 // 메모 하나
 class MemoItem extends StatelessWidget {
-  // ------- 메모 정보 가져올때 주석 풀기
-  //final String date;
-  //final String content;
-  //final String imageUrl;
+  final String date; // 작성 날짜
+  final String content; // 메모 내용
+  final String imageUrl; // 이미지 경로
+  final int emojiIndex; // 이모지 인덱스
   //final VoidCallback onTap;
 
-  const MemoItem({super.key}
-    //super.key,
-    //required this.date,
-    //required this.content,
-    //required this.imageUrl,
+  const MemoItem({
+    super.key,
+    required this.date,
+    required this.content,
+    required this.imageUrl,
+    required this.emojiIndex,
     //required this.onTap,
-  );
+  });
 
   @override
   Widget build(BuildContext context) {
+    const emojis = ['😆', '😊', '😐', '😞', '😭'];
+    final file = File(imageUrl);
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 5),
       child: Container(
@@ -33,18 +38,17 @@ class MemoItem extends StatelessWidget {
               child: Container(
                 width: 20,
                 height: 20,
-                color: Colors.white,
+                color: Color(0x99ECF7F2),
                 alignment: Alignment.center,
-                child: Icon(
-                  Icons.sentiment_very_satisfied,
-                  size: 20, // 아이콘 크기
-                  color: Color(0xFFFFDE00),
+                child: Text(
+                  emojis[emojiIndex],
+                  style: const TextStyle(fontSize: 15),
                 ),
               ),
             ),
             const SizedBox(width: 8),
             Text( // 작성 날짜
-              "2024.10.06", // date
+              date, // date
               style: TextStyle(
                 fontSize: 8,
                 fontWeight: FontWeight.bold,
@@ -57,18 +61,18 @@ class MemoItem extends StatelessWidget {
                 children: [
                   SizedBox(height: 10),
                   Text( // 메모 내용
-                    "메모 내용이 표시됩니다.",
+                    content,
                     style: TextStyle(
                       fontSize: 10,
                       color: Colors.black,
                     ),
                   ),
                   SizedBox(height: 7),
-                  //if (imageUrl != null && imageUrl.isNotEmpty) // 메모 이미지가 있다면
+                  if (imageUrl != null && imageUrl.isNotEmpty) // 메모 이미지가 있다면
                     ClipRRect(
                       borderRadius: BorderRadius.circular(10),
-                      child: Image.asset(
-                        "assets/images/plant1.png", //imageUrl, // 이미지 경로
+                      child: Image.file(
+                        File(imageUrl), // 이미지 경로
                         width: 150,
                         height: 150,
                         fit: BoxFit.cover,

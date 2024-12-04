@@ -165,18 +165,18 @@ class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
                   ),
                 ),
                 // 타임라인 리스트
-                ListView(
-                  padding: const EdgeInsets.all(16),
-                  physics: NeverScrollableScrollPhysics(), // 내부 스크롤 비활성화
-                  shrinkWrap: true,
-                  children: memos.take(3).map((memo) { // 최근 3개의 Memo만 보이기
-                    return MemoItem(
-                      //date: memo['date'],
-                      //content: memo['content'],
-                      //imageUrl: memo['imageUrl'],
-                    );
-                  }).toList(),
-                ),
+                // ListView(
+                //   padding: const EdgeInsets.all(16),
+                //   physics: NeverScrollableScrollPhysics(), // 내부 스크롤 비활성화
+                //   shrinkWrap: true,
+                //   children: memos.take(3).map((memo) { // 최근 3개의 Memo만 보이기
+                //     return MemoItem(
+                //       //date: memo['date'],
+                //       //content: memo['content'],
+                //       //imageUrl: memo['imageUrl'],
+                //     );
+                //   }).toList(),
+                // ),
                 InkWell( // 더보기 버튼
                   onTap: () {
                     _showTimeLineModal(context);
@@ -568,7 +568,7 @@ class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
       builder: (BuildContext context) {
         return FractionallySizedBox(
           heightFactor: 0.85, // 화면 높이의 85%로 설정
-          child: TimelineModal(), // comment_modal.dart에 정의된 위젯
+          child: TimelineModal(plantId: widget.plantId,), // comment_modal.dart에 정의된 위젯
         );
       },
     );
