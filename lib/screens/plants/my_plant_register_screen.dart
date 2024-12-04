@@ -9,7 +9,17 @@ import '../modals/cycle_setting_modal.dart';
 import '../modals/calendar_modal.dart';
 
 class MyPlantRegisterScreen extends StatefulWidget {
-  const MyPlantRegisterScreen({super.key});
+  final Map<String, dynamic>? plantData; // 수정 모드일 경우 식물 데이터를 전달받음
+  final bool isEditing; // 등록 모드(false) 또는 수정 모드(true)
+  final String? plantId; // 수정 모드일 경우 Firebase 문서 ID 전달받음
+
+  const MyPlantRegisterScreen({
+    Key? key,
+    required this.isEditing,
+    this.plantId,
+    this.plantData,
+  }) : super(key: key);
+
 
   @override
   State<MyPlantRegisterScreen> createState() => _MyPlantRegisterScreenState();
@@ -23,6 +33,8 @@ class _MyPlantRegisterScreenState extends State<MyPlantRegisterScreen> {
   final _plantSpeciesController = TextEditingController();
   bool isError = false;
   bool isImageUploaded = false;
+  late bool isEditing;
+  late Map<String, dynamic>? plantData;
 
   // 초기값 설정
   double waterCycle = 40; // 물 주기
@@ -33,6 +45,32 @@ class _MyPlantRegisterScreenState extends State<MyPlantRegisterScreen> {
   int sunlightLevel = 3; // 일조량
   int waterLevel = 3; // 물 주는 양
   double temperature = 15.0; // 온도
+
+  @override
+  void initState() {
+    super.initState();
+    isEditing = widget.isEditing;
+    plantData = widget.plantData;
+
+    if (widget.isEditing && widget.plantData != null) {
+      _initializeDataForEdit();
+    }
+  }
+
+  // 수정 모드일 경우 데이터 초깃값
+  void _initializeDataForEdit() {
+    final data = widget.plantData ?? {};
+    _plantNameController.text = data['plantname'] ?? '';
+    _plantSpeciesController.text = data['species'] ?? '';
+    waterCycle = (data['waterCycle'] ?? 40).toDouble();
+    fertilizerCycle = (data['fertilizerCycle'] ?? 3).toDouble();
+    repottingCycle = (data['repottingCycle'] ?? 12).toDouble();
+    meetingDate = DateTime.parse(data['meetingDate'] ?? DateTime.now().toIso8601String());
+    waterDate = DateTime.parse(data['waterDate'] ?? DateTime.now().toIso8601String());
+    sunlightLevel = data['sunlightLevel'] ?? 3;
+    waterLevel = data['waterLevel'] ?? 3;
+    temperature = (data['temperature'] ?? 15).toDouble();
+  }
 
   @override
   void dispose() {
@@ -59,44 +97,71 @@ class _MyPlantRegisterScreenState extends State<MyPlantRegisterScreen> {
         throw Exception("로그인된 사용자가 없습니다.");
       }
 
-      // Firestore에 저장
-      await FirebaseFirestore.instance
+      final plantCollection = FirebaseFirestore.instance
           .collection('users')
           .doc(user.uid)
-          .collection('plants')
-          .add({
-        'plantname': _plantNameController.text.trim(),
-        'species': _plantSpeciesController.text.trim(),
-        'waterCycle': waterCycle.toInt(),
-        'fertilizerCycle': fertilizerCycle.toInt(),
-        'repottingCycle': repottingCycle.toInt(),
-        'sunlightLevel': sunlightLevel,
-        'waterLevel': waterLevel,
-        'temperature': temperature,
-        'meetingDate': meetingDate.toIso8601String(),
-        'waterDate': waterDate.toIso8601String(),
-        'imageUrl': _image != null ? _image!.path : null,
-        'createdAt': FieldValue.serverTimestamp(),
-      });
+          .collection('plants');
 
-      Fluttertoast.showToast(
-        msg: "식물 등록 성공!",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.CENTER,
-        backgroundColor: Color(0xFFECF7F2),
-        textColor: Colors.black,
-        fontSize: 13.0,
-      );
+      if (widget.isEditing) {
+        // 수정 모드: 기존 문서 업데이트
+        await plantCollection.doc(widget.plantId).update({
+          'plantname': _plantNameController.text.trim(),
+          'species': _plantSpeciesController.text.trim(),
+          'waterCycle': waterCycle.toInt(),
+          'fertilizerCycle': fertilizerCycle.toInt(),
+          'repottingCycle': repottingCycle.toInt(),
+          'sunlightLevel': sunlightLevel,
+          'waterLevel': waterLevel,
+          'temperature': temperature,
+          'meetingDate': meetingDate.toIso8601String(),
+          'waterDate': waterDate.toIso8601String(),
+          'imageUrl': _image != null ? _image!.path : widget.plantData?['imageUrl'],
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+
+        Fluttertoast.showToast(
+          msg: "식물 수정 성공!",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          backgroundColor: const Color(0xFF4B7E5B),
+          textColor: Colors.white,
+          fontSize: 13.0,
+        );
+      } else {
+        // 등록 모드: 새로운 문서 추가
+        await plantCollection.add({
+          'plantname': _plantNameController.text.trim(),
+          'species': _plantSpeciesController.text.trim(),
+          'waterCycle': waterCycle.toInt(),
+          'fertilizerCycle': fertilizerCycle.toInt(),
+          'repottingCycle': repottingCycle.toInt(),
+          'sunlightLevel': sunlightLevel,
+          'waterLevel': waterLevel,
+          'temperature': temperature,
+          'meetingDate': meetingDate.toIso8601String(),
+          'waterDate': waterDate.toIso8601String(),
+          'imageUrl': _image != null ? _image!.path : null,
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+
+        Fluttertoast.showToast(
+          msg: "식물 등록 성공!",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          backgroundColor: const Color(0xFF4B7E5B),
+          textColor: Colors.white,
+          fontSize: 13.0,
+        );
+      }
 
       if (!mounted) return;
-      context.pop(); // 내식물모음페이지로 이동
-
+      context.go('/plants'); // 이전 화면으로 돌아가기
     } catch (e) {
       Fluttertoast.showToast(
-        msg: "등록 실패..",
+        msg: "저장 실패: $e",
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
-        backgroundColor: Color(0xFFE81010),
+        backgroundColor: const Color(0xFFE81010),
         textColor: Colors.white,
       );
     }
@@ -213,8 +278,8 @@ class _MyPlantRegisterScreenState extends State<MyPlantRegisterScreen> {
     return AppBar(
       backgroundColor: Colors.white,
       title: Text(
-        '내 식물 등록하기',
-        style: TextStyle(
+        widget.isEditing ? '내 식물 수정하기' : '내 식물 등록하기',
+        style: const TextStyle(
           color: Colors.black,
           fontSize: 16,
           fontWeight: FontWeight.bold,

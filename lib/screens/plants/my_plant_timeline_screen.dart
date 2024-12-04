@@ -110,19 +110,6 @@ class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                // 타임라인 리스트
-                // ListView(
-                //   padding: const EdgeInsets.all(16),
-                //   physics: NeverScrollableScrollPhysics(), // 내부 스크롤 비활성화
-                //   shrinkWrap: true,
-                //   children: memos.take(3).map((memo) { // 최근 3개의 Memo만 보이기
-                //     return MemoItem(
-                //       //date: memo['date'],
-                //       //content: memo['content'],
-                //       //imageUrl: memo['imageUrl'],
-                //     );
-                //   }).toList(),
-                // ),
                 _buildRecentMemos(), // 최신 메모 3개만 보이기
                 InkWell( // 더보기 버튼
                   onTap: () {
@@ -213,11 +200,28 @@ class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
       ),
       centerTitle: true,
       actions: [
-        IconButton(
+        IconButton( // 수정 버튼
           icon: const Icon(
               Icons.edit_outlined, color: Color(0xFF7D7D7D), size: 24),
-          onPressed: () {
-            context.push('/plants/register'); // 내식물등록페이지로 이동
+          onPressed: () async {
+            final snapshot = await FirebaseFirestore.instance
+                .collection('users')
+                .doc(FirebaseAuth.instance.currentUser!.uid)
+                .collection('plants')
+                .doc(widget.plantId)
+                .get();
+
+            if (snapshot.exists) {
+              final plantData = snapshot.data();
+              context.push(
+                '/plants/register', // 내식물등록페이지로 이동
+                extra: {
+                  'isEditing': true,
+                  'plantId': widget.plantId,
+                  'plantData': plantData,
+                },
+              );
+            }
           },
         ),
         IconButton(
