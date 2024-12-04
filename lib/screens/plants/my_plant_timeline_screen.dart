@@ -200,7 +200,7 @@ class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
         onPressed: () {
           showDialog(
             context: context,
-            builder: (context) => const MemoCreateModal(),
+            builder: (context) => MemoCreateModal(plantId: widget.plantId),
           );
         },
         backgroundColor: Colors.white, // 배경색 변경
