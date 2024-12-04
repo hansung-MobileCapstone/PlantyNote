@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import '../modals/cycle_setting_modal.dart';
@@ -38,15 +41,6 @@ class _MyPlantRegisterScreenState extends State<MyPlantRegisterScreen> {
     super.dispose();
   }
 
- /* void _submitForm() {
-    setState(() {
-      isError = !_formKey.currentState!.validate();
-    });
-    if (!isError) {
-      // 완료 처리
-    }
-  }
-*/
   // 사진 선택 함수
   void _pickImage() async {
     final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
@@ -54,6 +48,57 @@ class _MyPlantRegisterScreenState extends State<MyPlantRegisterScreen> {
       setState(() {
         _image = image;
       });
+    }
+  }
+
+  // Firestore에 데이터 저장
+  Future<void> _submitPlantData() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        throw Exception("로그인된 사용자가 없습니다.");
+      }
+
+      // Firestore에 저장
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .collection('plants')
+          .add({
+        'plantname': _plantNameController.text.trim(),
+        'species': _plantSpeciesController.text.trim(),
+        'waterCycle': waterCycle.toInt(),
+        'fertilizerCycle': fertilizerCycle.toInt(),
+        'repottingCycle': repottingCycle.toInt(),
+        'sunlightLevel': sunlightLevel,
+        'waterLevel': waterLevel,
+        'temperature': temperature,
+        'meetingDate': meetingDate.toIso8601String(),
+        'waterDate': waterDate.toIso8601String(),
+        'imageUrl': _image != null ? _image!.path : null,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+
+      Fluttertoast.showToast(
+        msg: "식물 등록 성공!",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+        backgroundColor: Color(0xFFECF7F2),
+        textColor: Colors.black,
+        fontSize: 13.0,
+      );
+
+      if (!mounted) return;
+      context.pop(); // 내식물모음페이지로 이동
+
+    } catch (e) {
+      Fluttertoast.showToast(
+        msg: "등록 실패..",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Color(0xFFE81010),
+        textColor: Colors.white,
+      );
     }
   }
 
@@ -584,7 +629,7 @@ class _MyPlantRegisterScreenState extends State<MyPlantRegisterScreen> {
           Expanded( // 완료 버튼
             flex: 7,
             child: ElevatedButton(
-              onPressed: () { context.pop(); }, // 데이터 전달 필요
+              onPressed: () { _submitPlantData(); }, // 데이터 저장
               style: ElevatedButton.styleFrom(
                 backgroundColor: Color(0xFF4B7E5B),
                 foregroundColor: Colors.white,
