@@ -42,35 +42,6 @@ class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
         .get();
   }
 
-  // Memo 예시 데이터
-  final List<Map<String, dynamic>> memos = [
-    {
-      'date': '2024.10.06',
-      'content': '꽃이 피었다!',
-      'imageUrl': 'assets/images/sample_post.png',
-    },
-    {
-      'date': '2024.10.05',
-      'content': '오늘 물을 주었다. 큰 꽃이 필 것 같아서 기대가 된다.',
-      'imageUrl': '',
-    },
-    {
-      'date': '2024.10.01',
-      'content': '팥이 키우기 시작.',
-      'imageUrl': 'assets/images/sample_post.png',
-    },
-    {
-      'date': '2024.10.01',
-      'content': '팥이 키우기 시작.',
-      'imageUrl': '',
-    },
-    {
-      'date': '2024.10.01',
-      'content': '팥이 키우기 시작.',
-      'imageUrl': 'assets/images/sample_post.png',
-    },
-  ];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -99,34 +70,9 @@ class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
 
           final file = File(imageUrl);
 
-
           // 함께한 D-Day 계산
           final dDayTogether =
               DateTime.now().difference(meetingDate).inDays + 1;
-
-          // 물 D-Day 계산
-          final nextWaterDate = DateTime(
-            waterDate.year,
-            waterDate.month,
-            waterDate.day,
-          ).add(Duration(days: waterCycle));
-          final dDayWater = nextWaterDate.difference(DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day)).inDays;
-
-          // 영양제 D-Day 계산
-          final nextFertilizerDate = DateTime(
-            waterDate.year,
-            waterDate.month,
-            waterDate.day,
-          ).add(Duration(days: fertilizerCycle*30));
-          final dDayFertilizer = nextFertilizerDate.difference(DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day)).inDays;
-
-          // 분갈이 D-Day 계산
-          final nextRepottingDate = DateTime(
-            waterDate.year,
-            waterDate.month,
-            waterDate.day,
-          ).add(Duration(days: repottingCycle*30));
-          final dDayRepotting = nextRepottingDate.difference(DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day)).inDays;
 
           return SingleChildScrollView(
             child: Column(
@@ -145,9 +91,9 @@ class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
                   sunlightLevel: sunlightLevel,
                   waterLevel: waterLevel,
                   temperature: temperature,
-                  dDayWater: dDayWater,
-                  dDayFertilizer: dDayFertilizer,
-                    dDayRepotting: dDayRepotting
+                  dDayWater: _calculateDday(waterDate, waterCycle),
+                  dDayFertilizer: _calculateDday(waterDate, fertilizerCycle * 30),
+                  dDayRepotting: _calculateDday(waterDate, repottingCycle * 30),
                 ),
                 const Divider(
                   color: Color(0xFF7D7D7D),
@@ -177,6 +123,7 @@ class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
                 //     );
                 //   }).toList(),
                 // ),
+                _buildRecentMemos(), // 최신 메모 3개만 보이기
                 InkWell( // 더보기 버튼
                   onTap: () {
                     _showTimeLineModal(context);
@@ -215,6 +162,12 @@ class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
         ),
       ),
     );
+  }
+
+  // D-Day 계산 함수
+  int _calculateDday(DateTime date, int cycleDays) {
+    final nextDate = date.add(Duration(days: cycleDays));
+    return nextDate.difference(DateTime.now()).inDays;
   }
 
   // 상단 바
@@ -569,6 +522,62 @@ class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
         return FractionallySizedBox(
           heightFactor: 0.85, // 화면 높이의 85%로 설정
           child: TimelineModal(plantId: widget.plantId,), // comment_modal.dart에 정의된 위젯
+        );
+      },
+    );
+  }
+
+  // 최신 메모 3개 표시
+  Widget _buildRecentMemos() {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      return const Center(child: Text('로그인된 사용자가 없습니다.'));
+    }
+
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .collection('plants')
+          .doc(widget.plantId)
+          .collection('memos')
+          .orderBy('createdAt', descending: true)
+          .limit(3)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return const Center(child: Text(
+              '메모를 작성해 보세요!',
+              style: TextStyle(
+                color: Color(0xFFB3B3B3),
+                fontSize: 15,
+              ),
+          ));
+        }
+
+        final memos = snapshot.data!.docs;
+
+        return ListView.builder(
+          padding: const EdgeInsets.all(16),
+          physics: const NeverScrollableScrollPhysics(),
+          shrinkWrap: true,
+          itemCount: memos.length,
+          itemBuilder: (context, index) {
+            final memo = memos[index];
+            final data = memo.data() as Map<String, dynamic>;
+
+            return MemoItem(
+              date: (data['createdAt'] as Timestamp?)?.toDate().toString().substring(0, 10) ?? '-',
+              content: data['content'] ?? '내용 없음',
+              imageUrl: data['imageUrl'] ?? '',
+              emojiIndex: data['emoji'] ?? 0,
+            );
+          },
         );
       },
     );
