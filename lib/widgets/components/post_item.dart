@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 // 게시물 하나
 class PostItem extends StatelessWidget {
@@ -17,31 +18,35 @@ class PostItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 130, // Card 높이 고정
-      child: Card(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        elevation: 4,
-        color: const Color(0xFFF5F5F5),
-        margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
-        child: SizedBox(
-          height: 10,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _postImage(), // 게시물 사진
-              const SizedBox(width: 12),
-              _postContent(), // 텍스트 영역
-              const SizedBox(width: 8),
-              Container(
-                // 세로선
-                width: 1,
-                height: 95,
-                color: const Color(0xFF7D7D7D),
-              ),
-              const SizedBox(width: 8),
-              _plantInformation(), // 식물 상세 정보 (식물종, 물주기, 분갈이주기, 환경)
-            ],
+    return GestureDetector(
+      onTap: () {
+        context.push('/community/detail'); // 게시물상세페이지로 이동(/$id 추가)
+      },
+      child: SizedBox(
+        height: 130, // Card 높이 고정
+        child: Card(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          elevation: 4,
+          color: const Color(0xFFF5F5F5),
+          margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+          child: SizedBox(
+            height: 10,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _postImage(), // 게시물 사진
+                SizedBox(width: 12),
+                _postContent(), // 텍스트 영역
+                SizedBox(width: 8),
+                Container( // 세로선
+                  width: 1,
+                  height: 95,
+                  color: const Color(0xFF7D7D7D),
+                ),
+                SizedBox(width: 8),
+                _plantInformation(), // 식물 상세 정보 (식물종, 물주기, 분갈이주기, 환경)
+              ],
+            ),
           ),
         ),
       ),
@@ -73,18 +78,17 @@ class PostItem extends StatelessWidget {
             borderRadius: BorderRadius.circular(10),
             child: imageUrls.isNotEmpty
                 ? Image.network(
-                    imageUrls[0],
-                    width: 90,
-                    height: 90,
-                    fit: BoxFit.cover,
-                  )
+              imageUrls[0],
+              width: 90,
+              height: 90,
+              fit: BoxFit.cover,
+            )
                 : Image.network(
-                    'https://res.cloudinary.com/heyset/image/upload/v1689582418/buukmenow-folder/no-image-icon-0.jpg',
-                    // 기본 이미지 경로
-                    width: 90,
-                    height: 90,
-                    fit: BoxFit.cover,
-                  ),
+              'https://res.cloudinary.com/heyset/image/upload/v1689582418/buukmenow-folder/no-image-icon-0.jpg', // 기본 이미지 경로
+              width: 90,
+              height: 90,
+              fit: BoxFit.cover,
+            ),
           ),
         ],
       ),
@@ -100,15 +104,13 @@ class PostItem extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const CircleAvatar(
-                // 프로필 사진
+              const CircleAvatar( // 프로필 사진
                 radius: 10,
                 backgroundImage:
-                    NetworkImage('https://via.placeholder.com/150'),
+                NetworkImage('https://via.placeholder.com/150'),
               ),
               const SizedBox(width: 8),
-              Text(
-                // 이름
+              Text( // 이름
                 name,
                 style: const TextStyle(
                   fontSize: 13,
@@ -144,8 +146,8 @@ class PostItem extends StatelessWidget {
             child: Row(
               children: [
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 7, vertical: 2),
                   decoration: BoxDecoration(
                     border: Border.all(
                       color: const Color(0x804B7E5B),
@@ -175,5 +177,6 @@ class PostItem extends StatelessWidget {
         }).toList(),
       ),
     );
+
   }
 }
