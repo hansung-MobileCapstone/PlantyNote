@@ -29,6 +29,7 @@ class LoginScreenState extends State<LoginScreen> {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF7FBF1),
+      resizeToAvoidBottomInset: false, // 키보드가 나타날 때 화면 요소가 위로 올라가지 않도록 설정
       body: Stack(
         children: [
           _treeImage(screenWidth), // 트리 이미지
@@ -182,12 +183,18 @@ class LoginScreenState extends State<LoginScreen> {
             width: 3.0,
           ),
         ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: const BorderSide(
+            color: Color(0xFFD2DED6), // 포커스 시 색상 변경
+            width: 3.0,
+          ),
+        ),
       ),
       validator: (value) {
         if (value == null || value.isEmpty) {
           return '이메일을 입력하세요.';
         }
-        // 이메일 형식 검사
         if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
           return '유효한 이메일 주소를 입력하세요.';
         }
@@ -218,6 +225,13 @@ class LoginScreenState extends State<LoginScreen> {
           borderRadius: BorderRadius.circular(15),
           borderSide: const BorderSide(
             color: Color(0xFF4B7E5B),
+            width: 3.0,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: const BorderSide(
+            color: Color(0xFFD2DED6), // 포커스 시 색상 변경
             width: 3.0,
           ),
         ),
@@ -256,12 +270,12 @@ class LoginScreenState extends State<LoginScreen> {
   Widget _signupButton(BuildContext context) {
     return TextButton(
       onPressed: () {
-        context.push('/start/signup'); // 회원가입페이지로 이동
+        context.push('/start/signup');
       },
       child: const Text.rich(
         TextSpan(
           text: 'Don\'t have account? ',
-          style: TextStyle(fontSize:18, color: Color(0xFFB7C7C2)),
+          style: TextStyle(fontSize: 18, color: Color(0xFFB7C7C2)),
           children: [
             TextSpan(
               text: 'Sign up',
@@ -280,26 +294,20 @@ class LoginScreenState extends State<LoginScreen> {
   void _login() async {
     if (_formKey.currentState!.validate()) {
       try {
-        // Firebase Authentication을 사용하여 로그인
         await FirebaseAuth.instance.signInWithEmailAndPassword(
           email: _emailController.text.trim(),
           password: _passwordController.text.trim(),
         );
-
-        // 로그인 성공 시 토스트 메시지 표시
         Fluttertoast.showToast(
           msg: "로그인 성공!",
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM,
-          backgroundColor: Color(0xFF4B7E5B), // 배경색
-          textColor: Colors.white, // 글자 색
+          backgroundColor: const Color(0xFF4B7E5B),
+          textColor: Colors.white,
           fontSize: 16.0,
         );
-
-        // 로그인 성공 시 메인 페이지로 이동
         if (!mounted) return;
         context.go('/main');
-
       } on FirebaseAuthException catch (e) {
         if (e.code == 'wrong-password') {
           setState(() {
