@@ -41,7 +41,7 @@ class _PlantListItemState extends State<PlantListItem> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        context.push('/plants/timeline'); // 내식물타임라인페이지로 이동(/$id 추가)
+        context.push('/plants/timeline/${widget.plantId}'); // 내식물타임라인페이지로 이동
       },
       child: SizedBox(
         height: 130, // Card 높이 고정
