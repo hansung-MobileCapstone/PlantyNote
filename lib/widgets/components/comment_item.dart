@@ -1,7 +1,16 @@
 import 'package:flutter/material.dart';
 
 class CommentItem extends StatelessWidget {
-  const CommentItem({super.key});
+  final String userId;
+  final String text;
+  final String date;
+
+  const CommentItem({
+    super.key,
+    required this.userId,
+    required this.text,
+    required this.date,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -16,35 +25,36 @@ class CommentItem extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ClipOval(
-              child: Image.asset(
-                'assets/images/sample_post.png', // 프로필 사진
-                width: 17, // 고정된 이미지 크기
-                height: 17,
-                fit: BoxFit.cover,
-              ),
-            ),
-            const SizedBox(width: 8), // 프로필과 이름 간격
+            // 프로필 이미지를 제거했습니다.
+            // 필요하다면 여기에 다른 위젯을 추가할 수 있습니다.
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    "닉네임",
-                    style: TextStyle(
+                  Text(
+                    userId,
+                    style: const TextStyle(
                       fontSize: 8, // 고정된 이름 글씨 크기
                       fontWeight: FontWeight.bold,
                       color: Colors.black,
                     ),
                   ),
                   const SizedBox(height: 2), // 이름과 댓글 간격
-                  const Text(
-                    "이곳에 댓글 내용이 표시됩니다.",
-                    style: TextStyle(
+                  Text(
+                    text,
+                    style: const TextStyle(
                       fontSize: 10, // 고정된 댓글 글씨 크기
                       color: Colors.black87,
                     ),
                     textAlign: TextAlign.left,
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    date,
+                    style: const TextStyle(
+                      fontSize: 8,
+                      color: Colors.grey,
+                    ),
                   ),
                 ],
               ),

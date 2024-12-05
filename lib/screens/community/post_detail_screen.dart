@@ -80,13 +80,20 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   }
 
   void _showCommentModal(BuildContext context) {
+    if (widget.docId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("수정할 게시물을 찾을 수 없습니다.")),
+      );
+      return;
+    }
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       builder: (BuildContext context) {
-        return const FractionallySizedBox(
+        return FractionallySizedBox(
           heightFactor: 0.85,
-          child: CommentModal(),
+          child: CommentModal(docId: widget.docId!), // docId 전달
         );
       },
     );
