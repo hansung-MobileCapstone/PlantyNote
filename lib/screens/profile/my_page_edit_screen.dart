@@ -34,6 +34,14 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
 
   bool _isLoading = true; // 데이터 로딩 상태
 
+  // 사용자 정보 변수
+  String _nickname = '';
+  String _bio = '';
+  String? _profileImage;
+
+  // 식물 개수
+  int _plantCount = 0;
+
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -107,6 +115,7 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
     _introController = TextEditingController();
     if (_user != null) {
       _fetchUserData();
+      _fetchPlantCount();
     }
   }
 
@@ -120,8 +129,8 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
         if (data != null) {
           if (!mounted) return; // 위젯이 마운트되어 있는지 확인
           setState(() {
-            _nameController.text = data['nickname'] ?? '';
-            _introController.text = data['bio'] ?? '';
+            _nickname = data['nickname'] ?? '';
+            _bio = data['bio'] ?? '';
             _profileImageUrl = data['profileImage'] as String?;
 
             // 프로필 이미지 URL이 로컬 경로인 경우 null로 설정하여 기본 이미지 사용
@@ -129,6 +138,8 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
               _profileImageUrl = null;
             }
 
+            _nameController.text = _nickname;
+            _introController.text = _bio;
             _isLoading = false; // 데이터 로딩 완료
           });
         }
@@ -155,7 +166,25 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
     }
   }
 
-  final int plantCount = 2;
+  Future<void> _fetchPlantCount() async {
+    try {
+      // 사용자의 식물 개수 가져오기 (예: 'plants' 컬렉션을 사용한다고 가정)
+      QuerySnapshot plantSnapshot = await _firestore
+          .collection('users')
+          .doc(_user!.uid)
+          .collection('plants') // 식물이 저장된 컬렉션 이름
+          .get();
+
+      if (!mounted) return;
+
+      setState(() {
+        _plantCount = plantSnapshot.docs.length;
+      });
+    } catch (e) {
+      print('Error fetching plant count: $e');
+      // Optionally, show a toast or handle the error
+    }
+  }
 
   // PW변경 모달창 호출 함수
   void _showPasswordChangeModal() {
@@ -165,14 +194,78 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
     );
   }
 
-  // 이미지 경로 리스트 (게시물용)
-  final List<String> imagePaths = [
-    'assets/images/plant1.png',
-    'assets/images/plant1.png',
-    'assets/images/plant1.png',
-    'assets/images/plant1.png',
-    'assets/images/plant1.png'
-  ];
+  /// 탈퇴 확인 팝업
+  void _showWithdrawDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        // 다른 변수명 사용
+        return AlertDialog(
+          title: Text("계정 탈퇴"),
+          content: Text("정말 탈퇴 하시겠습니까?"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop(); // 팝업 닫기
+              },
+              child: Text("아니오"),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop(); // 팝업 닫기 (먼저 실행)
+                _deleteAccount(); // 비동기 함수 호출
+              },
+              child: Text("예"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _deleteAccount() async {
+    try {
+      // 계정 탈퇴 로직
+      await _auth.currentUser?.delete();
+      await _firestore.collection('users').doc(_user!.uid).delete();
+      await _firestore.collection('public_users').doc(_user!.uid).delete();
+      await FirebaseStorage.instance
+          .ref()
+          .child('profile_images')
+          .child('${_user!.uid}.jpg')
+          .delete();
+
+      Fluttertoast.showToast(
+        msg: "계정이 성공적으로 탈퇴되었습니다.",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.green,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+
+      // 계정 탈퇴 후 로그인 페이지로 이동
+      if (!mounted) return;
+      context.go('/start/login'); // 로그인 페이지로 이동
+    } catch (e) {
+      print('계정 탈퇴 실패: $e');
+      Fluttertoast.showToast(
+        msg: "계정 탈퇴 실패: $e",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _introController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -230,7 +323,9 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
             ),
             _myPostsNumber(),
             SizedBox(height: 12),
-            _myPosts(), // 나의 게시물들
+            Expanded(
+              child: _myPosts(), // 나의 게시물들 (동적으로 가져옴)
+            ),
             Align(
               // 계정탈퇴 버튼
               alignment: Alignment.center,
@@ -449,7 +544,7 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
           ),
           SizedBox(width: 4),
           Text(
-            '$plantCount',
+            '$_plantCount',
             style: TextStyle(
               color: Color(0xFF4B7E5B),
             ),
@@ -464,103 +559,82 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
     return Padding(
       padding: const EdgeInsets.only(left: 6.0),
       child: Text(
-        '나의 게시물 : ${imagePaths.length}개',
+        '나의 게시물 : ',
         style:
         TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey),
       ),
     );
   }
 
-  // 나의 게시물들
+  // 나의 게시물들 (동적으로 가져오기)
   Widget _myPosts() {
-    return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 2.0),
-        child: GridView.builder(
+    if (_user == null) {
+      return Center(child: Text('로그인 후 이용해주세요.'));
+    }
+
+    return StreamBuilder<QuerySnapshot>(
+      stream: _firestore
+          .collection('users')
+          .doc(_user!.uid)
+          .collection('posts')
+          .orderBy('createdAt', descending: true)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError || !snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return Center(child: Text('작성한 게시물이 없습니다.'));
+        }
+
+        final docs = snapshot.data!.docs;
+
+        // 이미지 URL만 추출하여 리스트 생성
+        final imageUrls = docs.map((doc) {
+          final data = doc.data() as Map<String, dynamic>;
+          final imageUrlList = List<String>.from(data['imageUrl'] ?? []);
+          return imageUrlList.isNotEmpty ? imageUrlList[0] : null;
+        }).where((url) => url != null).cast<String>().toList();
+
+        if (imageUrls.isEmpty) {
+          return Center(child: Text('게시물에 이미지가 없습니다.'));
+        }
+
+        return GridView.builder(
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 3,
             crossAxisSpacing: 8,
             mainAxisSpacing: 8,
           ),
-          itemCount: imagePaths.length,
+          itemCount: imageUrls.length,
           itemBuilder: (context, index) {
-            return ClipRRect(
-              // 클릭 이벤트 없음
-              borderRadius: BorderRadius.circular(10),
-              child: Image.asset(
-                imagePaths[index],
-                fit: BoxFit.cover,
+            return GestureDetector(
+              onTap: () {
+                // 클릭 시 상세 페이지로 이동, docId 전달 필요
+                final docId = docs[index].id;
+                context.push('/community/detail', extra: {'docId': docId});
+              },
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Image.network(
+                  imageUrls[index],
+                  fit: BoxFit.cover,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Center(child: CircularProgressIndicator());
+                  },
+                  errorBuilder: (context, error, stackTrace) {
+                    return Image.asset(
+                      'assets/images/default_image.png',
+                      fit: BoxFit.cover,
+                    );
+                  },
+                ),
               ),
             );
           },
-        ),
-      ),
-    );
-  }
-
-  /// 탈퇴 확인 팝업
-  void _showWithdrawDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext dialogContext) {
-        // 다른 변수명 사용
-        return AlertDialog(
-          title: Text("계정 탈퇴"),
-          content: Text("정말 탈퇴 하시겠습니까?"),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(dialogContext).pop(); // 팝업 닫기
-              },
-              child: Text("아니오"),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(dialogContext).pop(); // 팝업 닫기 (먼저 실행)
-                _deleteAccount(); // 비동기 함수 호출
-              },
-              child: Text("예"),
-            ),
-          ],
         );
       },
     );
-  }
-
-  Future<void> _deleteAccount() async {
-    try {
-      // 계정 탈퇴 로직
-      await _auth.currentUser?.delete();
-      await _firestore.collection('users').doc(_user!.uid).delete();
-      await _firestore.collection('public_users').doc(_user!.uid).delete();
-      await FirebaseStorage.instance
-          .ref()
-          .child('profile_images')
-          .child('${_user!.uid}.jpg')
-          .delete();
-
-      Fluttertoast.showToast(
-        msg: "계정이 성공적으로 탈퇴되었습니다.",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.green,
-        textColor: Colors.white,
-        fontSize: 16.0,
-      );
-
-      // 계정 탈퇴 후 로그인 페이지로 이동
-      if (!mounted) return;
-      context.go('/start/login'); // 로그인 페이지로 이동
-    } catch (e) {
-      print('계정 탈퇴 실패: $e');
-      Fluttertoast.showToast(
-        msg: "계정 탈퇴 실패: $e",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-        fontSize: 16.0,
-      );
-    }
   }
 }

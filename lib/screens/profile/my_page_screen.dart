@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:plant/widgets/components/bottom_navigation_bar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../widgets/components/bottom_navigation_bar.dart';
 
 class MyPageScreen extends StatefulWidget {
   const MyPageScreen({super.key});
@@ -25,16 +25,8 @@ class MyPageScreenState extends State<MyPageScreen> {
     });
   }
 
-  final int plantCount = 1;
-
-  // 이미지 경로 리스트
-  final List<String> imagePaths = [
-    'assets/images/plant1.png',
-    'assets/images/plant1.png',
-    'assets/images/plant1.png',
-    'assets/images/plant1.png',
-    'assets/images/plant1.png',
-  ];
+  // 식물 개수는 Firestore에서 동적으로 가져옵니다.
+  int _plantCount = 0;
 
   Future<void> _fetchUserData() async {
     try {
@@ -48,6 +40,17 @@ class MyPageScreenState extends State<MyPageScreen> {
             _nickname = userDoc.get('nickname') ?? '';
             _bio = userDoc.get('bio') ?? '';
             _profileImageUrl = userDoc.get('profileImage') as String?;
+          });
+
+          // 사용자의 식물 개수 가져오기 (예시: 'plants' 컬렉션을 사용한다고 가정)
+          QuerySnapshot plantSnapshot = await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .collection('plants') // 식물이 저장된 컬렉션 이름
+              .get();
+
+          setState(() {
+            _plantCount = plantSnapshot.docs.length;
           });
         }
       }
@@ -114,7 +117,9 @@ class MyPageScreenState extends State<MyPageScreen> {
             ),
             _myPostsNumber(),
             SizedBox(height: 12),
-            _myPosts(), // 나의 게시물들
+            Expanded(
+              child: _myPosts(), // 나의 게시물들
+            ),
           ],
         ),
       ),
@@ -178,9 +183,9 @@ class MyPageScreenState extends State<MyPageScreen> {
               child: Text("아니오"),
             ),
             TextButton(
-              onPressed: () {
+              onPressed: () async {
+                await FirebaseAuth.instance.signOut(); // 로그아웃 처리
                 context.go('/start/login'); // 로그인페이지로 이동
-                // 로그인 기능 구현
               },
               child: Text("예"),
             ),
@@ -192,13 +197,20 @@ class MyPageScreenState extends State<MyPageScreen> {
 
   // 프로필 사진
   Widget _profileImage() {
+    String? displayImageUrl = _profileImageUrl;
+
+    if (displayImageUrl != null && displayImageUrl.startsWith('http')) {
+      // 캐시 무효화를 위해 타임스탬프 추가
+      displayImageUrl = '$displayImageUrl?${DateTime.now().millisecondsSinceEpoch}';
+    }
+
     return Padding(
       padding: EdgeInsets.only(left: 8.0),
       child: CircleAvatar(
         radius: 50,
         backgroundColor: Colors.grey[200],
-        backgroundImage: _profileImageUrl != null && _profileImageUrl!.startsWith('http')
-            ? NetworkImage(_profileImageUrl!)
+        backgroundImage: displayImageUrl != null && displayImageUrl.startsWith('http')
+            ? NetworkImage(displayImageUrl)
             : AssetImage('assets/images/basic_profile.png') as ImageProvider,
       ),
     );
@@ -238,7 +250,7 @@ class MyPageScreenState extends State<MyPageScreen> {
   Widget _editProfileButton() {
     return ElevatedButton(
       onPressed: () async {
-        // 상대 경로를 사용하여 중첩된 라우트로 이동
+        // 프로필 수정 페이지로 이동 후, 업데이트 여부에 따라 데이터 다시 가져오기
         final isUpdated = await context.push<bool>('/profile/edit');
         if (isUpdated == true) {
           _fetchUserData(); // 데이터 다시 가져오기
@@ -268,7 +280,7 @@ class MyPageScreenState extends State<MyPageScreen> {
           ),
           SizedBox(width: 4),
           Text(
-            '$plantCount',
+            '$_plantCount',
             style: TextStyle(
               color: Color(0xFF4B7E5B),
             ),
@@ -283,7 +295,7 @@ class MyPageScreenState extends State<MyPageScreen> {
     return Padding(
       padding: const EdgeInsets.only(left: 6.0),
       child: Text(
-        '나의 게시물 : ${imagePaths.length}개',
+        '나의 게시물 : ',
         style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey),
       ),
     );
@@ -291,32 +303,76 @@ class MyPageScreenState extends State<MyPageScreen> {
 
   // 나의 게시물들
   Widget _myPosts() {
-    return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 2.0),
-        child: GridView.builder(
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      return Center(child: Text('로그인 후 이용해주세요.'));
+    }
+
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .collection('posts')
+          .orderBy('createdAt', descending: true)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError || !snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return Center(child: Text('작성한 게시물이 없습니다.'));
+        }
+
+        final docs = snapshot.data!.docs;
+
+        // 이미지 URL만 추출하여 리스트 생성
+        final imageUrls = docs.map((doc) {
+          final data = doc.data() as Map<String, dynamic>;
+          final imageUrlList = List<String>.from(data['imageUrl'] ?? []);
+          return imageUrlList.isNotEmpty ? imageUrlList[0] : null;
+        }).where((url) => url != null).cast<String>().toList();
+
+        if (imageUrls.isEmpty) {
+          return Center(child: Text('게시물에 이미지가 없습니다.'));
+        }
+
+        return GridView.builder(
+          shrinkWrap: true,
+          physics: NeverScrollableScrollPhysics(),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 3,
             crossAxisSpacing: 8,
             mainAxisSpacing: 8,
           ),
-          itemCount: imagePaths.length,
+          itemCount: imageUrls.length,
           itemBuilder: (context, index) {
             return GestureDetector(
               onTap: () {
-                context.push('/community/detail'); // 클릭 시 화면 이동
+                // 클릭 시 상세 페이지로 이동, docId 전달 필요
+                final docId = docs[index].id;
+                context.push('/community/detail', extra: {'docId': docId});
               },
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(10),
-                child: Image.asset(
-                  imagePaths[index],
+                child: Image.network(
+                  imageUrls[index],
                   fit: BoxFit.cover,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Center(child: CircularProgressIndicator());
+                  },
+                  errorBuilder: (context, error, stackTrace) {
+                    return Image.asset(
+                      'assets/images/default_image.png',
+                      fit: BoxFit.cover,
+                    );
+                  },
                 ),
               ),
             );
           },
-        ),
-      ),
+        );
+      },
     );
   }
 }
