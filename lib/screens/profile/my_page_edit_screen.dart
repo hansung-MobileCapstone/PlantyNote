@@ -10,6 +10,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:go_router/go_router.dart';
 
 class MyPageEditScreen extends StatefulWidget {
   const MyPageEditScreen({super.key});
@@ -51,7 +52,6 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
       await _uploadProfileImage(File(_image!.path));
     }
   }
-
 
   // 이미지 업로드 함수
   Future<void> _uploadProfileImage(File imageFile) async {
@@ -99,7 +99,6 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
     }
   }
 
-
   @override
   void initState() {
     super.initState();
@@ -126,8 +125,7 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
             _profileImageUrl = data['profileImage'] as String?;
 
             // 프로필 이미지 URL이 로컬 경로인 경우 null로 설정하여 기본 이미지 사용
-            if (_profileImageUrl != null &&
-                !_profileImageUrl!.startsWith('http')) {
+            if (_profileImageUrl != null && !_profileImageUrl!.startsWith('http')) {
               _profileImageUrl = null;
             }
 
@@ -156,7 +154,6 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
       });
     }
   }
-
 
   final int plantCount = 2;
 
@@ -271,7 +268,6 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
     return AppBar(
       scrolledUnderElevation: 0,
       automaticallyImplyLeading: true,
-      // 뒤로가기 버튼 숨기기
       backgroundColor: Colors.white,
       title: Text(
         'MY 프로필',
@@ -379,7 +375,6 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
                 fontSize: 12,
                 color: Color(0xFF4B7E5B),
               ),
-              // 여기서 입력 제한을 제거하거나 한국어를 허용하도록 수정
               decoration: InputDecoration(
                 border: InputBorder.none,
                 isCollapsed: true,
@@ -424,7 +419,7 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
       );
 
       if (!mounted) return;
-      Navigator.pop(context, true); // 변경 사항이 있음을 알림
+      context.pop(true); // 변경 사항이 있음을 알림
     } catch (e) {
       print('Error updating profile: ${e.toString()}');
       Fluttertoast.showToast(
@@ -437,7 +432,6 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
       );
     }
   }
-
 
   // 내식물모음페이지에 있는 식물 개수
   Widget _plantsNumber() {
@@ -471,8 +465,8 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
       padding: const EdgeInsets.only(left: 6.0),
       child: Text(
         '나의 게시물 : ${imagePaths.length}개',
-        style: TextStyle(
-            fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey),
+        style:
+        TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey),
       ),
     );
   }
@@ -504,11 +498,12 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
     );
   }
 
-/// 탈퇴 확인 팝업
+  /// 탈퇴 확인 팝업
   void _showWithdrawDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (BuildContext dialogContext) { // 다른 변수명 사용
+      builder: (BuildContext dialogContext) {
+        // 다른 변수명 사용
         return AlertDialog(
           title: Text("계정 탈퇴"),
           content: Text("정말 탈퇴 하시겠습니까?"),
@@ -553,6 +548,9 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
         fontSize: 16.0,
       );
 
+      // 계정 탈퇴 후 로그인 페이지로 이동
+      if (!mounted) return;
+      context.go('/start/login'); // 로그인 페이지로 이동
     } catch (e) {
       print('계정 탈퇴 실패: $e');
       Fluttertoast.showToast(

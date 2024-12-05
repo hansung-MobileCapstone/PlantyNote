@@ -4,9 +4,6 @@ import 'package:plant/widgets/components/bottom_navigation_bar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'my_page_edit_screen.dart';
-
-
 class MyPageScreen extends StatefulWidget {
   const MyPageScreen({super.key});
 
@@ -19,7 +16,7 @@ class MyPageScreenState extends State<MyPageScreen> {
 
   // 사용자 정보 변수
   String _nickname = ''; // 이름 (닉네임)
-  String _bio = '';      // 소개문
+  String _bio = ''; // 소개문
   String? _profileImageUrl; // 프로필 이미지 URL 추가
 
   void _onItemTapped(int index) {
@@ -43,10 +40,8 @@ class MyPageScreenState extends State<MyPageScreen> {
     try {
       User? user = FirebaseAuth.instance.currentUser;
       if (user != null) {
-        DocumentSnapshot userDoc = await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user.uid)
-            .get();
+        DocumentSnapshot userDoc =
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
 
         if (userDoc.exists) {
           setState(() {
@@ -77,7 +72,8 @@ class MyPageScreenState extends State<MyPageScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container( // 프로필 박스
+            Container(
+              // 프로필 박스
               height: 150,
               padding: EdgeInsets.all(10),
               decoration: BoxDecoration(
@@ -109,7 +105,8 @@ class MyPageScreenState extends State<MyPageScreen> {
               ),
             ),
             SizedBox(height: 10),
-            Divider( // 구분선
+            Divider(
+              // 구분선
               color: Color(0xFF4B7E5B),
               thickness: 0.7,
               indent: 5,
@@ -121,7 +118,8 @@ class MyPageScreenState extends State<MyPageScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: MyBottomNavigationBar( // 하단 네비게이션바
+      bottomNavigationBar: MyBottomNavigationBar(
+        // 하단 네비게이션바
         selectedIndex: _selectedIndex,
         onItemTapped: _onItemTapped,
       ),
@@ -141,10 +139,12 @@ class MyPageScreenState extends State<MyPageScreen> {
           fontWeight: FontWeight.bold,
         ),
       ),
-      actions: [ // 오른쪽 끝 배치
+      actions: [
+        // 오른쪽 끝 배치
         Padding(
           padding: const EdgeInsets.only(right: 18.0),
-          child: InkWell( // 로그아웃 버튼
+          child: InkWell(
+            // 로그아웃 버튼
             onTap: () {
               _showLogoutDialog(context);
             },
@@ -204,15 +204,15 @@ class MyPageScreenState extends State<MyPageScreen> {
     );
   }
 
-
-// 닉네임, 소개글
+  // 닉네임, 소개글
   Widget _profileInfo() {
     return Padding(
       padding: const EdgeInsets.only(left: 4.0, top: 8.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text( // 닉네임
+          Text(
+            // 닉네임
             _nickname.isNotEmpty ? _nickname : '이름 없음',
             style: TextStyle(
               fontSize: 18,
@@ -221,7 +221,8 @@ class MyPageScreenState extends State<MyPageScreen> {
             ),
           ),
           SizedBox(height: 4),
-          Text( // 소개 글
+          Text(
+            // 소개 글
             _bio.isNotEmpty ? _bio : '소개문을 입력해주세요.',
             style: TextStyle(
               fontSize: 12,
@@ -236,15 +237,12 @@ class MyPageScreenState extends State<MyPageScreen> {
   // 프로필 수정 버튼
   Widget _editProfileButton() {
     return ElevatedButton(
-      onPressed: () {
-        Navigator.push<bool>(
-          context,
-          MaterialPageRoute(builder: (context) => MyPageEditScreen()),
-        ).then((isUpdated) {
-          if (isUpdated == true) {
-            _fetchUserData(); // 데이터 다시 가져오기
-          }
-        });
+      onPressed: () async {
+        // 상대 경로를 사용하여 중첩된 라우트로 이동
+        final isUpdated = await context.push<bool>('/profile/edit');
+        if (isUpdated == true) {
+          _fetchUserData(); // 데이터 다시 가져오기
+        }
       },
       style: ElevatedButton.styleFrom(
         backgroundColor: Color(0xFF4B7E5B),
@@ -254,23 +252,26 @@ class MyPageScreenState extends State<MyPageScreen> {
     );
   }
 
-
   // 내식물모음페이지에 있는 식물 개수
   Widget _plantsNumber() {
     return Container(
-      padding:
-      EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(50),
       ),
       child: Row(
         children: [
-          Icon(Icons.eco, color: Color(0xFF4B7E5B),),
+          Icon(
+            Icons.eco,
+            color: Color(0xFF4B7E5B),
+          ),
           SizedBox(width: 4),
           Text(
             '$plantCount',
-            style: TextStyle(color: Color(0xFF4B7E5B),),
+            style: TextStyle(
+              color: Color(0xFF4B7E5B),
+            ),
           ),
         ],
       ),

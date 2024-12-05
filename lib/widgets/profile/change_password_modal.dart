@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluttertoast/fluttertoast.dart'; // Fluttertoast 패키지 임포트
+import 'package:go_router/go_router.dart'; // GoRouter 패키지 임포트
 
 class PasswordChangeModal extends StatefulWidget {
   const PasswordChangeModal({super.key});
@@ -76,7 +77,7 @@ class PasswordChangeModalState extends State<PasswordChangeModal> {
       if (!mounted) return;
 
       // 비밀번호 변경 완료 후 모달 닫기 및 토스트 메시지 표시
-      Navigator.pop(context);
+      context.pop(); // 변경된 부분
       Fluttertoast.showToast(
         msg: '비밀번호가 성공적으로 변경되었습니다.',
         toastLength: Toast.LENGTH_SHORT,
@@ -207,7 +208,7 @@ class PasswordChangeModalState extends State<PasswordChangeModal> {
                 children: [
                   ElevatedButton(
                     onPressed: () {
-                      Navigator.pop(context); // 모달 닫기
+                      context.pop(); // 변경된 부분
                     },
                     style: ElevatedButton.styleFrom(
                       padding:
