@@ -73,18 +73,18 @@ class PostItem extends StatelessWidget {
             borderRadius: BorderRadius.circular(10),
             child: imageUrls.isNotEmpty
                 ? Image.network(
-                    imageUrls[0],
-                    width: 90,
-                    height: 90,
-                    fit: BoxFit.cover,
-                  )
+              imageUrls[0],
+              width: 90,
+              height: 90,
+              fit: BoxFit.cover,
+            )
                 : Image.network(
-                    'https://res.cloudinary.com/heyset/image/upload/v1689582418/buukmenow-folder/no-image-icon-0.jpg',
-                    // 기본 이미지 경로
-                    width: 90,
-                    height: 90,
-                    fit: BoxFit.cover,
-                  ),
+              'https://res.cloudinary.com/heyset/image/upload/v1689582418/buukmenow-folder/no-image-icon-0.jpg',
+              // 기본 이미지 경로
+              width: 90,
+              height: 90,
+              fit: BoxFit.cover,
+            ),
           ),
         ],
       ),
@@ -104,7 +104,7 @@ class PostItem extends StatelessWidget {
                 // 프로필 사진
                 radius: 10,
                 backgroundImage:
-                    NetworkImage('https://via.placeholder.com/150'),
+                NetworkImage('https://via.placeholder.com/150'),
               ),
               const SizedBox(width: 8),
               Text(
@@ -145,7 +145,7 @@ class PostItem extends StatelessWidget {
               children: [
                 Container(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                  const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                   decoration: BoxDecoration(
                     border: Border.all(
                       color: const Color(0x804B7E5B),
