@@ -2,8 +2,15 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
-      allow read, write: if false;
+    // 사용자별 게시물에 대한 규칙
+    match /users/{userId}/posts/{postId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // 다른 경로에 대한 규칙 (필요에 따라 추가)
+    // 예: 식물 정보
+    match /users/{userId}/plants/{plantId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
     }
   }
 }
