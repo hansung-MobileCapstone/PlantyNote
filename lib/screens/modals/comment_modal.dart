@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../widgets/components/comment_item.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class CommentModal extends StatefulWidget {
   final String docId; // 게시물의 docId를 받아오기
@@ -27,11 +29,24 @@ class _CommentModalState extends State<CommentModal> {
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("로그인 후 이용해주세요.")),
+        Fluttertoast.showToast(
+          msg: "로그인 후 이용해주세요",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: Color(0xFF4B7E5B), // 배경색
+          textColor: Colors.white, // 글자 색
+          fontSize: 16.0,
         );
         return;
       }
+
+      // Firestore에서 현재 사용자 닉네임 가져오기
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+
+      final nickname = userDoc.data()?['nickname'] ?? '알수없음';
 
       final commentsRef = FirebaseFirestore.instance
           .collection('users')
@@ -42,18 +57,29 @@ class _CommentModalState extends State<CommentModal> {
 
       await commentsRef.add({
         'userId': user.uid,
+        'nickname': nickname,
         'text': commentText,
         'createdAt': FieldValue.serverTimestamp(),
       });
 
       _commentController.clear();
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("댓글이 추가되었습니다.")),
+      Fluttertoast.showToast(
+        msg: "댓글 추가 성공!",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Color(0xFF4B7E5B), // 배경색
+        textColor: Colors.white, // 글자 색
+        fontSize: 16.0,
       );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("댓글 추가 실패: $e")),
+      Fluttertoast.showToast(
+        msg: "댓글 추가 실패..",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Color(0xFF4B7E5B), // 배경색
+        textColor: Colors.white, // 글자 색
+        fontSize: 16.0,
       );
     } finally {
       setState(() {
@@ -107,7 +133,7 @@ class _CommentModalState extends State<CommentModal> {
                 IconButton(
                   icon: const Icon(Icons.close, color: Colors.black, size: 24),
                   onPressed: () {
-                    Navigator.pop(context); // 모달창 닫기
+                    context.pop(); // 모달창 닫기
                   },
                 ),
               ],
@@ -140,6 +166,7 @@ class _CommentModalState extends State<CommentModal> {
                             final commentData =
                                 comments[index].data() as Map<String, dynamic>;
                             final userId = commentData['userId'] ?? 'Unknown';
+                            final nickname = commentData['nickname'] ?? '알수없음';
                             final text = commentData['text'] ?? '';
                             final createdAt =
                                 commentData['createdAt'] as Timestamp?;
@@ -149,6 +176,7 @@ class _CommentModalState extends State<CommentModal> {
 
                             return CommentItem(
                               userId: userId,
+                              nickname: nickname,
                               text: text,
                               date: date,
                             );
