@@ -30,16 +30,16 @@ class PostItem extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _postImage(), // 게시물 사진
-              SizedBox(width: 12),
+              const SizedBox(width: 12),
               _postContent(), // 텍스트 영역
-              SizedBox(width: 8),
+              const SizedBox(width: 8),
               Container(
                 // 세로선
                 width: 1,
                 height: 95,
                 color: const Color(0xFF7D7D7D),
               ),
-              SizedBox(width: 8),
+              const SizedBox(width: 8),
               _plantInformation(), // 식물 상세 정보 (식물종, 물주기, 분갈이주기, 환경)
             ],
           ),

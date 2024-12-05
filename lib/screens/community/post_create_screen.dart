@@ -7,7 +7,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
 class PostCreateScreen extends StatefulWidget {
-  const PostCreateScreen({super.key});
+  final String? docId; // 수정 모드일 경우 docId를 받습니다.
+
+  const PostCreateScreen({super.key, this.docId});
 
   @override
   PostCreateScreenState createState() => PostCreateScreenState();
@@ -26,10 +28,8 @@ class PostCreateScreenState extends State<PostCreateScreen> {
   @override
   void initState() {
     super.initState();
-    final args = GoRouter.of(context).routerDelegate.currentConfiguration.extra;
-    if (args != null && args is Map<String, dynamic>) {
-      _docId = args['docId'] as String?;
-    }
+    _docId = widget.docId; // widget.docId로 설정
+    print("PostCreateScreen initState with docId: $_docId"); // 디버그 출력
     _loadEditingData();
     _fetchUserPlants(); // 내 식물 목록 가져오기
   }
@@ -144,6 +144,7 @@ class PostCreateScreenState extends State<PostCreateScreen> {
           .collection('posts');
 
       if (_docId != null) {
+        // 수정 모드
         final docRef = postsRef.doc(_docId);
         final docSnap = await docRef.get();
         if (!docSnap.exists) {
@@ -153,9 +154,8 @@ class PostCreateScreenState extends State<PostCreateScreen> {
           );
           return;
         }
-
-        final currentData = docSnap.data()!;
-        final existingImages = List<String>.from(currentData['imageUrl'] ?? []);
+        final existingImages =
+            List<String>.from(docSnap.data()?['imageUrl'] ?? []);
         final updatedImages =
             newImageUrls.isNotEmpty ? newImageUrls : existingImages;
 
@@ -169,6 +169,7 @@ class PostCreateScreenState extends State<PostCreateScreen> {
         Navigator.pop(context);
         context.pop({'docId': _docId, 'action': 'update'});
       } else {
+        // 신규 작성
         final newDoc = await postsRef.add({
           'uid': user.uid,
           'name': user.displayName ?? '사용자',
@@ -178,6 +179,8 @@ class PostCreateScreenState extends State<PostCreateScreen> {
           'createdAt': FieldValue.serverTimestamp(),
           'updatedAt': FieldValue.serverTimestamp(),
         });
+
+        print("New post created with docId: ${newDoc.id}"); // 디버그 출력
 
         Navigator.pop(context);
         context.pop({'docId': newDoc.id});

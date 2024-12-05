@@ -174,6 +174,8 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
               color: Color(0xFF7D7D7D), size: 24),
           onPressed: () {
             if (widget.docId != null) {
+              print(
+                  "Navigating to edit post with docId: ${widget.docId}"); // 디버그 출력
               context.push('/community/create', extra: {'docId': widget.docId});
             } else {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -338,8 +340,10 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                 ),
                 child: Text(
                   detail.keys.first,
-                  style:
-                      const TextStyle(fontSize: 10, color: Color(0xFF7D7D7D)),
+                  style: const TextStyle(
+                    fontSize: 10,
+                    color: Color(0xFF7D7D7D),
+                  ),
                 ),
               ),
               const SizedBox(width: 5),
