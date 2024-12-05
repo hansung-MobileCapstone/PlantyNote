@@ -2,8 +2,27 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
-      allow read, write: if false;
+    // 사용자별 게시물에 대한 규칙
+    match /users/{userId}/posts/{postId} {
+      // 게시물 읽기 및 쓰기 권한
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+
+      // 게시물의 댓글에 대한 규칙
+      match /comments/{commentId} {
+        // 모든 사용자가 댓글을 읽을 수 있도록 허용
+        allow read: if true;
+
+        // 인증된 사용자만 댓글을 작성할 수 있도록 허용
+        allow create: if request.auth != null;
+
+        // 댓글 수정 및 삭제는 댓글 작성자에게만 허용
+        allow update, delete: if request.auth != null && request.auth.uid == resource.data.userId;
+      }
+    }
+
+    // 사용자별 식물 정보에 대한 규칙
+    match /users/{userId}/plants/{plantId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
     }
   }
 }
