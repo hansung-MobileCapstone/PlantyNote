@@ -18,10 +18,9 @@ class SignupScreenState extends State<SignupScreen> {
 
   final _formKey = GlobalKey<FormState>();
 
-  //에러 메세지 저장
-  String _nicknameError = '';
-  String _emailError = '';
-  String _passwordError = '';
+  String _nicknameError = ''; // 닉네임 에러 메시지
+  String _emailError = ''; // 이메일 에러 메시지
+  String _passwordError = ''; // 비밀번호 에러 메시지
 
   @override
   void initState() {
@@ -68,11 +67,12 @@ class SignupScreenState extends State<SignupScreen> {
     final double screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      backgroundColor: Color(0xFFF7FBF1),
+      backgroundColor: const Color(0xFFF7FBF1),
+      resizeToAvoidBottomInset: false, // 키보드가 나타나도 UI가 고정되도록 설정
       body: Stack(
         children: [
-          _treeImage(screenWidth), // 트리 이미지
-          Positioned( // 텍스트 박스, 로고 : 중앙 상단
+          _treeImage(screenWidth),
+          Positioned(
             top: 150,
             left: 20,
             child: Stack(
@@ -92,12 +92,12 @@ class SignupScreenState extends State<SignupScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    SizedBox(height: 120),
-                    _iDInput(), // ID 입력 필드
-                    SizedBox(height: 10),
-                    _eMailInput(), // Email 입력 필드
-                    SizedBox(height: 10),
-                    _pWInput(), // PW 입력 필드if (_errorMessage.isNotEmpty)
+                    const SizedBox(height: 55),
+                    _iDInput(),
+                    const SizedBox(height: 10),
+                    _eMailInput(),
+                    const SizedBox(height: 10),
+                    _pWInput(),
                   ],
                 ),
               ),
@@ -210,6 +210,13 @@ class SignupScreenState extends State<SignupScreen> {
             width: 3.0,
           ),
         ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: const BorderSide(
+            color: Color(0xFFD2DED6), // 포커스 시 색상
+            width: 3.0,
+          ),
+        ),
       ),
       validator: (value) {
         if (value == null || value.isEmpty) {
@@ -249,6 +256,13 @@ class SignupScreenState extends State<SignupScreen> {
           borderRadius: BorderRadius.circular(15),
           borderSide: const BorderSide(
             color: Color(0xFF4B7E5B),
+            width: 3.0,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: const BorderSide(
+            color: Color(0xFFD2DED6), // 포커스 시 색상
             width: 3.0,
           ),
         ),
@@ -292,6 +306,13 @@ class SignupScreenState extends State<SignupScreen> {
               borderRadius: BorderRadius.circular(15),
               borderSide: const BorderSide(
                 color: Color(0xFF4B7E5B),
+                width: 3.0,
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(15),
+              borderSide: const BorderSide(
+                color: Color(0xFFD2DED6), // 포커스 시 색상
                 width: 3.0,
               ),
             ),
@@ -409,8 +430,8 @@ class SignupScreenState extends State<SignupScreen> {
         msg: "회원가입 성공!",
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
-        backgroundColor: Color(0xFF4B7E5B), // 배경색 설정
-        textColor: Colors.white, // 글자 색 설정
+        backgroundColor: const Color(0xFF4B7E5B),
+        textColor: Colors.white,
         fontSize: 16.0,
       );
 
