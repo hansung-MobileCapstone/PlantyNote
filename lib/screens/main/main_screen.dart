@@ -93,14 +93,14 @@ class _MainScreenState extends State<MainScreen> {
       children: [
         Image.asset(
           'assets/images/logo.png',
-          height: 32, // 로고 크기를 조정
+          height: 32, // 로고 크기를 고정
         ),
         const SizedBox(width: 7), // 로고와 텍스트 간격
-        Text(
+        const Text(
           'PlantyNote',
           style: TextStyle(
             fontSize: 23,
-            color: const Color(0xFF434343),
+            color: Color(0xFF434343),
             fontWeight: FontWeight.bold,
             fontStyle: FontStyle.italic,
           ),
@@ -158,8 +158,8 @@ class _MainScreenState extends State<MainScreen> {
             borderRadius: BorderRadius.circular(10), // 둥근 모서리
             child: Image.asset(
               'assets/images/main_plant.png', // 이미지 경로
-              width: MediaQuery.of(context).size.width * 0.6, // 화면 너비의 60%
-              height: (MediaQuery.of(context).size.width * 0.6) * (270 / 220), // 고정 비율
+              width: 240, // 고정 너비
+              height: 300, // 고정 높이
               fit: BoxFit.fill, // 전체 채우기
             ),
           ),
@@ -191,7 +191,7 @@ class _MainScreenState extends State<MainScreen> {
             ],
           ),
         ),
-        const SizedBox(height: 15), // 간격을 화면 크기에 상관없이 고정
+        const SizedBox(height: 15),
         _makeCarousel(user),
       ],
     );
@@ -211,33 +211,21 @@ class _MainScreenState extends State<MainScreen> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         }
-        if (snapshot.hasError) {
-          // 오류 발생 시 기본 이미지만 표시
-          return _defaultCarousel();
-        }
-        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          // 데이터가 없을 경우 기본 이미지만 표시
+        if (snapshot.hasError || !snapshot.hasData || snapshot.data!.docs.isEmpty) {
           return _defaultCarousel();
         }
 
         final docs = snapshot.data!.docs;
-
-        // 이미지 URL과 docId를 함께 추출하여 리스트 생성
         final List<Map<String, String>> posts = docs.map((doc) {
           final data = doc.data() as Map<String, dynamic>;
           final imageUrlList = List<String>.from(data['imageUrl'] ?? []);
           final firstImageUrl = imageUrlList.isNotEmpty ? imageUrlList[0] : null;
-          return {
-            'imageUrl': firstImageUrl ?? '',
-            'docId': doc.id,
-          };
-        }).where((post) => post['imageUrl']!.isNotEmpty).toList();
+          return {'imageUrl': firstImageUrl ?? '', 'docId': doc.id};
+        }).toList();
 
-        // 최대 5개의 이미지로 제한
         final limitedPosts = posts.take(5).toList();
 
         if (limitedPosts.isEmpty) {
-          // 이미지가 하나도 없을 경우 기본 이미지 표시
           return _defaultCarousel();
         }
 
@@ -263,14 +251,7 @@ class _MainScreenState extends State<MainScreen> {
 
   // 기본 캐러셀 (오류 발생 시 표시)
   Widget _defaultCarousel() {
-    // 기본 이미지 리스트 (원하는 대로 수정 가능)
-    final defaultImages = [
-      'assets/images/default_post.png',
-      'assets/images/default_post.png',
-      'assets/images/default_post.png',
-      'assets/images/default_post.png',
-      'assets/images/default_post.png',
-    ];
+    final defaultImages = List.generate(5, (_) => 'assets/images/default_post.png');
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -292,37 +273,26 @@ class _MainScreenState extends State<MainScreen> {
 
   // 캐러셀 이미지 아이템
   Widget _carouselImageItem(String imageUrl, {bool isAsset = false, String? docId}) {
-    final double screenWidth = MediaQuery.of(context).size.width;
-    final double maxItemWidth = 160; // 최대 아이템 너비 제한
-    final double itemWidth = (screenWidth * 0.3).clamp(100, maxItemWidth);
-    final double itemHeight = itemWidth * (120 / 130); // 고정 비율
-
     return GestureDetector(
       onTap: () {
         if (docId != null) {
-          // 이미지 클릭 시 상세 페이지로 이동, docId 전달
           context.push('/community/detail', extra: {'docId': docId});
         }
       },
       child: Container(
-        width: itemWidth,
-        margin: const EdgeInsets.symmetric(horizontal: 9), // 간격 고정
+        width: 160,
+        margin: const EdgeInsets.symmetric(horizontal: 9),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10), // 둥근 모서리
+          borderRadius: BorderRadius.circular(10),
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(10), // 둥근 모서리
+          borderRadius: BorderRadius.circular(10),
           child: isAsset
-              ? Image.asset(
-            imageUrl,
-            width: itemWidth,
-            height: itemHeight,
-            fit: BoxFit.cover,
-          )
+              ? Image.asset(imageUrl, width: 160, height: 200, fit: BoxFit.cover)
               : Image.network(
             imageUrl,
-            width: itemWidth,
-            height: itemHeight,
+            width: 160,
+            height: 200,
             fit: BoxFit.cover,
             loadingBuilder: (context, child, loadingProgress) {
               if (loadingProgress == null) return child;
@@ -331,8 +301,8 @@ class _MainScreenState extends State<MainScreen> {
             errorBuilder: (context, error, stackTrace) {
               return Image.asset(
                 'assets/images/default_image.png',
-                width: itemWidth,
-                height: itemHeight,
+                width: 160,
+                height: 200,
                 fit: BoxFit.cover,
               );
             },
