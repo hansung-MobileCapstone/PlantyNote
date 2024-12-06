@@ -158,8 +158,8 @@ class _MainScreenState extends State<MainScreen> {
             borderRadius: BorderRadius.circular(10), // 둥근 모서리
             child: Image.asset(
               'assets/images/main_plant.png', // 이미지 경로
-              width: MediaQuery.of(context).size.width * 0.6, // 화면 너비의 60%
-              height: (MediaQuery.of(context).size.width * 0.6) * (270 / 220), // 고정 비율
+              width: 280, // 고정 너비
+              height: 380, // 고정 높이
               fit: BoxFit.fill, // 전체 채우기
             ),
           ),
@@ -248,7 +248,7 @@ class _MainScreenState extends State<MainScreen> {
               return _carouselImageItem(post['imageUrl']!, docId: post['docId']!);
             }).toList(),
             options: CarouselOptions(
-              height: 200,
+              height: 150,
               viewportFraction: 0.4,
               enableInfiniteScroll: false,
               autoPlay: false,
@@ -292,10 +292,8 @@ class _MainScreenState extends State<MainScreen> {
 
   // 캐러셀 이미지 아이템
   Widget _carouselImageItem(String imageUrl, {bool isAsset = false, String? docId}) {
-    final double screenWidth = MediaQuery.of(context).size.width;
-    final double maxItemWidth = 160; // 최대 아이템 너비 제한
-    final double itemWidth = (screenWidth * 0.3).clamp(100, maxItemWidth);
-    final double itemHeight = itemWidth * (120 / 130); // 고정 비율
+    final double itemWidth = 150; // 고정 너비
+    final double itemHeight = 150; // 고정 높이
 
     return GestureDetector(
       onTap: () {
