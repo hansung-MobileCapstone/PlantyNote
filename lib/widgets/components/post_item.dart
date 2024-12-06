@@ -33,33 +33,32 @@ class PostItem extends StatelessWidget {
     final String plantSpecies = _getDetail('식물 종');
     final String waterCycle = _getDetail('물 주기');
     final String fertilizerCycle = _getDetail('분갈이 주기');
-    // final String environment = _getDetail('환경'); // 환경 정보 제거
 
     return SizedBox(
-      height: 130, // Card 높이 고정
+      height: 140, // Card 높이를 약간 늘림
       child: Card(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         elevation: 4,
         color: const Color(0xFFF5F5F5),
         margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center, // 모든 요소를 중앙 정렬
           children: [
+            const SizedBox(width: 10), // 왼쪽 여백
             _postImage(),
-            // 게시물 사진
-            const SizedBox(width: 12),
-            _postContent(),
-            // 텍스트 영역
-            const SizedBox(width: 8),
+            const SizedBox(width: 16), // 이미지와 텍스트 간격
+            Expanded(
+              child: _postContent(), // 텍스트 내용
+            ),
+            const SizedBox(width: 10), // 텍스트와 세로선 간격
             Container(
-              // 세로선
               width: 1,
-              height: 95,
+              height: 100, // 세로선 고정 높이
               color: const Color(0xFF7D7D7D),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 10), // 세로선과 식물 정보 간격
             _plantInformation(plantSpecies, waterCycle, fertilizerCycle),
-            // 환경 정보 제거
+            const SizedBox(width: 10), // 오른쪽 여백
           ],
         ),
       ),
@@ -72,7 +71,6 @@ class PostItem extends StatelessWidget {
       width: 100,
       child: Stack(
         children: [
-          // 두 번째 이미지 (뒤에 배치)
           if (imageUrls.length > 1)
             Positioned(
               left: 10,
@@ -86,23 +84,21 @@ class PostItem extends StatelessWidget {
                 ),
               ),
             ),
-          // 첫 번째 이미지
           ClipRRect(
             borderRadius: BorderRadius.circular(10),
             child: imageUrls.isNotEmpty
                 ? Image.network(
-                    imageUrls[0],
-                    width: 90,
-                    height: 90,
-                    fit: BoxFit.cover,
-                  )
+              imageUrls[0],
+              width: 90,
+              height: 90,
+              fit: BoxFit.cover,
+            )
                 : Image.network(
-                    'https://res.cloudinary.com/heyset/image/upload/v1689582418/buukmenow-folder/no-image-icon-0.jpg',
-                    // 기본 이미지 경로
-                    width: 90,
-                    height: 90,
-                    fit: BoxFit.cover,
-                  ),
+              'https://res.cloudinary.com/heyset/image/upload/v1689582418/buukmenow-folder/no-image-icon-0.jpg',
+              width: 90,
+              height: 90,
+              fit: BoxFit.cover,
+            ),
           ),
         ],
       ),
@@ -111,60 +107,53 @@ class PostItem extends StatelessWidget {
 
   // 올린 글
   Widget _postContent() {
-    return Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              CircleAvatar(
-                // 프로필 사진
-                radius: 10,
-                backgroundImage: NetworkImage(profileImage),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                // 이름
-                name,
-                style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(
-            contents, // 게시물 내용
-            style: const TextStyle(
-              fontSize: 11,
-              color: Color(0xFF7D7D7D),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.center, // 세로 중앙 정렬
+      children: [
+        Row(
+          children: [
+            CircleAvatar(
+              radius: 10,
+              backgroundImage: NetworkImage(profileImage),
             ),
-            maxLines: 3, // 3줄까지 표시
-            overflow: TextOverflow.ellipsis, // 내용이 길면 ...으로
+            const SizedBox(width: 8),
+            Text(
+              name,
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Text(
+          contents,
+          style: const TextStyle(
+            fontSize: 11,
+            color: Color(0xFF7D7D7D),
           ),
-        ],
-      ),
+          maxLines: 3,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ],
     );
   }
 
   // 식물 정보
   Widget _plantInformation(
       String plantSpecies, String waterCycle, String fertilizerCycle) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 15),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _informationRow('식물 종', plantSpecies),
-          const SizedBox(height: 8),
-          _informationRow('물 주기', waterCycle),
-          const SizedBox(height: 8),
-          _informationRow('분갈이 주기', fertilizerCycle),
-          // '환경' 정보 제거
-        ],
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.center, // 세로 중앙 정렬
+      children: [
+        _informationRow('식물 종', plantSpecies),
+        const SizedBox(height: 8),
+        _informationRow('물 주기', waterCycle),
+        const SizedBox(height: 8),
+        _informationRow('분갈이 주기', fertilizerCycle),
+      ],
     );
   }
 
