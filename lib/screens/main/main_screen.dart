@@ -1,6 +1,8 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // Firebase Firestore 임포트
+import 'package:firebase_auth/firebase_auth.dart'; // Firebase Auth 임포트
 import '../../widgets/components/bottom_navigation_bar.dart';
 
 class MainScreen extends StatefulWidget {
@@ -21,29 +23,47 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: _buildAppBar(),
-      body: SafeArea(
-        bottom: false,
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              SizedBox(height: 5),
-              _searchBar(),
-              SizedBox(height: 18),
-              _mainContent(),
-              SizedBox(height: 50),
-              _recentPosts(),
-              SizedBox(height: 10),
-            ],
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, authSnapshot) {
+        if (authSnapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        final user = authSnapshot.data;
+        if (user == null) {
+          return const Scaffold(
+            body: Center(child: Text("로그인 후 이용해주세요.")),
+          );
+        }
+
+        return Scaffold(
+          backgroundColor: Colors.white,
+          appBar: _buildAppBar(),
+          body: SafeArea(
+            bottom: false,
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  const SizedBox(height: 5),
+                  _searchBar(),
+                  const SizedBox(height: 18),
+                  _mainContent(),
+                  const SizedBox(height: 50),
+                  _recentPosts(user),
+                  const SizedBox(height: 10),
+                ],
+              ),
+            ),
           ),
-        ),
-      ),
-      bottomNavigationBar: MyBottomNavigationBar(
-        selectedIndex: _selectedIndex,
-        onItemTapped: _onItemTapped,
-      ),
+          bottomNavigationBar: MyBottomNavigationBar(
+            selectedIndex: _selectedIndex,
+            onItemTapped: _onItemTapped,
+          ),
+        );
+      },
     );
   }
 
@@ -65,7 +85,6 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
-
   // 상단 로고 위젯
   Widget _logoImage() {
     return Row(
@@ -76,7 +95,7 @@ class _MainScreenState extends State<MainScreen> {
           'assets/images/logo.png',
           height: 32, // 로고 크기를 조정
         ),
-        SizedBox(width: 7), // 로고와 텍스트 간격
+        const SizedBox(width: 7), // 로고와 텍스트 간격
         Text(
           'PlantyNote',
           style: TextStyle(
@@ -106,7 +125,7 @@ class _MainScreenState extends State<MainScreen> {
             borderRadius: BorderRadius.circular(15),
           ),
           child: Row(
-            children: const[
+            children: const [
               SizedBox(width: 16), // 좌측 패딩
               Icon(Icons.search, color: Color(0xFFB3B3B3)),
               SizedBox(width: 8),
@@ -120,7 +139,6 @@ class _MainScreenState extends State<MainScreen> {
       ),
     );
   }
-
 
   // 메인 컨텐츠 (광고멘트, 이미지)
   Widget _mainContent() {
@@ -146,13 +164,12 @@ class _MainScreenState extends State<MainScreen> {
             ),
           ),
         ),
-
       ],
     );
   }
 
   // 최근 게시물
-  Widget _recentPosts() {
+  Widget _recentPosts(User user) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -175,13 +192,106 @@ class _MainScreenState extends State<MainScreen> {
           ),
         ),
         const SizedBox(height: 15), // 간격을 화면 크기에 상관없이 고정
-        _makeCarousel(), // 캐러셀
+        _makeCarousel(user),
       ],
     );
   }
 
-  // 캐러셀 게시물 하나
-  Widget _carouselItem(String name, String species, String imageUrl) {
+  // 캐러셀
+  Widget _makeCarousel(User user) {
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .collection('posts')
+          .orderBy('createdAt', descending: true)
+          .limit(5)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          // 오류 발생 시 기본 이미지만 표시
+          return _defaultCarousel();
+        }
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          // 데이터가 없을 경우 기본 이미지만 표시
+          return _defaultCarousel();
+        }
+
+        final docs = snapshot.data!.docs;
+
+        // 이미지 URL과 docId를 함께 추출하여 리스트 생성
+        final List<Map<String, String>> posts = docs.map((doc) {
+          final data = doc.data() as Map<String, dynamic>;
+          final imageUrlList = List<String>.from(data['imageUrl'] ?? []);
+          final firstImageUrl = imageUrlList.isNotEmpty ? imageUrlList[0] : null;
+          return {
+            'imageUrl': firstImageUrl ?? '',
+            'docId': doc.id,
+          };
+        }).where((post) => post['imageUrl']!.isNotEmpty).toList();
+
+        // 최대 5개의 이미지로 제한
+        final limitedPosts = posts.take(5).toList();
+
+        if (limitedPosts.isEmpty) {
+          // 이미지가 하나도 없을 경우 기본 이미지 표시
+          return _defaultCarousel();
+        }
+
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: CarouselSlider(
+            items: limitedPosts.map((post) {
+              return _carouselImageItem(post['imageUrl']!, docId: post['docId']!);
+            }).toList(),
+            options: CarouselOptions(
+              height: 200,
+              viewportFraction: 0.4,
+              enableInfiniteScroll: false,
+              autoPlay: false,
+              enlargeCenterPage: false,
+              initialPage: 0,
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // 기본 캐러셀 (오류 발생 시 표시)
+  Widget _defaultCarousel() {
+    // 기본 이미지 리스트 (원하는 대로 수정 가능)
+    final defaultImages = [
+      'assets/images/default_post.png',
+      'assets/images/default_post.png',
+      'assets/images/default_post.png',
+      'assets/images/default_post.png',
+      'assets/images/default_post.png',
+    ];
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: CarouselSlider(
+        items: defaultImages.map((imagePath) {
+          return _carouselImageItem(imagePath, isAsset: true);
+        }).toList(),
+        options: CarouselOptions(
+          height: 200,
+          viewportFraction: 0.4,
+          enableInfiniteScroll: false,
+          autoPlay: false,
+          enlargeCenterPage: false,
+          initialPage: 0,
+        ),
+      ),
+    );
+  }
+
+  // 캐러셀 이미지 아이템
+  Widget _carouselImageItem(String imageUrl, {bool isAsset = false, String? docId}) {
     final double screenWidth = MediaQuery.of(context).size.width;
     final double maxItemWidth = 160; // 최대 아이템 너비 제한
     final double itemWidth = (screenWidth * 0.3).clamp(100, maxItemWidth);
@@ -189,7 +299,10 @@ class _MainScreenState extends State<MainScreen> {
 
     return GestureDetector(
       onTap: () {
-        context.push('/community/detail'); // 게시물상세페이지로 이동(/$id 추가)
+        if (docId != null) {
+          // 이미지 클릭 시 상세 페이지로 이동, docId 전달
+          context.push('/community/detail', extra: {'docId': docId});
+        }
       },
       child: Container(
         width: itemWidth,
@@ -197,67 +310,33 @@ class _MainScreenState extends State<MainScreen> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10), // 둥근 모서리
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            // 이미지
-            ClipRRect(
-              borderRadius: BorderRadius.circular(10), // 둥근 모서리
-              child: Image.asset(
-                imageUrl,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(10), // 둥근 모서리
+          child: isAsset
+              ? Image.asset(
+            imageUrl,
+            width: itemWidth,
+            height: itemHeight,
+            fit: BoxFit.cover,
+          )
+              : Image.network(
+            imageUrl,
+            width: itemWidth,
+            height: itemHeight,
+            fit: BoxFit.cover,
+            loadingBuilder: (context, child, loadingProgress) {
+              if (loadingProgress == null) return child;
+              return const Center(child: CircularProgressIndicator());
+            },
+            errorBuilder: (context, error, stackTrace) {
+              return Image.asset(
+                'assets/images/default_image.png',
                 width: itemWidth,
                 height: itemHeight,
                 fit: BoxFit.cover,
-              ),
-            ),
-            const SizedBox(height: 8), // 간격 고정
-            // 종 텍스트
-            Text(
-              species,
-              style: const TextStyle(fontSize: 12, color: Colors.grey), // 텍스트 스타일
-            ),
-            // 이름 텍스트
-            Text(
-              name,
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold), // 텍스트 스타일
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-// 캐러셀
-  Widget _makeCarousel() {
-    const double itemSpacing = 16; // 게시물 간 간격
-    const double maxViewportFraction = 0.4; // 최대 viewportFraction 제한
-    final double screenWidth = MediaQuery.of(context).size.width;
-    final double itemWidth = (screenWidth * 0.3).clamp(100, 160);
-    final double viewportFraction = (itemWidth + itemSpacing) / screenWidth;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20), // 캐러셀 전체 패딩
-      child: CarouselSlider.builder(
-        itemCount: 6, // 게시물 수
-        itemBuilder: (context, index, realIndex) {
-          final items = [ // 예시 데이터
-            {'name': '팥이', 'species': '몬스테라', 'imageUrl': 'assets/images/sample_post.png'},
-            {'name': '콩이', 'species': '레몬나무', 'imageUrl': 'assets/images/sample_post.png'},
-            {'name': '그루트', 'species': '금전수', 'imageUrl': 'assets/images/sample_post.png'},
-            {'name': '팥이', 'species': '몬스테라', 'imageUrl': 'assets/images/sample_post.png'},
-            {'name': '콩이', 'species': '레몬나무', 'imageUrl': 'assets/images/sample_post.png'},
-            {'name': '그루트', 'species': '금전수', 'imageUrl': 'assets/images/sample_post.png'},
-          ];
-          final item = items[index];
-          return _carouselItem(item['name']!, item['species']!, item['imageUrl']!);
-        },
-        options: CarouselOptions(
-          height: 200, // 캐러셀 높이
-          viewportFraction: viewportFraction.clamp(0.2, maxViewportFraction),
-          enableInfiniteScroll: false, // 무한 스크롤 비활성화
-          autoPlay: false, // 자동 스크롤 비활성화
-          enlargeCenterPage: false, // 가운데 아이템 확대 비활성화
-          initialPage: 2,
+              );
+            },
+          ),
         ),
       ),
     );
