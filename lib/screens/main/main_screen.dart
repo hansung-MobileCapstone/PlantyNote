@@ -178,7 +178,7 @@ class _MainScreenState extends State<MainScreen> {
           child: Row(
             children: [
               const Text(
-                '최근 게시물',
+                '전체 게시물',
                 style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
               ),
               const Spacer(),
