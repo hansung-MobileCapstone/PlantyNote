@@ -265,11 +265,11 @@ class _MainScreenState extends State<MainScreen> {
   Widget _defaultCarousel() {
     // 기본 이미지 리스트 (원하는 대로 수정 가능)
     final defaultImages = [
-      'assets/images/default_image.png',
-      'assets/images/default_image.png',
-      'assets/images/default_image.png',
-      'assets/images/default_image.png',
-      'assets/images/default_image.png',
+      'assets/images/default_post.png',
+      'assets/images/default_post.png',
+      'assets/images/default_post.png',
+      'assets/images/default_post.png',
+      'assets/images/default_post.png',
     ];
 
     return Padding(

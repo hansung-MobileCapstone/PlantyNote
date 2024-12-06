@@ -199,21 +199,22 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
     showDialog(
       context: context,
       builder: (BuildContext dialogContext) {
-        // 다른 변수명 사용
         return AlertDialog(
           title: Text("계정 탈퇴"),
           content: Text("정말 탈퇴 하시겠습니까?"),
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(dialogContext).pop(); // 팝업 닫기
+                dialogContext.pop(); // 팝업 닫기 using go_router
               },
               child: Text("아니오"),
             ),
             TextButton(
-              onPressed: () {
-                Navigator.of(dialogContext).pop(); // 팝업 닫기 (먼저 실행)
-                _deleteAccount(); // 비동기 함수 호출
+              onPressed: () async {
+                dialogContext.pop(); // 팝업 닫기 (먼저 실행)
+                await _deleteAccount(); // 비동기 함수 호출
+                // 예를 들어, 탈퇴 후 로그인 화면으로 이동
+                context.go('start/login'); // 필요한 경로로 변경
               },
               child: Text("예"),
             ),
