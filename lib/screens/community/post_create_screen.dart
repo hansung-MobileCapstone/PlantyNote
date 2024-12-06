@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -80,8 +81,13 @@ class PostCreateScreenState extends State<PostCreateScreen> {
       }
       setState(() {});
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("수정할 게시물을 찾을 수 없습니다.")),
+      Fluttertoast.showToast(
+        msg: "수정할 게시물을 찾을 수 없습니다.",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Color(0xFF812727), // 배경색
+        textColor: Colors.white, // 글자 색
+        fontSize: 16.0,
       );
       if (mounted) context.pop();
     }
@@ -105,11 +111,25 @@ class PostCreateScreenState extends State<PostCreateScreen> {
   Future<void> _submitPost() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("로그인 후 이용해주세요.")),
+      Fluttertoast.showToast(
+        msg: "로그인 후 이용해주세요",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Color(0xFF812727), // 배경색
+        textColor: Colors.white, // 글자 색
+        fontSize: 16.0,
       );
       return;
     }
+
+    // Firestore에서 현재 사용자 닉네임, 프로필 가져오기
+    final userDoc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .get();
+
+    final nickname = userDoc.data()?['nickname'] ?? '알수없음';
+    final profileImage = userDoc.data()?['profileImage'] ?? '';
 
     showDialog(
       context: context,
@@ -172,9 +192,14 @@ class PostCreateScreenState extends State<PostCreateScreen> {
         final docRef = postsRef.doc(_docId);
         final docSnap = await docRef.get();
         if (!docSnap.exists) {
-          Navigator.pop(context);
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("게시물을 찾을 수 없습니다.")),
+          context.pop();
+          Fluttertoast.showToast(
+            msg: "게시물을 찾을 수 없습니다.",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            backgroundColor: Color(0xFF812727), // 배경색
+            textColor: Colors.white, // 글자 색
+            fontSize: 16.0,
           );
           return;
         }
@@ -190,13 +215,14 @@ class PostCreateScreenState extends State<PostCreateScreen> {
           'updatedAt': FieldValue.serverTimestamp(),
         });
 
-        Navigator.pop(context);
-        context.pop({'docId': _docId, 'action': 'update'});
+        if (mounted) Navigator.pop(context);
+        if (mounted) context.pop({'docId': _docId, 'action': 'update'});
       } else {
         // 신규 작성
         final newDoc = await postsRef.add({
           'uid': user.uid,
-          'name': user.displayName ?? '사용자',
+          'name': nickname,
+          'profileImage': profileImage,
           'contents': _textController.text.trim(),
           'imageUrl': newImageUrls,
           'details': details,
@@ -206,13 +232,18 @@ class PostCreateScreenState extends State<PostCreateScreen> {
 
         print("New post created with docId: ${newDoc.id}"); // 디버그 출력
 
-        Navigator.pop(context);
-        context.pop({'docId': newDoc.id});
+        if (mounted) Navigator.pop(context); // 로딩 닫기
+        if (mounted) context.pop({'docId': newDoc.id});
       }
     } catch (e) {
-      Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("게시물 등록(수정) 실패: $e")),
+      if (mounted) Navigator.pop(context); // 로딩 닫기
+      Fluttertoast.showToast(
+        msg: "등록 실패..",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Color(0xFF812727), // 배경색
+        textColor: Colors.white, // 글자 색
+        fontSize: 16.0,
       );
     }
   }
