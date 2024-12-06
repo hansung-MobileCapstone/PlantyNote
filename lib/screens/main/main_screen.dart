@@ -158,8 +158,8 @@ class _MainScreenState extends State<MainScreen> {
             borderRadius: BorderRadius.circular(10), // 둥근 모서리
             child: Image.asset(
               'assets/images/main_plant.png', // 이미지 경로
-              width: 240, // 고정 너비
-              height: 300, // 고정 높이
+              width: 300, // 고정 너비
+              height: 200, // 고정 높이
               fit: BoxFit.fill, // 전체 채우기
             ),
           ),
@@ -251,7 +251,13 @@ class _MainScreenState extends State<MainScreen> {
 
   // 기본 캐러셀 (오류 발생 시 표시)
   Widget _defaultCarousel() {
-    final defaultImages = List.generate(5, (_) => 'assets/images/default_post.png');
+    final defaultImages = [
+      'assets/images/default_post.png',
+      'assets/images/default_post.png',
+      'assets/images/default_post.png',
+      'assets/images/default_post.png',
+      'assets/images/default_post.png',
+    ];
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -280,7 +286,7 @@ class _MainScreenState extends State<MainScreen> {
         }
       },
       child: Container(
-        width: 160,
+        width: 150, // 고정된 너비
         margin: const EdgeInsets.symmetric(horizontal: 9),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
@@ -288,11 +294,11 @@ class _MainScreenState extends State<MainScreen> {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(10),
           child: isAsset
-              ? Image.asset(imageUrl, width: 160, height: 200, fit: BoxFit.cover)
+              ? Image.asset(imageUrl, width: 150, height: 100, fit: BoxFit.cover)
               : Image.network(
             imageUrl,
-            width: 160,
-            height: 200,
+            width: 150,
+            height: 100,
             fit: BoxFit.cover,
             loadingBuilder: (context, child, loadingProgress) {
               if (loadingProgress == null) return child;
@@ -301,8 +307,8 @@ class _MainScreenState extends State<MainScreen> {
             errorBuilder: (context, error, stackTrace) {
               return Image.asset(
                 'assets/images/default_image.png',
-                width: 160,
-                height: 200,
+                width: 150,
+                height: 100,
                 fit: BoxFit.cover,
               );
             },
