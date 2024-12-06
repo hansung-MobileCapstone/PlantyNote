@@ -131,12 +131,36 @@ class PostCreateScreenState extends State<PostCreateScreen> {
         }
       }
 
+      // 선택한 식물의 정보를 가져오기
+      String selectedPlantName = _selectedPlantName ?? '선택안함';
+      Map<String, dynamic>? plantData;
+
+      if (selectedPlantName != '선택안함') {
+        final plantQuery = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .collection('plants')
+            .where('plantname', isEqualTo: selectedPlantName)
+            .limit(1)
+            .get();
+
+        if (plantQuery.docs.isNotEmpty) {
+          plantData = plantQuery.docs.first.data();
+        }
+      }
+
+      // 'details' 필드 구성 (환경 필드 제거)
       final details = [
-        {'식물 종': _selectedPlantName ?? '선택안함'},
-        {'물 주기': '정보 없음'},
-        {'분갈이 주기': '정보 없음'},
-        {'환경': '정보 없음'}
+        {'식물 종': selectedPlantName},
+        {'물 주기': plantData?['waterCycle']?.toString() ?? '정보 없음'},
+        {'분갈이 주기': plantData?['fertilizerCycle']?.toString() ?? '정보 없음'},
+        // { '환경': plantData?['environment']?.toString() ?? '정보 없음' } // 제거
       ];
+
+      // 디버그 출력
+      print("Selected Plant Name: $selectedPlantName");
+      print("Plant Data: $plantData");
+      print("Details: $details");
 
       final postsRef = FirebaseFirestore.instance
           .collection('users')

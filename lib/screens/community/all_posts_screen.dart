@@ -68,11 +68,8 @@ class _AllPostsScreenState extends State<AllPostsScreen> {
               final name = postData['name'] ?? '사용자';
               final contents = postData['contents'] ?? '';
               final imageUrls = List<String>.from(postData['imageUrl'] ?? []);
-              final rawDetails = (postData['details'] ?? []) as List;
-              final details = rawDetails.map((element) {
-                final map = element as Map;
-                return map.map((k, v) => MapEntry(k.toString(), v.toString()));
-              }).toList();
+              final details =
+                  List<Map<String, dynamic>>.from(postData['details'] ?? []);
 
               return GestureDetector(
                 onTap: () {
@@ -84,7 +81,7 @@ class _AllPostsScreenState extends State<AllPostsScreen> {
                   name: name,
                   contents: contents,
                   imageUrls: imageUrls,
-                  details: details,
+                  details: details, // details 리스트 전달
                 ),
               );
             },
