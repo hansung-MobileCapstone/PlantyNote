@@ -65,7 +65,8 @@ class _AllPostsScreenState extends State<AllPostsScreen> {
             itemBuilder: (context, index) {
               final postData = docs[index].data() as Map<String, dynamic>;
               final docId = docs[index].id;
-              final name = postData['name'] ?? '사용자';
+              final name = postData['name'] ?? '알수없음';
+              final profileImage = postData['profileImage'] ?? '';
               final contents = postData['contents'] ?? '';
               final imageUrls = List<String>.from(postData['imageUrl'] ?? []);
               final details =
@@ -79,6 +80,7 @@ class _AllPostsScreenState extends State<AllPostsScreen> {
                 },
                 child: PostItem(
                   name: name,
+                  profileImage: profileImage,
                   contents: contents,
                   imageUrls: imageUrls,
                   details: details, // details 리스트 전달

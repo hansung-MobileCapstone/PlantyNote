@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 // 게시물 하나
 class PostItem extends StatelessWidget {
   final String name;
+  final String profileImage;
   final String contents;
   final List<String> imageUrls;
   final List<Map<String, dynamic>> details;
@@ -10,6 +11,7 @@ class PostItem extends StatelessWidget {
   const PostItem({
     super.key,
     required this.name,
+    required this.profileImage,
     required this.contents,
     required this.imageUrls,
     required this.details,
@@ -116,11 +118,10 @@ class PostItem extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const CircleAvatar(
+              CircleAvatar(
                 // 프로필 사진
                 radius: 10,
-                backgroundImage:
-                    NetworkImage('https://via.placeholder.com/150'),
+                backgroundImage: NetworkImage(profileImage),
               ),
               const SizedBox(width: 8),
               Text(
