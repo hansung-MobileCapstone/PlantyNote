@@ -1,12 +1,103 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../widgets/components/comment_item.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
-class CommentModal extends StatelessWidget {
-  const CommentModal({super.key});
+class CommentModal extends StatefulWidget {
+  final String docId; // 게시물의 docId를 받아오기
+
+  const CommentModal({super.key, required this.docId});
+
+  @override
+  State<CommentModal> createState() => _CommentModalState();
+}
+
+class _CommentModalState extends State<CommentModal> {
+  final TextEditingController _commentController = TextEditingController();
+  bool _isSubmitting = false;
+
+  Future<void> _submitComment() async {
+    final commentText = _commentController.text.trim();
+    if (commentText.isEmpty) return;
+
+    setState(() {
+      _isSubmitting = true;
+    });
+
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        Fluttertoast.showToast(
+          msg: "로그인 후 이용해주세요",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: Color(0xFF4B7E5B), // 배경색
+          textColor: Colors.white, // 글자 색
+          fontSize: 16.0,
+        );
+        return;
+      }
+
+      // Firestore에서 현재 사용자 닉네임 가져오기
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+
+      final nickname = userDoc.data()?['nickname'] ?? '알수없음';
+
+      final commentsRef = FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .collection('posts')
+          .doc(widget.docId)
+          .collection('comments');
+
+      await commentsRef.add({
+        'userId': user.uid,
+        'nickname': nickname,
+        'text': commentText,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+
+      _commentController.clear();
+
+      Fluttertoast.showToast(
+        msg: "댓글 추가 성공!",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Color(0xFF4B7E5B), // 배경색
+        textColor: Colors.white, // 글자 색
+        fontSize: 16.0,
+      );
+    } catch (e) {
+      Fluttertoast.showToast(
+        msg: "댓글 추가 실패..",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Color(0xFF4B7E5B), // 배경색
+        textColor: Colors.white, // 글자 색
+        fontSize: 16.0,
+      );
+    } finally {
+      setState(() {
+        _isSubmitting = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final commentsRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .collection('posts')
+        .doc(widget.docId)
+        .collection('comments')
+        .orderBy('createdAt', descending: false);
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -54,16 +145,53 @@ class CommentModal extends StatelessWidget {
               child: Column(
                 children: [
                   Expanded(
-                    child: ListView.builder(
-                      itemCount: 5, // 예시 댓글 개수
-                      itemBuilder: (context, index) {
-                        return CommentItem(); // 댓글 아이템 comment_item.dart
+                    child: StreamBuilder<QuerySnapshot>(
+                      stream: commentsRef.snapshots(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                              child: CircularProgressIndicator());
+                        }
+
+                        final comments = snapshot.data?.docs ?? [];
+
+                        if (comments.isEmpty) {
+                          return const Center(child: Text("댓글이 없습니다."));
+                        }
+
+                        return ListView.builder(
+                          itemCount: comments.length,
+                          itemBuilder: (context, index) {
+                            final commentData =
+                                comments[index].data() as Map<String, dynamic>;
+                            final userId = commentData['userId'] ?? 'Unknown';
+                            final nickname = commentData['nickname'] ?? '알수없음';
+                            final text = commentData['text'] ?? '';
+                            final createdAt =
+                                commentData['createdAt'] as Timestamp?;
+                            final date = createdAt != null
+                                ? "${createdAt.toDate().year}-${createdAt.toDate().month.toString().padLeft(2, '0')}-${createdAt.toDate().day.toString().padLeft(2, '0')} ${createdAt.toDate().hour.toString().padLeft(2, '0')}:${createdAt.toDate().minute.toString().padLeft(2, '0')}"
+                                : 'Unknown';
+
+                            return CommentItem(
+                              userId: userId,
+                              nickname: nickname,
+                              text: text,
+                              date: date,
+                            );
+                          },
+                        );
                       },
                     ),
                   ),
-                  const Padding(
-                    padding: EdgeInsets.only(bottom: 10.0),
-                    child: _InputSection(),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 10.0),
+                    child: _InputSection(
+                      controller: _commentController,
+                      onSubmit: _submitComment,
+                      isSubmitting: _isSubmitting,
+                    ),
                   ),
                 ],
               ),
@@ -77,7 +205,16 @@ class CommentModal extends StatelessWidget {
 
 // 입력 필드, 버튼
 class _InputSection extends StatelessWidget {
-  const _InputSection();
+  final TextEditingController controller;
+  final VoidCallback onSubmit;
+  final bool isSubmitting;
+
+  const _InputSection({
+    Key? key,
+    required this.controller,
+    required this.onSubmit,
+    required this.isSubmitting,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -93,10 +230,7 @@ class _InputSection extends StatelessWidget {
             child: SizedBox(
               height: 40,
               child: TextField(
-                style: const TextStyle(
-                  fontSize: 13,
-                  color: Colors.black,
-                ),
+                controller: controller,
                 decoration: InputDecoration(
                   hintText: "댓글을 입력하세요.",
                   hintStyle: const TextStyle(
@@ -133,28 +267,32 @@ class _InputSection extends StatelessWidget {
           Expanded(
             flex: 15, // 버튼 15%
             child: ElevatedButton(
-              onPressed: () {
-                // 댓글 전송
-              },
+              onPressed: isSubmitting ? null : onSubmit,
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF4B7E5B),
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
                 ),
-                minimumSize: const Size(40, 40), // 최소 크기
+                minimumSize: const Size(40, 40),
+                // 최소 크기
                 padding: EdgeInsets.zero,
               ),
-              child: const Center(
-                child: Text(
-                  "입력",
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
+              child: isSubmitting
+                  ? const CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      strokeWidth: 2,
+                    )
+                  : const Center(
+                      child: Text(
+                        "입력",
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
             ),
           ),
         ],
