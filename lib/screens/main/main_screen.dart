@@ -88,14 +88,14 @@ class _MainScreenState extends State<MainScreen> {
   // 상단 로고 위젯
   Widget _logoImage() {
     return Row(
-      mainAxisSize: MainAxisSize.min, // 크기를 내용에 맞춤
-      crossAxisAlignment: CrossAxisAlignment.center, // 가로축 정렬
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Image.asset(
           'assets/images/logo.png',
-          height: 32, // 로고 크기를 고정
+          height: 32, // 로고 크기
         ),
-        const SizedBox(width: 7), // 로고와 텍스트 간격
+        const SizedBox(width: 7),
         const Text(
           'PlantyNote',
           style: TextStyle(
@@ -113,20 +113,20 @@ class _MainScreenState extends State<MainScreen> {
   Widget _searchBar() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: InkWell( // 리플 효과
+      child: InkWell(
         onTap: () {
-          context.go('/main/search'); // /main/search로 이동
+          context.go('/main/search');
         },
         borderRadius: BorderRadius.circular(15),
         child: Container(
           height: 35,
           decoration: BoxDecoration(
-            color: const Color(0x264B7E5B), // 배경색
+            color: const Color(0x264B7E5B),
             borderRadius: BorderRadius.circular(15),
           ),
           child: Row(
             children: const [
-              SizedBox(width: 16), // 좌측 패딩
+              SizedBox(width: 16),
               Icon(Icons.search, color: Color(0xFFB3B3B3)),
               SizedBox(width: 8),
               Text(
@@ -154,13 +154,13 @@ class _MainScreenState extends State<MainScreen> {
         ),
         const SizedBox(height: 25),
         Center(
-          child: ClipRRect( // border-radius 주기 위함
-            borderRadius: BorderRadius.circular(10), // 둥근 모서리
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(10),
             child: Image.asset(
-              'assets/images/main_plant.png', // 이미지 경로
-              width: 300, // 고정 너비
-              height: 200, // 고정 높이
-              fit: BoxFit.fill, // 전체 채우기
+              'assets/images/main_plant.png',
+              width: 250, // 고정 너비
+              height: 300, // 고정 높이
+              fit: BoxFit.fill,
             ),
           ),
         ),
@@ -185,7 +185,7 @@ class _MainScreenState extends State<MainScreen> {
               IconButton(
                 icon: const Icon(Icons.arrow_forward, size: 18),
                 onPressed: () {
-                  context.go('/community'); // 전체게시물페이지로 이동
+                  context.go('/community');
                 },
               ),
             ],
@@ -211,17 +211,24 @@ class _MainScreenState extends State<MainScreen> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         }
-        if (snapshot.hasError || !snapshot.hasData || snapshot.data!.docs.isEmpty) {
+        if (snapshot.hasError) {
+          return _defaultCarousel();
+        }
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
           return _defaultCarousel();
         }
 
         final docs = snapshot.data!.docs;
+
         final List<Map<String, String>> posts = docs.map((doc) {
           final data = doc.data() as Map<String, dynamic>;
           final imageUrlList = List<String>.from(data['imageUrl'] ?? []);
           final firstImageUrl = imageUrlList.isNotEmpty ? imageUrlList[0] : null;
-          return {'imageUrl': firstImageUrl ?? '', 'docId': doc.id};
-        }).toList();
+          return {
+            'imageUrl': firstImageUrl ?? '',
+            'docId': doc.id,
+          };
+        }).where((post) => post['imageUrl']!.isNotEmpty).toList();
 
         final limitedPosts = posts.take(5).toList();
 
@@ -279,6 +286,9 @@ class _MainScreenState extends State<MainScreen> {
 
   // 캐러셀 이미지 아이템
   Widget _carouselImageItem(String imageUrl, {bool isAsset = false, String? docId}) {
+    final double itemWidth = 150; // 고정 너비
+    final double itemHeight = 180; // 고정 높이
+
     return GestureDetector(
       onTap: () {
         if (docId != null) {
@@ -286,7 +296,7 @@ class _MainScreenState extends State<MainScreen> {
         }
       },
       child: Container(
-        width: 150, // 고정된 너비
+        width: itemWidth,
         margin: const EdgeInsets.symmetric(horizontal: 9),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
@@ -294,11 +304,16 @@ class _MainScreenState extends State<MainScreen> {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(10),
           child: isAsset
-              ? Image.asset(imageUrl, width: 150, height: 100, fit: BoxFit.cover)
+              ? Image.asset(
+            imageUrl,
+            width: itemWidth,
+            height: itemHeight,
+            fit: BoxFit.cover,
+          )
               : Image.network(
             imageUrl,
-            width: 150,
-            height: 100,
+            width: itemWidth,
+            height: itemHeight,
             fit: BoxFit.cover,
             loadingBuilder: (context, child, loadingProgress) {
               if (loadingProgress == null) return child;
@@ -307,8 +322,8 @@ class _MainScreenState extends State<MainScreen> {
             errorBuilder: (context, error, stackTrace) {
               return Image.asset(
                 'assets/images/default_image.png',
-                width: 150,
-                height: 100,
+                width: itemWidth,
+                height: itemHeight,
                 fit: BoxFit.cover,
               );
             },
