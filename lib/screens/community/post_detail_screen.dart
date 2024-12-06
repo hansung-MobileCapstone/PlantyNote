@@ -53,7 +53,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
           actions: [
             TextButton(
               onPressed: () {
-                context.pop();
+                Navigator.pop(context); // 모달 닫기
               },
               child: const Text("아니오"),
             ),
@@ -68,7 +68,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                       .doc(widget.docId)
                       .delete();
                 }
-                context.pop();
+                Navigator.pop(context); // 모달 닫기
                 context.go('/community');
               },
               child: const Text("예"),
@@ -128,11 +128,14 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
             images.add('assets/images/sample_post.png');
           }
 
-          final rawDetails = (post['details'] ?? []) as List;
-          final details = rawDetails.map((element) {
-            final map = element as Map;
-            return map.map((k, v) => MapEntry(k.toString(), v.toString()));
-          }).toList();
+          final details =
+              List<Map<String, dynamic>>.from(post['details'] ?? []);
+
+          // 세부 정보 추출
+          final String plantSpecies = _getDetail(details, '식물 종');
+          final String waterCycle = _getDetail(details, '물 주기');
+          final String fertilizerCycle = _getDetail(details, '분갈이 주기');
+          // final String environment = _getDetail(details, '환경'); // 환경 정보 제거
 
           return LayoutBuilder(
             builder: (context, constraints) {
@@ -157,7 +160,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                       ),
                     ),
                   ),
-                  _plantDetails(details),
+                  _plantDetails(waterCycle, fertilizerCycle),
                 ],
               );
             },
@@ -169,6 +172,16 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
         onItemTapped: _onItemTapped,
       ),
     );
+  }
+
+  // 세부 정보를 추출하는 헬퍼 함수
+  String _getDetail(List<Map<String, dynamic>> details, String key) {
+    for (var detail in details) {
+      if (detail.containsKey(key)) {
+        return detail[key] ?? '정보 없음';
+      }
+    }
+    return '정보 없음';
   }
 
   AppBar _buildAppBar() {
@@ -329,43 +342,52 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     );
   }
 
-  Widget _plantDetails(List<Map<String, String>> details) {
+  // 식물 세부 정보 표시 (환경 정보 제거)
+  Widget _plantDetails(String waterCycle, String fertilizerCycle) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 3),
-      child: Wrap(
-        spacing: 8,
-        runSpacing: 3,
-        children: details.map((detail) {
-          return Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-                decoration: BoxDecoration(
-                  border: Border.all(color: const Color(0x804B7E5B)),
-                  borderRadius: BorderRadius.circular(50),
-                ),
-                child: Text(
-                  detail.keys.first,
-                  style: const TextStyle(
-                    fontSize: 10,
-                    color: Color(0xFF7D7D7D),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 5),
-              Text(
-                detail.values.first,
-                style: const TextStyle(
-                  fontSize: 10,
-                  color: Color(0xFF616161),
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          );
-        }).toList(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _informationRow('물 주기', waterCycle),
+          const SizedBox(height: 8),
+          _informationRow('분갈이 주기', fertilizerCycle),
+          // '환경' 정보 제거
+        ],
       ),
+    );
+  }
+
+  // 개별 정보 행
+  Widget _informationRow(String label, String value) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: const Color(0x804B7E5B),
+            ),
+            borderRadius: BorderRadius.circular(50),
+          ),
+          child: Text(
+            label,
+            style: const TextStyle(
+              fontSize: 10,
+              color: Color(0xFF7D7D7D),
+            ),
+          ),
+        ),
+        const SizedBox(width: 5),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 10,
+            color: Color(0xFF616161),
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
     );
   }
 }
