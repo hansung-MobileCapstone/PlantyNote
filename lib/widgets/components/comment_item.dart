@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 
 class CommentItem extends StatelessWidget {
   final String userId;
+  final String nickname;
   final String text;
   final String date;
 
   const CommentItem({
     super.key,
     required this.userId,
+    required this.nickname,
     required this.text,
     required this.date,
   });
@@ -25,36 +27,43 @@ class CommentItem extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 프로필 이미지를 제거했습니다.
-            // 필요하다면 여기에 다른 위젯을 추가할 수 있습니다.
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    userId,
-                    style: const TextStyle(
-                      fontSize: 8, // 고정된 이름 글씨 크기
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
+                  Row(
+                    children: [
+                      Text(
+                        nickname,
+                        style: const TextStyle(
+                          fontSize: 10, // 고정된 이름 글씨 크기
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                      const SizedBox(width: 5),
+                      Text(
+                        date,
+                        style: const TextStyle(
+                          fontSize: 10,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 2), // 이름과 댓글 간격
-                  Text(
-                    text,
-                    style: const TextStyle(
-                      fontSize: 10, // 고정된 댓글 글씨 크기
-                      color: Colors.black87,
-                    ),
-                    textAlign: TextAlign.left,
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    date,
-                    style: const TextStyle(
-                      fontSize: 8,
-                      color: Colors.grey,
-                    ),
+                  const SizedBox(height: 3), // 이름과 댓글 간격
+                  Row(
+                    children: [
+                      const SizedBox(width: 25),
+                      Text(
+                        text,
+                        style: const TextStyle(
+                          fontSize: 12, // 고정된 댓글 글씨 크기
+                          color: Colors.black87,
+                        ),
+                        textAlign: TextAlign.left,
+                      ),
+                    ],
                   ),
                 ],
               ),
