@@ -71,11 +71,12 @@ class PostCreateScreenState extends State<PostCreateScreen> {
         .doc(_docId);
 
     final docSnap = await docRef.get();
+    if (!mounted) return; // 추가된 부분
     if (docSnap.exists) {
       _editingPost = docSnap.data();
       _textController.text = _editingPost?['contents'] ?? '';
       final details =
-          List<Map<String, dynamic>>.from(_editingPost?['details'] ?? []);
+      List<Map<String, dynamic>>.from(_editingPost?['details'] ?? []);
       if (details.isNotEmpty && details[0].containsKey('식물 종')) {
         _selectedPlantName = details[0]['식물 종'];
       }
@@ -144,7 +145,7 @@ class PostCreateScreenState extends State<PostCreateScreen> {
           final fileName =
               '${DateTime.now().millisecondsSinceEpoch}_${img.name}';
           final storageRef =
-              FirebaseStorage.instance.ref('post_images/$fileName');
+          FirebaseStorage.instance.ref('post_images/$fileName');
           await storageRef.putFile(File(img.path));
           final downloadUrl = await storageRef.getDownloadURL();
           newImageUrls.add(downloadUrl);
@@ -204,9 +205,9 @@ class PostCreateScreenState extends State<PostCreateScreen> {
           return;
         }
         final existingImages =
-            List<String>.from(docSnap.data()?['imageUrl'] ?? []);
+        List<String>.from(docSnap.data()?['imageUrl'] ?? []);
         final updatedImages =
-            newImageUrls.isNotEmpty ? newImageUrls : existingImages;
+        newImageUrls.isNotEmpty ? newImageUrls : existingImages;
 
         await docRef.update({
           'contents': _textController.text.trim(),
@@ -215,8 +216,10 @@ class PostCreateScreenState extends State<PostCreateScreen> {
           'updatedAt': FieldValue.serverTimestamp(),
         });
 
-        if (mounted) Navigator.pop(context);
-        if (mounted) context.pop({'docId': _docId, 'action': 'update'});
+        if (!mounted) return; // 추가된 부분
+        Navigator.pop(context);
+        if (!mounted) return; // 추가된 부분
+        context.pop({'docId': _docId, 'action': 'update'});
       } else {
         // 신규 작성
         final newDoc = await postsRef.add({
@@ -232,8 +235,10 @@ class PostCreateScreenState extends State<PostCreateScreen> {
 
         print("New post created with docId: ${newDoc.id}"); // 디버그 출력
 
-        if (mounted) Navigator.pop(context); // 로딩 닫기
-        if (mounted) context.pop({'docId': newDoc.id});
+        if (!mounted) return; // 추가된 부분
+        Navigator.pop(context); // 로딩 닫기
+        if (!mounted) return; // 추가된 부분
+        context.pop({'docId': newDoc.id});
       }
     } catch (e) {
       if (mounted) Navigator.pop(context); // 로딩 닫기
@@ -360,7 +365,7 @@ class PostCreateScreenState extends State<PostCreateScreen> {
                       shape: BoxShape.circle,
                     ),
                     child:
-                        const Icon(Icons.close, size: 15, color: Colors.white),
+                    const Icon(Icons.close, size: 15, color: Colors.white),
                   ),
                 ),
               ),
