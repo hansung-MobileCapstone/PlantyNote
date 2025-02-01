@@ -1,15 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
+
+  @override
+  LoginScreenState createState() => LoginScreenState();
+}
+
+class LoginScreenState extends State<LoginScreen> {
+  final TextEditingController _emailController = TextEditingController(); // 이메일 입력 컨트롤러
+  final TextEditingController _passwordController = TextEditingController(); // 비밀번호 입력 컨트롤러
+  final _formKey = GlobalKey<FormState>(); // 폼의 상태를 관리하기 위한 키
+  String _errorMessage = ''; // 에러 메시지 저장
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      backgroundColor: Color(0xFFF7FBF1),
+      backgroundColor: const Color(0xFFF7FBF1),
+      resizeToAvoidBottomInset: false, // 키보드가 나타날 때 화면 요소가 위로 올라가지 않도록 설정
       body: Stack(
         children: [
           _treeImage(screenWidth), // 트리 이미지
@@ -26,16 +46,30 @@ class LoginScreen extends StatelessWidget {
             ),
           ),
 
-          Center( // 입력 필드 (ID, PW)
+          Center( // 입력 필드 (Email, PW)
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 40.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _iDInput(), // ID 입력 필드
-                  const SizedBox(height: 10),
-                  _pWInput(), // PW 입력 필드
-                ],
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _emailInput(), // Email 입력 필드
+                    const SizedBox(height: 10),
+                    _pWInput(), // PW 입력 필드
+                    if (_errorMessage.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 5, left: 0),
+                        child: Align(
+                          alignment: Alignment.centerLeft, // 오른쪽 정렬
+                          child: Text(
+                            _errorMessage,
+                            style: const TextStyle(color: Colors.red),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -125,14 +159,15 @@ class LoginScreen extends StatelessWidget {
     );
   }
 
-  // ID 입력 필드
-  Widget _iDInput() {
+  // Email 입력 필드
+  Widget _emailInput() {
     return TextFormField(
+      controller: _emailController,
       decoration: InputDecoration(
         filled: true,
         fillColor: Colors.white,
-        labelText: 'ID',
-        hintText: '닉네임을 입력하세요.',
+        labelText: 'Email',
+        hintText: '이메일을 입력하세요.',
         labelStyle: const TextStyle(color: Color(0xFF4B7E5B)),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(15),
@@ -148,45 +183,72 @@ class LoginScreen extends StatelessWidget {
             width: 3.0,
           ),
         ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: const BorderSide(
+            color: Color(0xFFD2DED6), // 포커스 시 색상 변경
+            width: 3.0,
+          ),
+        ),
       ),
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return '이메일을 입력하세요.';
+        }
+        if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+          return '유효한 이메일 주소를 입력하세요.';
+        }
+        return null;
+      },
     );
   }
 
   // PW 입력 필드
   Widget _pWInput() {
-     return TextFormField(
-       obscureText: true,
-       decoration: InputDecoration(
-         filled: true,
-         fillColor: Colors.white,
-         labelText: 'PW',
-         hintText: '비밀번호를 입력하세요.',
-         labelStyle: const TextStyle(color: Color(0xFF4B7E5B)),
-         border: OutlineInputBorder(
-           borderRadius: BorderRadius.circular(15),
-           borderSide: const BorderSide(
-             color: Color(0xFF4B7E5B),
-             width: 3.0,
-           ),
-         ),
-         enabledBorder: OutlineInputBorder(
-           borderRadius: BorderRadius.circular(15),
-           borderSide: const BorderSide(
-             color: Color(0xFF4B7E5B),
-             width: 3.0,
-           ),
-         ),
-       ),
-     );
+    return TextFormField(
+      controller: _passwordController,
+      obscureText: true,
+      decoration: InputDecoration(
+        filled: true,
+        fillColor: Colors.white,
+        labelText: 'PW',
+        hintText: '비밀번호를 입력하세요.',
+        labelStyle: const TextStyle(color: Color(0xFF4B7E5B)),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: const BorderSide(
+            color: Color(0xFF4B7E5B),
+            width: 3.0,
+          ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: const BorderSide(
+            color: Color(0xFF4B7E5B),
+            width: 3.0,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: const BorderSide(
+            color: Color(0xFFD2DED6), // 포커스 시 색상 변경
+            width: 3.0,
+          ),
+        ),
+      ),
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return '비밀번호를 입력하세요.';
+        }
+        return null;
+      },
+    );
   }
 
   // 로그인 버튼
   Widget _loginButton(BuildContext context) {
     return ElevatedButton(
-      onPressed: () {
-        // 회원정보가 맞다면
-        context.go('/main'); // 메인페이지로 이동
-      },
+      onPressed: _login,
       style: ElevatedButton.styleFrom(
         backgroundColor: const Color(0xFF4B7E5B),
         padding: const EdgeInsets.symmetric(
@@ -208,12 +270,12 @@ class LoginScreen extends StatelessWidget {
   Widget _signupButton(BuildContext context) {
     return TextButton(
       onPressed: () {
-        context.push('/start/signup'); // 회원가입페이지로 이동
+        context.push('/start/signup');
       },
       child: const Text.rich(
         TextSpan(
           text: 'Don\'t have account? ',
-          style: TextStyle(fontSize:18, color: Color(0xFFB7C7C2)),
+          style: TextStyle(fontSize: 18, color: Color(0xFFB7C7C2)),
           children: [
             TextSpan(
               text: 'Sign up',
@@ -226,5 +288,45 @@ class LoginScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  // 로그인 함수
+  void _login() async {
+    if (_formKey.currentState!.validate()) {
+      try {
+        await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: _emailController.text.trim(),
+          password: _passwordController.text.trim(),
+        );
+        Fluttertoast.showToast(
+          msg: "로그인 성공!",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: const Color(0xFF4B7E5B),
+          textColor: Colors.white,
+          fontSize: 16.0,
+        );
+        if (!mounted) return;
+        context.go('/main');
+      } on FirebaseAuthException catch (e) {
+        if (e.code == 'wrong-password') {
+          setState(() {
+            _errorMessage = '올바르지 않은 비밀번호입니다.';
+          });
+        } else if (e.code == 'user-not-found') {
+          setState(() {
+            _errorMessage = '등록되지 않은 이메일입니다.';
+          });
+        } else {
+          setState(() {
+            _errorMessage = '로그인에 실패했습니다. (${e.code})';
+          });
+        }
+      } catch (e) {
+        setState(() {
+          _errorMessage = '로그인에 실패했습니다.';
+        });
+      }
+    }
   }
 }

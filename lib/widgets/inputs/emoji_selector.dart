@@ -21,11 +21,20 @@ class EmojiSelector extends StatelessWidget {
         emojis.length,
             (index) => GestureDetector(
           onTap: () => onEmojiSelected(index),
-          child: Text(
-            emojis[index],
-            style: TextStyle(
-              fontSize: 20,
-              color: selectedIndex == index ? Colors.blue : Colors.grey,
+          child: Container(
+            padding: EdgeInsets.all(1),
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: selectedIndex == index ? Color(0xFF4B7E5B) : Colors.transparent, // 선택된 테두리
+                width: 2,
+              ),
+              borderRadius: BorderRadius.circular(50),
+            ),
+            child: Text(
+              emojis[index],
+              style: TextStyle(
+                fontSize: 20, // 이모지 크기
+              ),
             ),
           ),
         ),

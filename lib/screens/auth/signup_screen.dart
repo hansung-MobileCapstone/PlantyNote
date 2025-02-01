@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -17,6 +18,42 @@ class SignupScreenState extends State<SignupScreen> {
 
   final _formKey = GlobalKey<FormState>();
 
+  String _nicknameError = ''; // 닉네임 에러 메시지
+  String _emailError = ''; // 이메일 에러 메시지
+  String _passwordError = ''; // 비밀번호 에러 메시지
+
+  @override
+  void initState() {
+    super.initState();
+
+    // 닉네임 컨트롤러에 리스너 추가
+    _nicknameController.addListener(() {
+      if (_nicknameError.isNotEmpty) {
+        setState(() {
+          _nicknameError = '';
+        });
+      }
+    });
+
+    // 이메일 컨트롤러에 리스너 추가
+    _emailController.addListener(() {
+      if (_emailError.isNotEmpty) {
+        setState(() {
+          _emailError = '';
+        });
+      }
+    });
+
+    // 비밀번호 컨트롤러에 리스너 추가
+    _passwordController.addListener(() {
+      if (_passwordError.isNotEmpty) {
+        setState(() {
+          _passwordError = '';
+        });
+      }
+    });
+  }
+
   @override
   void dispose() {
     _nicknameController.dispose();
@@ -30,11 +67,12 @@ class SignupScreenState extends State<SignupScreen> {
     final double screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      backgroundColor: Color(0xFFF7FBF1),
+      backgroundColor: const Color(0xFFF7FBF1),
+      resizeToAvoidBottomInset: false, // 키보드가 나타나도 UI가 고정되도록 설정
       body: Stack(
         children: [
-          _treeImage(screenWidth), // 트리 이미지
-          Positioned( // 텍스트 박스, 로고 : 중앙 상단
+          _treeImage(screenWidth),
+          Positioned(
             top: 150,
             left: 20,
             child: Stack(
@@ -54,18 +92,17 @@ class SignupScreenState extends State<SignupScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    SizedBox(height: 120),
-                    _iDInput(), // ID 입력 필드
-                    SizedBox(height: 10),
-                    _eMailInput(), // Email 입력 필드
-                    SizedBox(height: 10),
-                    _pWInput(), // PW 입력 필드
+                    const SizedBox(height: 55),
+                    _iDInput(),
+                    const SizedBox(height: 10),
+                    _eMailInput(),
+                    const SizedBox(height: 10),
+                    _pWInput(),
                   ],
                 ),
               ),
             ),
           ),
-
           Positioned( // 회원가입 버튼 : 중앙 하단
             bottom: 63,
             left: 0,
@@ -81,7 +118,6 @@ class SignupScreenState extends State<SignupScreen> {
       ),
     );
   }
-
   // 트리 이미지
   Widget _treeImage(double screenWidth) {
     return Positioned(
@@ -158,6 +194,7 @@ class SignupScreenState extends State<SignupScreen> {
         fillColor: Colors.white,
         labelText: 'ID',
         hintText: '닉네임을 입력하세요 (10자 이내)',
+        errorText: _nicknameError.isNotEmpty ? _nicknameError : null, // 오류 메시지 추가
         labelStyle: const TextStyle(color: Color(0xFF4B7E5B)),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(15),
@@ -173,6 +210,13 @@ class SignupScreenState extends State<SignupScreen> {
             width: 3.0,
           ),
         ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: const BorderSide(
+            color: Color(0xFFD2DED6), // 포커스 시 색상
+            width: 3.0,
+          ),
+        ),
       ),
       validator: (value) {
         if (value == null || value.isEmpty) {
@@ -181,7 +225,7 @@ class SignupScreenState extends State<SignupScreen> {
         if (value.length > 10) {
           return '닉네임은 10자 이내여야 합니다.';
         }
-        // Check for special characters
+        // 특수문자 검사
         if (!RegExp(r'^[a-zA-Z0-9ㄱ-ㅎ가-힣]+$').hasMatch(value)) {
           return '특수문자는 입력할 수 없습니다.';
         }
@@ -199,6 +243,7 @@ class SignupScreenState extends State<SignupScreen> {
         fillColor: Colors.white,
         labelText: 'Email',
         hintText: 'user@mail.com',
+        errorText: _emailError.isNotEmpty ? _emailError : null, // 오류 메시지 추가
         labelStyle: const TextStyle(color: Color(0xFF4B7E5B)),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(15),
@@ -214,12 +259,19 @@ class SignupScreenState extends State<SignupScreen> {
             width: 3.0,
           ),
         ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: const BorderSide(
+            color: Color(0xFFD2DED6), // 포커스 시 색상
+            width: 3.0,
+          ),
+        ),
       ),
       validator: (value) {
         if (value == null || value.isEmpty) {
           return '이메일을 입력하세요.';
         }
-        // Check for email format
+        // 이메일 형식 검사
         if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
           return '이메일 형식으로 입력하세요.';
         }
@@ -231,46 +283,52 @@ class SignupScreenState extends State<SignupScreen> {
   // PW 입력 필드
   Widget _pWInput() {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start, // 기본적으로 왼쪽 정렬
+      crossAxisAlignment: CrossAxisAlignment.start, // 왼쪽 정렬
       children: [
-        Center( // TextFormField를 중앙 정렬
-          child: TextFormField(
-            controller: _passwordController,
-            obscureText: true,
-            decoration: InputDecoration(
-              filled: true,
-              fillColor: Colors.white,
-              labelText: 'PW',
-              hintText: '비밀번호를 입력하세요.',
-              labelStyle: const TextStyle(color: Color(0xFF4B7E5B)),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(15),
-                borderSide: const BorderSide(
-                  color: Color(0xFF4B7E5B),
-                  width: 3.0,
-                ),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(15),
-                borderSide: const BorderSide(
-                  color: Color(0xFF4B7E5B),
-                  width: 3.0,
-                ),
+        TextFormField(
+          controller: _passwordController,
+          obscureText: true,
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: Colors.white,
+            labelText: 'PW',
+            hintText: '비밀번호를 입력하세요.',
+            errorText: _passwordError.isNotEmpty ? _passwordError : null, // 오류 메시지 추가
+            labelStyle: const TextStyle(color: Color(0xFF4B7E5B)),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(15),
+              borderSide: const BorderSide(
+                color: Color(0xFF4B7E5B),
+                width: 3.0,
               ),
             ),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return '비밀번호를 입력하세요.';
-              }
-              if (value.length < 6) {
-                return '비밀번호는 6자 이상이어야 합니다.';
-              }
-              return null;
-            },
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(15),
+              borderSide: const BorderSide(
+                color: Color(0xFF4B7E5B),
+                width: 3.0,
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(15),
+              borderSide: const BorderSide(
+                color: Color(0xFFD2DED6), // 포커스 시 색상
+                width: 3.0,
+              ),
+            ),
           ),
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return '비밀번호를 입력하세요.';
+            }
+            if (value.length < 6) {
+              return '비밀번호는 6자 이상이어야 합니다.';
+            }
+            return null;
+          },
         ),
         const SizedBox(height: 5),
-        Align( // Text를 우측 정렬
+        Align(
           alignment: Alignment.centerRight,
           child: const Text(
             '영문 대소문자, 숫자, 특수문자 가능',
@@ -286,6 +344,12 @@ class SignupScreenState extends State<SignupScreen> {
     return ElevatedButton(
       onPressed: () async {
         if (_formKey.currentState!.validate()) {
+          // 이전 오류 메시지 초기화
+          setState(() {
+            _nicknameError = '';
+            _emailError = '';
+            _passwordError = '';
+          });
           // 회원가입 처리 로직
           await _signup();
         }
@@ -322,12 +386,9 @@ class SignupScreenState extends State<SignupScreen> {
       if (documents.isNotEmpty) {
         // 닉네임이 이미 존재함
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('중복된 닉네임입니다.', style: TextStyle(color: Colors.red)),
-            backgroundColor: Colors.white,
-          ),
-        );
+        setState(() {
+          _nicknameError = '중복된 닉네임입니다.';
+        });
         return;
       }
 
@@ -335,51 +396,62 @@ class SignupScreenState extends State<SignupScreen> {
       UserCredential userCredential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password);
 
-      // 추가 정보 Firestore에 저장
+      // 회원가입시 비교용
+      await FirebaseFirestore.instance
+          .collection('public_users')
+          .doc(userCredential.user!.uid)
+          .set({
+        'nickname': nickname,
+        'email': email,
+        'bio': '안녕하세요',
+      });
+
+      // 개인 유저용
       await FirebaseFirestore.instance
           .collection('users')
           .doc(userCredential.user!.uid)
           .set({
         'nickname': nickname,
         'email': email,
+        'bio': '안녕하세요',
+        'profileImage': 'assets/images/basic_profile.png',
       });
 
-      // 회원가입 성공 처리
+      // 회원가입 성공 시 에러 메시지 초기화
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('회원가입이 완료되었습니다.', style: TextStyle(color: Colors.green)),
-          backgroundColor: Colors.white,
-        ),
+      setState(() {
+        _nicknameError = '';
+        _emailError = '';
+        _passwordError = '';
+      });
+
+      // 회원가입 성공 토스트 메시지 표시
+      Fluttertoast.showToast(
+        msg: "회원가입 성공!",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: const Color(0xFF4B7E5B),
+        textColor: Colors.white,
+        fontSize: 16.0,
       );
+
       // 로그인 페이지로 이동
-      if (!mounted) return;
       context.go('/start/login');
 
     } on FirebaseAuthException catch (e) {
-      String message;
-      if (e.code == 'email-already-in-use') {
-        message = '이미 사용 중인 이메일입니다.';
-      } else if (e.code == 'weak-password') {
-        message = '비밀번호는 6자 이상이어야 합니다.';
-      } else {
-        message = '회원가입에 실패했습니다. (${e.code})';
-      }
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(message, style: TextStyle(color: Colors.red)),
-          backgroundColor: Colors.white,
-        ),
-      );
+      setState(() {
+        if (e.code == 'email-already-in-use') {
+          _emailError = '이미 사용 중인 이메일입니다.';
+        } else if (e.code == 'weak-password') {
+          _passwordError = '비밀번호는 6자 이상이어야 합니다.';
+        } else {
+          _emailError = '회원가입에 실패했습니다. (${e.code})';
+        }
+      });
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('회원가입에 실패했습니다: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      // 기타 예외 처리
     }
   }
 }

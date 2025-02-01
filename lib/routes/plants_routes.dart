@@ -13,11 +13,21 @@ class PlantsRoutes {
       routes: [
         GoRoute(
           path: 'register', // /plants/register
-          builder: (context, state) => MyPlantRegisterScreen(),
+          builder: (context, state) {
+            final extra = state.extra as Map<String, dynamic>? ?? {};
+            return MyPlantRegisterScreen(
+              isEditing: extra['isEditing'] ?? false,
+              plantId: extra['plantId'] as String?,
+              plantData: extra['plantData'] as Map<String, dynamic>?,
+            );
+          },
         ),
         GoRoute(
-          path: 'timeline', // /plants/timeline
-          builder: (context, state) => MyPlantTimelineScreen(),
+          path: 'timeline/:plantId', // /plants/timeline/식물고유ID
+          builder: (context, state) {
+            final plantId = state.pathParameters['plantId']!;
+            return MyPlantTimelineScreen(plantId: plantId);
+          },
         ),
       ],
     ),
