@@ -42,69 +42,11 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
   // 식물 개수
   int _plantCount = 0;
 
+  // _onItemTapped는 한 번만 정의합니다.
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
-  }
-
-  // 사진 선택 및 업로드 함수
-  void _pickImage() async {
-    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
-    if (image != null) {
-      if (!mounted) return;
-      setState(() {
-        _image = image;
-      });
-      // 업로드 및 Firestore 업데이트
-      await _uploadProfileImage(File(_image!.path));
-    }
-  }
-
-  // 이미지 업로드 함수
-  Future<void> _uploadProfileImage(File imageFile) async {
-    try {
-      if (_user == null) return;
-
-      final storageRef = FirebaseStorage.instance
-          .ref()
-          .child('profile_images')
-          .child('${_user!.uid}.jpg');
-      await storageRef.putFile(imageFile);
-
-      // 업로드된 이미지의 URL 가져오기
-      String downloadUrl = await storageRef.getDownloadURL();
-
-      // Firestore에 이미지 URL 업데이트
-      await _firestore.collection('users').doc(_user!.uid).update({
-        'profileImage': downloadUrl,
-      });
-
-      if (!mounted) return; // 위젯이 마운트되어 있는지 확인
-
-      setState(() {
-        _profileImageUrl = downloadUrl;
-      });
-
-      Fluttertoast.showToast(
-        msg: "프로필 이미지가 업데이트되었습니다.",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Color(0xFF4B7E5B),
-        textColor: Colors.white,
-        fontSize: 16.0,
-      );
-    } catch (e) {
-      print('Error uploading profile image: ${e.toString()}');
-      Fluttertoast.showToast(
-        msg: "이미지 업로드 실패: ${e.toString()}",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-        fontSize: 16.0,
-      );
-    }
   }
 
   @override
@@ -127,26 +69,23 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
       if (userDoc.exists) {
         Map<String, dynamic>? data = userDoc.data() as Map<String, dynamic>?;
         if (data != null) {
-          if (!mounted) return; // 위젯이 마운트되어 있는지 확인
+          if (!mounted) return; // 추가된 부분
           setState(() {
             _nickname = data['nickname'] ?? '';
             _bio = data['bio'] ?? '';
             _profileImageUrl = data['profileImage'] as String?;
-
-            // 프로필 이미지 URL이 로컬 경로인 경우 null로 설정하여 기본 이미지 사용
             if (_profileImageUrl != null && !_profileImageUrl!.startsWith('http')) {
               _profileImageUrl = null;
             }
-
             _nameController.text = _nickname;
             _introController.text = _bio;
-            _isLoading = false; // 데이터 로딩 완료
+            _isLoading = false;
           });
         }
       } else {
-        if (!mounted) return;
+        if (!mounted) return; // 추가된 부분
         setState(() {
-          _isLoading = false; // 데이터 로딩 완료
+          _isLoading = false;
         });
       }
     } catch (e) {
@@ -159,9 +98,9 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
         textColor: Colors.white,
         fontSize: 16.0,
       );
-      if (!mounted) return;
+      if (!mounted) return; // 추가된 부분
       setState(() {
-        _isLoading = false; // 데이터 로딩 완료
+        _isLoading = false;
       });
     }
   }
@@ -172,17 +111,25 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
       QuerySnapshot plantSnapshot = await _firestore
           .collection('users')
           .doc(_user!.uid)
-          .collection('plants') // 식물이 저장된 컬렉션 이름
+          .collection('plants')
           .get();
 
-      if (!mounted) return;
-
+      if (!mounted) return; // 추가된 부분
       setState(() {
         _plantCount = plantSnapshot.docs.length;
       });
     } catch (e) {
       print('Error fetching plant count: $e');
-      // Optionally, show a toast or handle the error
+    }
+  }
+
+  // 여기서 _pickImage 메서드를 추가합니다.
+  Future<void> _pickImage() async {
+    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      setState(() {
+        _image = image;
+      });
     }
   }
 
@@ -201,7 +148,7 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
       builder: (BuildContext dialogContext) {
         return AlertDialog(
           title: Text("계정 탈퇴"),
-          content: Text("정말 탈퇴 하시겠습니까?"),
+          content: Text("정말 탈퇴하시겠습니까?"),
           actions: [
             TextButton(
               onPressed: () {
@@ -213,8 +160,8 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
               onPressed: () async {
                 dialogContext.pop(); // 팝업 닫기 (먼저 실행)
                 await _deleteAccount(); // 비동기 함수 호출
-                // 예를 들어, 탈퇴 후 로그인 화면으로 이동
-                context.go('start/login'); // 필요한 경로로 변경
+                // 탈퇴 후 로그인 화면으로 이동
+                context.go('start/login');
               },
               child: Text("예"),
             ),
@@ -245,7 +192,6 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
         fontSize: 16.0,
       );
 
-      // 계정 탈퇴 후 로그인 페이지로 이동
       if (!mounted) return;
       context.go('/start/login'); // 로그인 페이지로 이동
     } catch (e) {
@@ -274,7 +220,7 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
       backgroundColor: Colors.white,
       appBar: _buildAppBar(), // 상단 바
       body: _isLoading
-          ? Center(child: CircularProgressIndicator()) // 데이터 로딩 중일 때 로딩 표시
+          ? Center(child: CircularProgressIndicator())
           : Padding(
         padding: const EdgeInsets.only(right: 18.0, left: 18.0),
         child: Column(
@@ -332,7 +278,6 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
               alignment: Alignment.center,
               child: InkWell(
                 onTap: () {
-                  // 계정 탈퇴 로직
                   _showWithdrawDialog(context);
                 },
                 child: Padding(
@@ -352,14 +297,12 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
         ),
       ),
       bottomNavigationBar: MyBottomNavigationBar(
-        // 하단 네비게이션바
         selectedIndex: _selectedIndex,
         onItemTapped: _onItemTapped,
       ),
     );
   }
 
-  // 상단 바
   AppBar _buildAppBar() {
     return AppBar(
       scrolledUnderElevation: 0,
@@ -374,11 +317,9 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
         ),
       ),
       actions: [
-        // 오른쪽 끝 배치
         Padding(
           padding: const EdgeInsets.only(right: 18.0),
           child: InkWell(
-            // PW변경 버튼
             onTap: () {
               _showPasswordChangeModal();
             },
@@ -396,15 +337,14 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
     );
   }
 
-  // 사진 등록 ImagePicker
   Widget _imagePicker() {
     return GestureDetector(
-      onTap: _pickImage, // 새로운 사진 선택 가능
+      onTap: _pickImage, // _pickImage 메서드 호출
       child: CircleAvatar(
         radius: 50, // 동그란 모양의 크기 (지름의 절반)
-        backgroundColor: Colors.grey[200], // 배경색
+        backgroundColor: Colors.grey[200],
         backgroundImage: _image != null
-            ? FileImage(File(_image!.path))
+            ? FileImage(File(_image!.path)) // 이미지가 있으면 표시
             : (_profileImageUrl != null && _profileImageUrl!.startsWith('http'))
             ? NetworkImage(_profileImageUrl!)
             : AssetImage('assets/images/basic_profile.png') as ImageProvider,
@@ -419,7 +359,6 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
     );
   }
 
-  // 닉네임, 소개글 편집
   Widget _editProfileInfo() {
     return Padding(
       padding: const EdgeInsets.only(left: 4.0, top: 8.0),
@@ -482,7 +421,6 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
     );
   }
 
-  // 수정 완료 버튼
   Widget _editCompleteButton() {
     return ElevatedButton(
       onPressed: () async {
@@ -496,11 +434,9 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
     );
   }
 
-  // 프로필 저장 함수
   Future<void> _saveProfile() async {
     if (_user == null) return;
     try {
-      // Firestore에 데이터 업데이트
       await _firestore.collection('users').doc(_user!.uid).update({
         'nickname': _nameController.text,
         'bio': _introController.text,
@@ -513,9 +449,8 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
         textColor: Colors.white,
         fontSize: 16.0,
       );
-
-      if (!mounted) return;
-      context.pop(true); // 변경 사항이 있음을 알림
+      if (!mounted) return; // 추가된 부분
+      context.pop(true);
     } catch (e) {
       print('Error updating profile: ${e.toString()}');
       Fluttertoast.showToast(
@@ -529,7 +464,6 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
     }
   }
 
-  // 내식물모음페이지에 있는 식물 개수
   Widget _plantsNumber() {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -555,7 +489,6 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
     );
   }
 
-  // 나의 게시물 개수
   Widget _myPostsNumber() {
     return Padding(
       padding: const EdgeInsets.only(left: 6.0),
@@ -567,16 +500,16 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
     );
   }
 
-  // 나의 게시물들 (동적으로 가져오기)
   Widget _myPosts() {
-    if (_user == null) {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
       return Center(child: Text('로그인 후 이용해주세요.'));
     }
 
     return StreamBuilder<QuerySnapshot>(
-      stream: _firestore
+      stream: FirebaseFirestore.instance
           .collection('users')
-          .doc(_user!.uid)
+          .doc(user.uid)
           .collection('posts')
           .orderBy('createdAt', descending: true)
           .snapshots(),
@@ -589,8 +522,6 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
         }
 
         final docs = snapshot.data!.docs;
-
-        // 이미지 URL만 추출하여 리스트 생성
         final imageUrls = docs.map((doc) {
           final data = doc.data() as Map<String, dynamic>;
           final imageUrlList = List<String>.from(data['imageUrl'] ?? []);
@@ -602,6 +533,8 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
         }
 
         return GridView.builder(
+          shrinkWrap: true,
+          physics: NeverScrollableScrollPhysics(),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 3,
             crossAxisSpacing: 8,
@@ -611,7 +544,6 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
           itemBuilder: (context, index) {
             return GestureDetector(
               onTap: () {
-                // 클릭 시 상세 페이지로 이동, docId 전달 필요
                 final docId = docs[index].id;
                 context.push('/community/detail', extra: {'docId': docId});
               },

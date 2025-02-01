@@ -86,14 +86,15 @@ class PostCreateScreenState extends State<PostCreateScreen> {
         msg: "수정할 게시물을 찾을 수 없습니다.",
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
-        backgroundColor: Color(0xFF812727), // 배경색
-        textColor: Colors.white, // 글자 색
+        backgroundColor: Color(0xFF812727),
+        textColor: Colors.white,
         fontSize: 16.0,
       );
       if (mounted) context.pop();
     }
   }
 
+  // 여기서 _pickImage 메서드를 정의합니다.
   Future<void> _pickImage() async {
     final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
     if (image != null) {
@@ -116,14 +117,13 @@ class PostCreateScreenState extends State<PostCreateScreen> {
         msg: "로그인 후 이용해주세요",
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
-        backgroundColor: Color(0xFF812727), // 배경색
-        textColor: Colors.white, // 글자 색
+        backgroundColor: Color(0xFF812727),
+        textColor: Colors.white,
         fontSize: 16.0,
       );
       return;
     }
 
-    // Firestore에서 현재 사용자 닉네임, 프로필 가져오기
     final userDoc = await FirebaseFirestore.instance
         .collection('users')
         .doc(user.uid)
@@ -152,7 +152,6 @@ class PostCreateScreenState extends State<PostCreateScreen> {
         }
       }
 
-      // 선택한 식물의 정보를 가져오기
       String selectedPlantName = _selectedPlantName ?? '선택안함';
       Map<String, dynamic>? plantData;
 
@@ -170,15 +169,12 @@ class PostCreateScreenState extends State<PostCreateScreen> {
         }
       }
 
-      // 'details' 필드 구성 (환경 필드 제거)
       final details = [
         {'식물 종': selectedPlantName},
         {'물 주기': plantData?['waterCycle']?.toString() ?? '정보 없음'},
         {'분갈이 주기': plantData?['fertilizerCycle']?.toString() ?? '정보 없음'},
-        // { '환경': plantData?['environment']?.toString() ?? '정보 없음' } // 제거
       ];
 
-      // 디버그 출력
       print("Selected Plant Name: $selectedPlantName");
       print("Plant Data: $plantData");
       print("Details: $details");
@@ -189,7 +185,6 @@ class PostCreateScreenState extends State<PostCreateScreen> {
           .collection('posts');
 
       if (_docId != null) {
-        // 수정 모드
         final docRef = postsRef.doc(_docId);
         final docSnap = await docRef.get();
         if (!docSnap.exists) {
@@ -198,8 +193,8 @@ class PostCreateScreenState extends State<PostCreateScreen> {
             msg: "게시물을 찾을 수 없습니다.",
             toastLength: Toast.LENGTH_SHORT,
             gravity: ToastGravity.BOTTOM,
-            backgroundColor: Color(0xFF812727), // 배경색
-            textColor: Colors.white, // 글자 색
+            backgroundColor: Color(0xFF812727),
+            textColor: Colors.white,
             fontSize: 16.0,
           );
           return;
@@ -221,7 +216,6 @@ class PostCreateScreenState extends State<PostCreateScreen> {
         if (!mounted) return; // 추가된 부분
         context.pop({'docId': _docId, 'action': 'update'});
       } else {
-        // 신규 작성
         final newDoc = await postsRef.add({
           'uid': user.uid,
           'name': nickname,
@@ -233,21 +227,21 @@ class PostCreateScreenState extends State<PostCreateScreen> {
           'updatedAt': FieldValue.serverTimestamp(),
         });
 
-        print("New post created with docId: ${newDoc.id}"); // 디버그 출력
+        print("New post created with docId: ${newDoc.id}");
 
         if (!mounted) return; // 추가된 부분
-        Navigator.pop(context); // 로딩 닫기
+        Navigator.pop(context);
         if (!mounted) return; // 추가된 부분
         context.pop({'docId': newDoc.id});
       }
     } catch (e) {
-      if (mounted) Navigator.pop(context); // 로딩 닫기
+      if (mounted) Navigator.pop(context);
       Fluttertoast.showToast(
         msg: "등록 실패..",
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
-        backgroundColor: Color(0xFF812727), // 배경색
-        textColor: Colors.white, // 글자 색
+        backgroundColor: Color(0xFF812727),
+        textColor: Colors.white,
         fontSize: 16.0,
       );
     }
