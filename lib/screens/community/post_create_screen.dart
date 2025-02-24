@@ -30,9 +30,9 @@ class PostCreateScreenState extends State<PostCreateScreen> {
   void initState() {
     super.initState();
     _docId = widget.docId; // widget.docId로 설정
-    print("PostCreateScreen initState with docId: $_docId"); // 디버그 출력
+    print("PostCreateScreen initState with docId: $_docId");
     _loadEditingData();
-    _fetchUserPlants(); // 내 식물 목록 가져오기
+    _fetchUserPlants();
   }
 
   Future<void> _fetchUserPlants() async {
@@ -61,14 +61,8 @@ class PostCreateScreenState extends State<PostCreateScreen> {
 
   Future<void> _loadEditingData() async {
     if (_docId == null) return;
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
-
-    final docRef = FirebaseFirestore.instance
-        .collection('users')
-        .doc(user.uid)
-        .collection('posts')
-        .doc(_docId);
+    // 공용 컬렉션 'posts'에서 게시글을 불러옵니다.
+    final docRef = FirebaseFirestore.instance.collection('posts').doc(_docId);
 
     final docSnap = await docRef.get();
     if (docSnap.exists) {
@@ -85,8 +79,8 @@ class PostCreateScreenState extends State<PostCreateScreen> {
         msg: "수정할 게시물을 찾을 수 없습니다.",
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
-        backgroundColor: const Color(0xFF812727), // 배경색
-        textColor: Colors.white, // 글자 색
+        backgroundColor: const Color(0xFF812727),
+        textColor: Colors.white,
         fontSize: 16.0,
       );
       if (mounted) context.pop();
@@ -115,16 +109,18 @@ class PostCreateScreenState extends State<PostCreateScreen> {
         msg: "로그인 후 이용해주세요",
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
-        backgroundColor: const Color(0xFF812727), // 배경색
-        textColor: Colors.white, // 글자 색
+        backgroundColor: const Color(0xFF812727),
+        textColor: Colors.white,
         fontSize: 16.0,
       );
       return;
     }
 
-    // 더 이상 사용자 닉네임이나 프로필 이미지를 저장하지 않습니다.
-    // 대신 게시글에는 userId만 저장해서, 나중에 게시글을 표시할 때 최신 사용자 정보를 가져올 수 있습니다.
+    // 게시글 저장 시 사용자 정보는 따로 저장하지 않고, userId만 저장합니다.
+    // 공용 컬렉션 'posts'에 저장합니다.
+    final postsRef = FirebaseFirestore.instance.collection('posts');
 
+    // 로딩 다이얼로그 표시
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -146,7 +142,7 @@ class PostCreateScreenState extends State<PostCreateScreen> {
         }
       }
 
-      // 선택한 식물의 정보를 가져오기
+      // 선택한 식물 정보를 가져옵니다.
       String selectedPlantName = _selectedPlantName ?? '선택안함';
       Map<String, dynamic>? plantData;
 
@@ -164,34 +160,20 @@ class PostCreateScreenState extends State<PostCreateScreen> {
         }
       }
 
-      // 'details' 필드 구성 (환경 필드 제거)
       final details = [
         {'식물 종': selectedPlantName},
+        {'물 주기': plantData?['waterCycle']?.toString() ?? '정보 없음'},
         {
-          '물 주기': plantData?['waterCycle']?.toString() ?? '정보 없음'
-        },
-        {
-          '분갈이 주기':
-          plantData?['fertilizerCycle']?.toString() ?? '정보 없음'
+          '분갈이 주기': plantData?['fertilizerCycle']?.toString() ?? '정보 없음'
         },
       ];
 
-      // 디버그 출력
-      print("Selected Plant Name: $selectedPlantName");
-      print("Plant Data: $plantData");
-      print("Details: $details");
-
-      final postsRef = FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .collection('posts');
-
       if (_docId != null) {
-        // 수정 모드: 기존 게시글 업데이트 (userId는 변하지 않으므로 변경하지 않습니다.)
+        // 수정 모드: 기존 게시글 업데이트
         final docRef = postsRef.doc(_docId);
         final docSnap = await docRef.get();
         if (!docSnap.exists) {
-          context.pop();
+          Navigator.pop(context); // 로딩 닫기
           Fluttertoast.showToast(
             msg: "게시물을 찾을 수 없습니다.",
             toastLength: Toast.LENGTH_SHORT,
@@ -217,7 +199,7 @@ class PostCreateScreenState extends State<PostCreateScreen> {
         if (mounted) Navigator.pop(context);
         if (mounted) context.pop({'docId': _docId, 'action': 'update'});
       } else {
-        // 신규 작성: 사용자 정보를 별도로 저장하지 않고, userId만 저장합니다.
+        // 신규 작성: 공용 컬렉션에 저장 및 userId 포함
         final newDoc = await postsRef.add({
           'userId': user.uid,
           'contents': _textController.text.trim(),
@@ -228,12 +210,11 @@ class PostCreateScreenState extends State<PostCreateScreen> {
         });
 
         print("New post created with docId: ${newDoc.id}");
-
-        if (mounted) Navigator.pop(context); // 로딩 닫기
+        if (mounted) Navigator.pop(context);
         if (mounted) context.pop({'docId': newDoc.id});
       }
     } catch (e) {
-      if (mounted) Navigator.pop(context); // 로딩 닫기
+      if (mounted) Navigator.pop(context);
       Fluttertoast.showToast(
         msg: "등록 실패..",
         toastLength: Toast.LENGTH_SHORT,
@@ -356,8 +337,7 @@ class PostCreateScreenState extends State<PostCreateScreen> {
                       color: Colors.red,
                       shape: BoxShape.circle,
                     ),
-                    child:
-                    const Icon(Icons.close, size: 15, color: Colors.white),
+                    child: const Icon(Icons.close, size: 15, color: Colors.white),
                   ),
                 ),
               ),
@@ -388,18 +368,15 @@ class PostCreateScreenState extends State<PostCreateScreen> {
       minLines: 15,
       decoration: InputDecoration(
         hintText: '당신의 식물 이야기를 들려주세요!',
-        hintStyle:
-        const TextStyle(color: Color(0xFFB3B3B3), fontSize: 13),
+        hintStyle: const TextStyle(color: Color(0xFFB3B3B3), fontSize: 13),
         contentPadding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide:
-          const BorderSide(color: Color(0xFFB3B3B3), width: 1),
+          borderSide: const BorderSide(color: Color(0xFFB3B3B3), width: 1),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide:
-          const BorderSide(color: Color(0xFF4B7E5B), width: 1),
+          borderSide: const BorderSide(color: Color(0xFF4B7E5B), width: 1),
         ),
       ),
       style: const TextStyle(fontSize: 13, color: Colors.black),
@@ -409,8 +386,7 @@ class PostCreateScreenState extends State<PostCreateScreen> {
   Widget _bottomButton() {
     return Container(
       color: Colors.white,
-      padding:
-      const EdgeInsets.symmetric(vertical: 10, horizontal: 18),
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 18),
       child: Row(
         children: [
           Expanded(

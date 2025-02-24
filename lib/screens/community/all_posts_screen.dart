@@ -23,9 +23,9 @@ class _AllPostsScreenState extends State<AllPostsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // 로그인 여부 확인 (로그인하지 않아도 읽을 수 있도록 보안 규칙 확인 필요)
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      // 로그인 안된 경우
       return const Scaffold(
         body: Center(child: Text("로그인 후 이용해주세요.")),
       );
@@ -36,9 +36,7 @@ class _AllPostsScreenState extends State<AllPostsScreen> {
       appBar: _buildAppBar(),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
-            .collection('users')
-            .doc(user.uid)
-            .collection('posts')
+            .collection('posts') // 공용 컬렉션에서 조회
             .orderBy('createdAt', descending: true)
             .snapshots(),
         builder: (context, snapshot) {
@@ -64,7 +62,6 @@ class _AllPostsScreenState extends State<AllPostsScreen> {
             itemBuilder: (context, index) {
               final postData = docs[index].data() as Map<String, dynamic>;
               final docId = docs[index].id;
-              // 게시물에는 사용자 ID만 저장되어 있음
               final userId = postData['userId'];
               final contents = postData['contents'] ?? '';
               final imageUrls = List<String>.from(postData['imageUrl'] ?? []);
@@ -82,11 +79,10 @@ class _AllPostsScreenState extends State<AllPostsScreen> {
                   }
                   final userData = userSnapshot.data!.data() as Map<String, dynamic>;
                   final name = userData['nickname'] ?? '알 수 없음';
-                  final profileImage = userData['profileImage'] ?? '';
+                  final profileImage = userData['profileImage'] ?? 'assets/images/basic_profile.png';
 
                   return GestureDetector(
                     onTap: () {
-                      // docId 전달 및 디버그 출력
                       print("Clicked post with docId: $docId");
                       context.push('/community/detail', extra: {'docId': docId});
                     },
@@ -123,9 +119,7 @@ class _AllPostsScreenState extends State<AllPostsScreen> {
           fontWeight: FontWeight.bold,
         ),
       ),
-      actions: [
-        _writeButton(),
-      ],
+      actions: [_writeButton()],
     );
   }
 
