@@ -623,46 +623,9 @@ class _MyPlantRegisterScreenState extends State<MyPlantRegisterScreen> {
     required DateTime selectedDate,
     required Function(DateTime) onDateSelected,
   }) {
-    return GestureDetector(
-      onTap: () {
-        // 캘린더 모달 열기
-        showDialog(
-          context: context,
-          builder: (context) => CalendarModal(
-            initialDate: selectedDate,
-            onDateSelected: onDateSelected,
-          ),
-        );
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 35),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(50),
-          border: Border.all(
-            color: const Color(0xFFE6E6E6),
-            width: 2.0,
-          ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              '${selectedDate.year}.${selectedDate.month.toString().padLeft(2, '0')}.${selectedDate.day.toString().padLeft(2, '0')}',
-              style: const TextStyle(
-                fontSize: 15,
-                color: Colors.black,
-              ),
-            ),
-            const SizedBox(width: 10),
-            const Icon(
-              Icons.calendar_today, // 캘린더 아이콘
-              size: 16,
-              color: Color(0xFF697386),
-            ),
-          ],
-        ),
-      ),
+    return CalendarModalButton(
+      selectedDate: selectedDate,
+      onDateSelected: onDateSelected,
     );
   }
 
@@ -750,6 +713,62 @@ class CycleModalButton extends StatelessWidget {
               color: Color(0xFF697386),
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class CalendarModalButton extends StatelessWidget {
+  final DateTime selectedDate;
+  final ValueChanged<DateTime> onDateSelected;
+
+  const CalendarModalButton({
+    Key? key,
+    required this.selectedDate,
+    required this.onDateSelected,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        // 캘린더 모달 열기
+        showDialog(
+          context: context,
+          builder: (context) => CalendarModal(
+            initialDate: selectedDate,
+            onDateSelected: onDateSelected,
+          ),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 35),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(50),
+          border: Border.all(
+            color: const Color(0xFFE6E6E6),
+            width: 2.0,
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              '${selectedDate.year}.${selectedDate.month.toString().padLeft(2, '0')}.${selectedDate.day.toString().padLeft(2, '0')}',
+              style: const TextStyle(
+                fontSize: 15,
+                color: Colors.black,
+              ),
+            ),
+            const SizedBox(width: 10),
+            const Icon(
+              Icons.calendar_today,
+              size: 16,
+              color: Color(0xFF697386),
+            ),
+          ],
         ),
       ),
     );
