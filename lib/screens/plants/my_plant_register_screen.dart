@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import '../modals/cycle_setting_modal.dart';
 import '../modals/calendar_modal.dart';
+import 'package:plant/widgets/inputs/temperature_slider.dart';
 
 class MyPlantRegisterScreen extends StatefulWidget {
   final Map<String, dynamic>? plantData; // 수정 모드일 경우 식물 데이터를 전달받음
@@ -543,62 +544,13 @@ class _MyPlantRegisterScreenState extends State<MyPlantRegisterScreen> {
           const SizedBox(height: 20),
 
           // 온도 슬라이더
-          Column(
-            children: [
-              Text(
-                "온도: ${temperature.toStringAsFixed(1)}°C",
-                style: const TextStyle(
-                  fontSize: 13,
-                  color: Color(0xFF697386),
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    "-10",
-                    style: TextStyle(fontSize: 12, color: Color(0xFFB3B3B3)),
-                  ),
-                  SizedBox(
-                    width: 250, // 슬라이더 크기
-                    child: SliderTheme(
-                      data: SliderThemeData(
-                        activeTrackColor: const Color(0xFFE6E6E6),
-                        inactiveTrackColor: const Color(0xFFE6E6E6),
-                        thumbColor: const Color(0xFF4B7E5B),
-                        trackHeight: 3.0,
-                        thumbShape: const RoundSliderThumbShape(
-                          enabledThumbRadius: 6.0,
-                        ),
-                        valueIndicatorShape:
-                            const PaddleSliderValueIndicatorShape(),
-                        valueIndicatorColor: const Color(0xFF4B7E5B),
-                        valueIndicatorTextStyle: const TextStyle(
-                          color: Colors.white,
-                        ),
-                      ),
-                      child: Slider(
-                        value: temperature,
-                        min: -10,
-                        max: 40,
-                        divisions: 50,
-                        label: '${temperature.toStringAsFixed(1)}°C',
-                        onChanged: (value) {
-                          setState(() {
-                            temperature = value;
-                          });
-                        },
-                      ),
-                    ),
-                  ),
-                  const Text(
-                    "40",
-                    style: TextStyle(fontSize: 12, color: Color(0xFFB3B3B3)),
-                  ),
-                ],
-              ),
-            ],
+          TemperatureSlider(
+            temperature: temperature,
+            onChanged: (value) {
+              setState(() {
+                temperature = value;
+              });
+            },
           ),
         ],
       ),
