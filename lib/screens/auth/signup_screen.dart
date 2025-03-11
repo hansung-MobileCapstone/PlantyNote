@@ -3,6 +3,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:plant/widgets/inputs/custom_text_form_field.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -83,8 +84,8 @@ class SignupScreenState extends State<SignupScreen> {
               ],
             ),
           ),
-
-          Center( // 입력 필드 (ID, Email, PW)
+          Center(
+            // 입력 필드 (ID, Email, PW)
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 40.0),
               child: Form(
@@ -103,7 +104,8 @@ class SignupScreenState extends State<SignupScreen> {
               ),
             ),
           ),
-          Positioned( // 회원가입 버튼 : 중앙 하단
+          Positioned(
+            // 회원가입 버튼 : 중앙 하단
             bottom: 63,
             left: 0,
             right: 0,
@@ -118,6 +120,7 @@ class SignupScreenState extends State<SignupScreen> {
       ),
     );
   }
+
   // 트리 이미지
   Widget _treeImage(double screenWidth) {
     return Positioned(
@@ -194,7 +197,8 @@ class SignupScreenState extends State<SignupScreen> {
         fillColor: Colors.white,
         labelText: 'ID',
         hintText: '닉네임을 입력하세요 (10자 이내)',
-        errorText: _nicknameError.isNotEmpty ? _nicknameError : null, // 오류 메시지 추가
+        errorText: _nicknameError.isNotEmpty ? _nicknameError : null,
+        // 오류 메시지 추가
         labelStyle: const TextStyle(color: Color(0xFF4B7E5B)),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(15),
@@ -236,42 +240,15 @@ class SignupScreenState extends State<SignupScreen> {
 
   // Email 입력 필드
   Widget _eMailInput() {
-    return TextFormField(
+    return CustomTextFormField(
       controller: _emailController,
-      decoration: InputDecoration(
-        filled: true,
-        fillColor: Colors.white,
-        labelText: 'Email',
-        hintText: 'user@mail.com',
-        errorText: _emailError.isNotEmpty ? _emailError : null, // 오류 메시지 추가
-        labelStyle: const TextStyle(color: Color(0xFF4B7E5B)),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(15),
-          borderSide: const BorderSide(
-            color: Color(0xFF4B7E5B),
-            width: 3.0,
-          ),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(15),
-          borderSide: const BorderSide(
-            color: Color(0xFF4B7E5B),
-            width: 3.0,
-          ),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(15),
-          borderSide: const BorderSide(
-            color: Color(0xFFD2DED6), // 포커스 시 색상
-            width: 3.0,
-          ),
-        ),
-      ),
+      labelText: 'Email',
+      hintText: 'user@mail.com',
+      errorText: _emailError.isNotEmpty ? _emailError : null,
       validator: (value) {
         if (value == null || value.isEmpty) {
           return '이메일을 입력하세요.';
         }
-        // 이메일 형식 검사
         if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
           return '이메일 형식으로 입력하세요.';
         }
@@ -293,7 +270,8 @@ class SignupScreenState extends State<SignupScreen> {
             fillColor: Colors.white,
             labelText: 'PW',
             hintText: '비밀번호를 입력하세요.',
-            errorText: _passwordError.isNotEmpty ? _passwordError : null, // 오류 메시지 추가
+            errorText: _passwordError.isNotEmpty ? _passwordError : null,
+            // 오류 메시지 추가
             labelStyle: const TextStyle(color: Color(0xFF4B7E5B)),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(15),
@@ -437,7 +415,6 @@ class SignupScreenState extends State<SignupScreen> {
 
       // 로그인 페이지로 이동
       context.go('/start/login');
-
     } on FirebaseAuthException catch (e) {
       if (!mounted) return;
       setState(() {

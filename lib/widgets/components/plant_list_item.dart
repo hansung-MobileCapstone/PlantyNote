@@ -143,34 +143,37 @@ class _PlantListItemState extends State<PlantListItem> {
   void _showWateringDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12)),
-          title: Text("물 주기"),
-          content: Text("${widget.plantName}에게 물을 주시겠습니까?"),
-          actions: [
-            // 아니오 버튼
-            TextButton(
-              onPressed: () { context.pop(); }, // 팝업 닫기
-              child: const Text("아니오"),
-            ),
-            // 예 버튼
-            TextButton(
-              onPressed: () async {
-                context.pop(); // 팝업 닫기
-                try {
-                  await _updateWaterDate(); // 물 주기 로직
-                  _showToast("${widget.plantName}에게 물을 주었습니다!");
-                } catch (e) {
-                  _showToast("물 주기 실패..");
-                }
-              },
-              child: const Text("예"),
-            ),
-          ],
-        );
-      },
+      builder: (BuildContext context) => _buildWateringDialog(context),
+    );
+  }
+
+  Widget _buildWateringDialog(BuildContext context) {
+    return AlertDialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      title: Text("물 주기"),
+      content: Text("${widget.plantName}에게 물을 주시겠습니까?"),
+      actions: [
+        // 아니오 버튼
+        TextButton(
+          onPressed: () { context.pop(); }, // 팝업 닫기
+          child: const Text("아니오"),
+        ),
+        // 예 버튼
+        TextButton(
+          onPressed: () async {
+            context.pop(); // 팝업 닫기
+            try {
+              await _updateWaterDate(); // 물 주기 로직
+              _showToast("${widget.plantName}에게 물을 주었습니다!");
+            } catch (e) {
+              _showToast("물 주기 실패..");
+            }
+          },
+          child: const Text("예"),
+        ),
+      ],
     );
   }
 
