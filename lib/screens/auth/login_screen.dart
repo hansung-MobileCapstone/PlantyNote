@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../../util/LocalNotification.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -84,6 +85,21 @@ class LoginScreenState extends State<LoginScreen> {
                 _loginButton(context), // 로그인 버튼
                 const SizedBox(height: 5),
                 _signupButton(context), // 회원가입 버튼
+                const SizedBox(height: 10),
+                GestureDetector( // 추가된 GestureDetector
+                  onTap: () {
+                    LocalNotification.showSimpleNotification(
+                      title: '테스팅 11',
+                      body: '제발요',
+                      payload: "일반 푸시 알람 데이터",
+                    );
+                  },
+                  child: const Icon(
+                    Icons.notifications, // 아이콘 변경 가능
+                    size: 30,
+                    color: Colors.green, // 원하는 색상 설정
+                  ),
+                ),
               ],
             ),
           ),

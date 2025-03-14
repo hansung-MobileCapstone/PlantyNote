@@ -41,6 +41,10 @@ dependencies:
   firebase_storage: ^12.3.6
   cloud_firestore: ^5.5.0
 
+  flutter_local_notifications: ^18.0.1
+  permission_handler: ^11.4.0
+  timezone: ^0.9.4
+
 
   provider: ^6.1.2
   shared_preferences: ^2.3.3
