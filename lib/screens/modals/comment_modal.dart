@@ -40,13 +40,15 @@ class _CommentModalState extends State<CommentModal> {
         return;
       }
 
-      // Firestore에서 현재 사용자 닉네임 가져오기
+      // Firestore에서 현재 사용자 닉네임 및 프로필 이미지 가져오기
       final userDoc = await FirebaseFirestore.instance
           .collection('users')
           .doc(user.uid)
           .get();
 
       final nickname = userDoc.data()?['nickname'] ?? '알수없음';
+      final profileImageUrl = userDoc.data()?['profileImage'] ??
+          'assets/images/basic_profile.png';
 
       // 공용 컬렉션 방식에 맞게 댓글 경로 수정
       final commentsRef = FirebaseFirestore.instance
@@ -59,6 +61,7 @@ class _CommentModalState extends State<CommentModal> {
         'nickname': nickname,
         'text': commentText,
         'createdAt': FieldValue.serverTimestamp(),
+        'profileImageUrl': profileImageUrl, // 프로필 이미지 URL 추가
       });
 
       _commentController.clear();
@@ -171,12 +174,15 @@ class _CommentModalState extends State<CommentModal> {
                             final date = createdAt != null
                                 ? "${createdAt.toDate().year}-${createdAt.toDate().month.toString().padLeft(2, '0')}-${createdAt.toDate().day.toString().padLeft(2, '0')} ${createdAt.toDate().hour.toString().padLeft(2, '0')}:${createdAt.toDate().minute.toString().padLeft(2, '0')}"
                                 : 'Unknown';
+                            final profileImageUrl =
+                                commentData['profileImageUrl'] ?? '';
 
                             return CommentItem(
                               userId: userId,
                               nickname: nickname,
                               text: text,
                               date: date,
+                              profileImageUrl: profileImageUrl,
                             );
                           },
                         );
