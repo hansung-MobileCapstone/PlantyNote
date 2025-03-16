@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import '../routes/app_router.dart';
 import '../util/LocalNotification.dart';
+import '../firebase_options.dart';
 
 final navigatorKey = GlobalKey<NavigatorState>();
 FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
@@ -17,7 +18,9 @@ void main() async {
 //초기 구동
 Future<void> initService() async {
   //* Firebase  초기화
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   // 로컬 푸시 알림 초기화
   await LocalNotification.init();
 
