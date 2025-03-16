@@ -160,8 +160,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                       ),
                     ),
                   ),
-                  _plantDetails(waterCycle, fertilizerCycle),
-                ],
+                  _plantDetails(plantSpecies, waterCycle, fertilizerCycle),                ],
               );
             },
           );
@@ -338,12 +337,14 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     );
   }
 
-  Widget _plantDetails(String waterCycle, String fertilizerCycle) {
+  Widget _plantDetails(String plantSpecies, String waterCycle, String fertilizerCycle) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 3),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          _informationRow('식물 종', plantSpecies),
+          const SizedBox(height: 8),
           _informationRow('물 주기', waterCycle),
           const SizedBox(height: 8),
           _informationRow('분갈이 주기', fertilizerCycle),
@@ -351,6 +352,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       ),
     );
   }
+
 
   Widget _informationRow(String label, String value) {
     return Row(

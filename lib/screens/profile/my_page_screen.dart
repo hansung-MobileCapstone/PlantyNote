@@ -310,9 +310,8 @@ class MyPageScreenState extends State<MyPageScreen> {
 
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
           .collection('posts')
+          .where('userId', isEqualTo: user.uid)
           .orderBy('createdAt', descending: true)
           .snapshots(),
       builder: (context, snapshot) {
