@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -15,12 +16,13 @@ void main() async {
   runApp(const MyApp());
 }
 
-//초기 구동
+// 초기 구동
 Future<void> initService() async {
   //* Firebase  초기화
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
   // 로컬 푸시 알림 초기화
   await LocalNotification.init();
 
@@ -36,8 +38,6 @@ Future<void> initService() async {
     });
   }
 }
-
-
 
   class MyApp extends StatelessWidget {
   const MyApp({super.key});

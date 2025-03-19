@@ -155,7 +155,7 @@ class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
   // D-Day 계산 함수
   int _calculateDday(DateTime date, int cycleDays) {
     final nextDate = date.add(Duration(days: cycleDays));
-    return nextDate.difference(DateTime.now()).inDays + 1;
+    return nextDate.difference(DateTime.now()).inDays;
   }
 
   // 상단 바

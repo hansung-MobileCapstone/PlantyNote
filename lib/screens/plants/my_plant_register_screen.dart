@@ -61,7 +61,7 @@ class _MyPlantRegisterScreenState extends State<MyPlantRegisterScreen> {
   // D-Day 계산 함수
   int calculateDday(DateTime date, double cycleDays) {
     final nextDate = date.add(Duration(days: cycleDays.toInt()));
-    return nextDate.difference(DateTime.now()).inDays + 1;
+    return nextDate.difference(DateTime.now()).inDays;
   }
 
   // 수정 모드일 경우 데이터 초깃값
