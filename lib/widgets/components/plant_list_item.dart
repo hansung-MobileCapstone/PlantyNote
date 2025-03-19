@@ -193,6 +193,7 @@ class _PlantListItemState extends State<PlantListItem> {
           .doc(widget.plantId) // Firestore 문서 ID
           .update({
         'waterDate': DateTime.now().toIso8601String(), // 오늘 날짜로 업데이트
+        'dDayWater': widget.waterCycle, // 물 d-day 업데이트
       });
 
       // dDayWater를 물 주기로 갱신
