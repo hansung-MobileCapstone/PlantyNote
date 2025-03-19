@@ -23,8 +23,15 @@ Future<void> initService() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
+  // 라우터 초기화
+  await AppRouter.initRouter();
+
   // 로컬 푸시 알림 초기화
-  await LocalNotification.init();
+  User? user = FirebaseAuth.instance.currentUser;
+  if (user != null) {
+    // 로그인된 유저에 대해서만
+    await LocalNotification.init();
+  }
 
   // 앱이 종료된 상태에서 푸시 알람 탭
   final NotificationAppLaunchDetails? notificationAppLaunchDetails =
@@ -39,7 +46,7 @@ Future<void> initService() async {
   }
 }
 
-  class MyApp extends StatelessWidget {
+class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
