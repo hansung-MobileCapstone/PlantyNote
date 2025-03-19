@@ -20,7 +20,7 @@ class MyPlantTimelineScreen extends StatefulWidget {
 
 class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
   late Future<DocumentSnapshot<Map<String, dynamic>>> plantDataFuture;
-  bool isNotificationEnabled = false;
+  bool isNotificationEnabled = true;
 
   @override
   void initState() {
@@ -155,7 +155,7 @@ class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
   // D-Day 계산 함수
   int _calculateDday(DateTime date, int cycleDays) {
     final nextDate = date.add(Duration(days: cycleDays));
-    return nextDate.difference(DateTime.now()).inDays;
+    return nextDate.difference(DateTime.now()).inDays + 1;
   }
 
   // 상단 바

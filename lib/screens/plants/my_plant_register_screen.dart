@@ -42,6 +42,7 @@ class _MyPlantRegisterScreenState extends State<MyPlantRegisterScreen> {
   double repottingCycle = 12; // 분갈이 주기
   DateTime meetingDate = DateTime.now(); // 처음 만난 날
   DateTime waterDate = DateTime.now(); // 마지막 물 준 날
+  int dDayWater = 1; // 물 d-day
   int sunlightLevel = 3; // 일조량
   int waterLevel = 3; // 물 주는 양
   double temperature = 15.0; // 온도
@@ -55,6 +56,12 @@ class _MyPlantRegisterScreenState extends State<MyPlantRegisterScreen> {
     if (widget.isEditing && widget.plantData != null) {
       _initializeDataForEdit();
     }
+  }
+
+  // D-Day 계산 함수
+  int calculateDday(DateTime date, double cycleDays) {
+    final nextDate = date.add(Duration(days: cycleDays.toInt()));
+    return nextDate.difference(DateTime.now()).inDays + 1;
   }
 
   // 수정 모드일 경우 데이터 초깃값
@@ -117,6 +124,7 @@ class _MyPlantRegisterScreenState extends State<MyPlantRegisterScreen> {
           'temperature': temperature,
           'meetingDate': meetingDate.toIso8601String(),
           'waterDate': waterDate.toIso8601String(),
+          'dDayWater': calculateDday(waterDate, waterCycle),
           'imageUrl':
               _image != null ? _image!.path : widget.plantData?['imageUrl'],
           'updatedAt': FieldValue.serverTimestamp(),
@@ -143,6 +151,7 @@ class _MyPlantRegisterScreenState extends State<MyPlantRegisterScreen> {
           'temperature': temperature,
           'meetingDate': meetingDate.toIso8601String(),
           'waterDate': waterDate.toIso8601String(),
+          'dDayWater': calculateDday(waterDate, waterCycle),
           'imageUrl': _image != null ? _image!.path : null,
           'createdAt': FieldValue.serverTimestamp(),
         });

@@ -13,18 +13,18 @@ class LocalNotification {
   static final StreamController<String?> notificationStream =
   StreamController<String?>.broadcast();
 
-// 푸시 알림 탭 했을 때 호출되는 함수
+  // 푸시 알림 탭 했을 때 호출되는 함수
   static void onNotificationTap(NotificationResponse notificationResponse) {
     notificationStream.add(notificationResponse.payload!);
   }
 
-  //플러그인 초기화
+  // 플러그인 초기화
   static Future init() async {
-    //안드로이드 알람 이미지 세팅
+    // 안드로이드 알람 이미지 세팅
     const AndroidInitializationSettings initializationSettingAndroid =
     AndroidInitializationSettings("@mipmap/ic_launcher");
 
-    //iOS 세팅 - 유저 권한 요청
+    // iOS 세팅 - 유저 권한 요청
     const DarwinInitializationSettings initializationSettingIOS =
     DarwinInitializationSettings(
       requestAlertPermission: true,
@@ -38,7 +38,7 @@ class LocalNotification {
       iOS: initializationSettingIOS,
     );
 
-// 안드로이드 알람 권한 요청
+  // 안드로이드 알람 권한 요청
     if (Platform.isAndroid) {
       _flutterLocalNotificationsPlugin
           .resolvePlatformSpecificImplementation<
@@ -54,7 +54,7 @@ class LocalNotification {
     );
   }
 
-//일반 푸시알람 보내기
+  // 일반 푸시알람 보내기
   static Future showSimpleNotification({
     required String title,
     required String body,
@@ -74,7 +74,7 @@ class LocalNotification {
         .show(0, title, body, notificationDetails, payload: payload);
   }
 
-//지정된 스케줄에 맞춰 알람 보내기
+  // 지정된 스케줄에 맞춰 알람 보내기
   static Future showScheduledNotification({
     required String title,
     required String body,
