@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import '../modals/cycle_setting_modal.dart';
 import '../modals/calendar_modal.dart';
+import 'package:plant/widgets/inputs/temperature_slider.dart';
 
 class MyPlantRegisterScreen extends StatefulWidget {
   final Map<String, dynamic>? plantData; // 수정 모드일 경우 식물 데이터를 전달받음
@@ -19,7 +20,6 @@ class MyPlantRegisterScreen extends StatefulWidget {
     this.plantId,
     this.plantData,
   }) : super(key: key);
-
 
   @override
   State<MyPlantRegisterScreen> createState() => _MyPlantRegisterScreenState();
@@ -65,8 +65,10 @@ class _MyPlantRegisterScreenState extends State<MyPlantRegisterScreen> {
     waterCycle = (data['waterCycle'] ?? 40).toDouble();
     fertilizerCycle = (data['fertilizerCycle'] ?? 3).toDouble();
     repottingCycle = (data['repottingCycle'] ?? 12).toDouble();
-    meetingDate = DateTime.parse(data['meetingDate'] ?? DateTime.now().toIso8601String());
-    waterDate = DateTime.parse(data['waterDate'] ?? DateTime.now().toIso8601String());
+    meetingDate =
+        DateTime.parse(data['meetingDate'] ?? DateTime.now().toIso8601String());
+    waterDate =
+        DateTime.parse(data['waterDate'] ?? DateTime.now().toIso8601String());
     sunlightLevel = data['sunlightLevel'] ?? 3;
     waterLevel = data['waterLevel'] ?? 3;
     temperature = (data['temperature'] ?? 15).toDouble();
@@ -115,7 +117,8 @@ class _MyPlantRegisterScreenState extends State<MyPlantRegisterScreen> {
           'temperature': temperature,
           'meetingDate': meetingDate.toIso8601String(),
           'waterDate': waterDate.toIso8601String(),
-          'imageUrl': _image != null ? _image!.path : widget.plantData?['imageUrl'],
+          'imageUrl':
+              _image != null ? _image!.path : widget.plantData?['imageUrl'],
           'updatedAt': FieldValue.serverTimestamp(),
         });
 
@@ -201,7 +204,7 @@ class _MyPlantRegisterScreenState extends State<MyPlantRegisterScreen> {
                 const SizedBox(height: 8),
                 _cycleModalButton(), // 주기설정 입력 모달
                 const SizedBox(height: 25),
-                
+
                 Align(
                   alignment: Alignment.centerLeft,
                   child: const Text(
@@ -219,7 +222,8 @@ class _MyPlantRegisterScreenState extends State<MyPlantRegisterScreen> {
 
                 Row(
                   children: [
-                    Column( // 처음 만난 날
+                    Column(
+                      // 처음 만난 날
                       children: [
                         const Text(
                           "처음 만난 날",
@@ -241,7 +245,8 @@ class _MyPlantRegisterScreenState extends State<MyPlantRegisterScreen> {
                       ],
                     ),
                     const Spacer(),
-                    Column( // 마지막 물 준 날 섹션
+                    Column(
+                      // 마지막 물 준 날 섹션
                       children: [
                         const Text(
                           "마지막 물 준 날",
@@ -293,22 +298,9 @@ class _MyPlantRegisterScreenState extends State<MyPlantRegisterScreen> {
 
   // 사진 등록 ImagePicker
   Widget _imagePicker() {
-    return GestureDetector(
-      onTap: _pickImage, // 새로운 사진 선택 가능
-      child: CircleAvatar(
-        radius: 75,
-        backgroundColor: Colors.grey[200],
-        backgroundImage: _image != null
-            ? FileImage(File(_image!.path)) // 이미지가 있으면 표시
-            : null,
-        child: _image == null
-            ? Icon(
-          Icons.add, // 이미지가 없을 때 추가 아이콘 표시
-          color: Colors.grey[400],
-          size: 30,
-        )
-            : null, // 이미지가 있으면 아이콘 표시 안함
-      ),
+    return PlantImagePicker(
+      image: _image,
+      onTap: _pickImage,
     );
   }
 
@@ -319,30 +311,35 @@ class _MyPlantRegisterScreenState extends State<MyPlantRegisterScreen> {
       decoration: InputDecoration(
         labelText: '식물 이름',
         hintText: '애칭을 정해주세요. (5자 이내)',
-        labelStyle: TextStyle( // labelText 스타일
+        labelStyle: TextStyle(
+          // labelText 스타일
           color: Color(0xFF697386),
           fontSize: 14,
           fontWeight: FontWeight.bold,
         ),
-        hintStyle: TextStyle( // hintText 스타일
+        hintStyle: TextStyle(
+          // hintText 스타일
           color: Color(0xFFB3B3B3),
           fontSize: 14,
         ),
-        border: OutlineInputBorder( // 기본 테두리
+        border: OutlineInputBorder(
+          // 기본 테두리
           borderRadius: BorderRadius.circular(50.0),
           borderSide: BorderSide(
             color: Color(0xFFE6E6E6),
             width: 2.0,
           ),
         ),
-        focusedBorder: OutlineInputBorder( // 포커스
+        focusedBorder: OutlineInputBorder(
+          // 포커스
           borderRadius: BorderRadius.circular(50.0),
           borderSide: BorderSide(
             color: Color(0xFF4B7E5B),
             width: 2.0,
           ),
         ),
-        enabledBorder: OutlineInputBorder( // 비활성화
+        enabledBorder: OutlineInputBorder(
+          // 비활성화
           borderRadius: BorderRadius.circular(50.0),
           borderSide: BorderSide(
             color: Color(0xFFE6E6E6),
@@ -370,30 +367,35 @@ class _MyPlantRegisterScreenState extends State<MyPlantRegisterScreen> {
       decoration: InputDecoration(
         labelText: '식물 종',
         hintText: '식물의 종을 입력하세요.',
-        labelStyle: TextStyle( // labelText 스타일
+        labelStyle: TextStyle(
+          // labelText 스타일
           color: Color(0xFF697386),
           fontSize: 14, // 글자 크기
           fontWeight: FontWeight.bold,
         ),
-        hintStyle: TextStyle( // hintText 스타일
+        hintStyle: TextStyle(
+          // hintText 스타일
           color: Color(0xFFB3B3B3),
           fontSize: 14, // 글자 크기
         ),
-        border: OutlineInputBorder( // 기본 테두리
+        border: OutlineInputBorder(
+          // 기본 테두리
           borderRadius: BorderRadius.circular(50.0),
           borderSide: BorderSide(
             color: Color(0xFFE6E6E6),
             width: 2.0,
           ),
         ),
-        focusedBorder: OutlineInputBorder( // 포커스
+        focusedBorder: OutlineInputBorder(
+          // 포커스
           borderRadius: BorderRadius.circular(50.0),
           borderSide: BorderSide(
             color: Color(0xFF4B7E5B), // 포커스 시에도 회색 테두리
             width: 2.0,
           ),
         ),
-        enabledBorder: OutlineInputBorder( // 비활성화
+        enabledBorder: OutlineInputBorder(
+          // 비활성화
           borderRadius: BorderRadius.circular(50.0),
           borderSide: BorderSide(
             color: Color(0xFFE6E6E6),
@@ -416,44 +418,28 @@ class _MyPlantRegisterScreenState extends State<MyPlantRegisterScreen> {
 
   // 주기 모달창 버튼
   Widget _cycleModalButton() {
-    return Center(
-      child: GestureDetector(
-        onTap: () {
-          showDialog(
-            context: context,
-            builder: (context) => CycleSettingModal( // 주기 모달창 호출
-              initialWaterCycle: waterCycle, // 물
-              initialFertilizerCycle: fertilizerCycle, // 영양체
-              initialRepottingCycle: repottingCycle, // 분갈이
-              onSave: (double newWaterCycle, double newFertilizerCycle, double newRepottingCycle) {
-                setState(() {
-                  waterCycle = newWaterCycle;
-                  fertilizerCycle = newFertilizerCycle;
-                  repottingCycle = newRepottingCycle;
-                });
-              },
-            ),
-          );
-        },
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 15),
-          decoration: BoxDecoration(
-            color: Color(0xFFECF7F2),
-            borderRadius: BorderRadius.circular(50),
-            border: Border.all(
-              color: Color(0xFFE6E6E6),
-              width: 2.0,
-            ),
+    return CycleModalButton(
+      waterCycle: waterCycle,
+      fertilizerCycle: fertilizerCycle,
+      repottingCycle: repottingCycle,
+      onTap: () {
+        showDialog(
+          context: context,
+          builder: (context) => CycleSettingModal(
+            initialWaterCycle: waterCycle,
+            initialFertilizerCycle: fertilizerCycle,
+            initialRepottingCycle: repottingCycle,
+            onSave: (double newWaterCycle, double newFertilizerCycle,
+                double newRepottingCycle) {
+              setState(() {
+                waterCycle = newWaterCycle;
+                fertilizerCycle = newFertilizerCycle;
+                repottingCycle = newRepottingCycle;
+              });
+            },
           ),
-          child: Text(
-            '물: ${waterCycle.toInt()}일  영양제: ${fertilizerCycle.toInt()}개월  분갈이: ${repottingCycle.toInt()}개월',
-            style: const TextStyle(
-              fontSize: 14,
-              color: Color(0xFF697386),
-            ),
-          ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -558,61 +544,13 @@ class _MyPlantRegisterScreenState extends State<MyPlantRegisterScreen> {
           const SizedBox(height: 20),
 
           // 온도 슬라이더
-          Column(
-            children: [
-              Text(
-                "온도: ${temperature.toStringAsFixed(1)}°C",
-                style: const TextStyle(
-                  fontSize: 13,
-                  color: Color(0xFF697386),
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    "-10",
-                    style: TextStyle(fontSize: 12, color: Color(0xFFB3B3B3)),
-                  ),
-                  SizedBox(
-                    width: 250, // 슬라이더 크기
-                    child: SliderTheme(
-                      data: SliderThemeData(
-                        activeTrackColor: const Color(0xFFE6E6E6),
-                        inactiveTrackColor: const Color(0xFFE6E6E6),
-                        thumbColor: const Color(0xFF4B7E5B),
-                        trackHeight: 3.0,
-                        thumbShape: const RoundSliderThumbShape(
-                          enabledThumbRadius: 6.0,
-                        ),
-                        valueIndicatorShape: const PaddleSliderValueIndicatorShape(),
-                        valueIndicatorColor: const Color(0xFF4B7E5B),
-                        valueIndicatorTextStyle: const TextStyle(
-                          color: Colors.white,
-                        ),
-                      ),
-                      child: Slider(
-                        value: temperature,
-                        min: -10,
-                        max: 40,
-                        divisions: 50,
-                        label: '${temperature.toStringAsFixed(1)}°C',
-                        onChanged: (value) {
-                          setState(() {
-                            temperature = value;
-                          });
-                        },
-                      ),
-                    ),
-                  ),
-                  const Text(
-                    "40",
-                    style: TextStyle(fontSize: 12, color: Color(0xFFB3B3B3)),
-                  ),
-                ],
-              ),
-            ],
+          TemperatureSlider(
+            temperature: temperature,
+            onChanged: (value) {
+              setState(() {
+                temperature = value;
+              });
+            },
           ),
         ],
       ),
@@ -624,7 +562,114 @@ class _MyPlantRegisterScreenState extends State<MyPlantRegisterScreen> {
     required DateTime selectedDate,
     required Function(DateTime) onDateSelected,
   }) {
+    return CalendarModalButton(
+      selectedDate: selectedDate,
+      onDateSelected: onDateSelected,
+    );
+  }
 
+  // 하단 버튼 2개 (취소, 완료)
+  Widget _bottomButton() {
+    return Container(
+      color: Colors.white,
+      padding: EdgeInsets.symmetric(vertical: 10, horizontal: 18),
+      child: Row(
+        children: [
+          Expanded(
+            // 취소 버튼
+            flex: 3,
+            child: ElevatedButton(
+              onPressed: () {
+                context.pop();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xFFE6E6E6),
+                foregroundColor: Colors.black,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              child: Text('취소'),
+            ),
+          ),
+          SizedBox(width: 10),
+          Expanded(
+            // 완료 버튼
+            flex: 7,
+            child: ElevatedButton(
+              onPressed: () {
+                _submitPlantData();
+              }, // 데이터 저장
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xFF4B7E5B),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              child: Text('완료'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class CycleModalButton extends StatelessWidget {
+  final double waterCycle;
+  final double fertilizerCycle;
+  final double repottingCycle;
+  final VoidCallback onTap;
+
+  const CycleModalButton({
+    Key? key,
+    required this.waterCycle,
+    required this.fertilizerCycle,
+    required this.repottingCycle,
+    required this.onTap,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 15),
+          decoration: BoxDecoration(
+            color: const Color(0xFFECF7F2),
+            borderRadius: BorderRadius.circular(50),
+            border: Border.all(
+              color: const Color(0xFFE6E6E6),
+              width: 2.0,
+            ),
+          ),
+          child: Text(
+            '물: ${waterCycle.toInt()}일  영양제: ${fertilizerCycle.toInt()}개월  분갈이: ${repottingCycle.toInt()}개월',
+            style: const TextStyle(
+              fontSize: 14,
+              color: Color(0xFF697386),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class CalendarModalButton extends StatelessWidget {
+  final DateTime selectedDate;
+  final ValueChanged<DateTime> onDateSelected;
+
+  const CalendarModalButton({
+    Key? key,
+    required this.selectedDate,
+    required this.onDateSelected,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
         // 캘린더 모달 열기
@@ -637,7 +682,6 @@ class _MyPlantRegisterScreenState extends State<MyPlantRegisterScreen> {
         );
       },
       child: Container(
-
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 35),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -659,7 +703,7 @@ class _MyPlantRegisterScreenState extends State<MyPlantRegisterScreen> {
             ),
             const SizedBox(width: 10),
             const Icon(
-              Icons.calendar_today, // 캘린더 아이콘
+              Icons.calendar_today,
               size: 16,
               color: Color(0xFF697386),
             ),
@@ -668,44 +712,33 @@ class _MyPlantRegisterScreenState extends State<MyPlantRegisterScreen> {
       ),
     );
   }
+}
 
-  // 하단 버튼 2개 (취소, 완료)
-  Widget _bottomButton() {
-    return Container(
-      color: Colors.white,
-      padding: EdgeInsets.symmetric(vertical: 10, horizontal: 18),
-      child: Row(
-        children: [
-          Expanded( // 취소 버튼
-            flex: 3,
-            child: ElevatedButton(
-              onPressed: () { context.pop(); },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFFE6E6E6),
-                foregroundColor: Colors.black,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              child: Text('취소'),
-            ),
-          ),
-          SizedBox(width: 10),
-          Expanded( // 완료 버튼
-            flex: 7,
-            child: ElevatedButton(
-              onPressed: () { _submitPlantData(); }, // 데이터 저장
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFF4B7E5B),
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              child: Text('완료'),
-            ),
-          ),
-        ],
+class PlantImagePicker extends StatelessWidget {
+  final XFile? image;
+  final VoidCallback onTap;
+
+  const PlantImagePicker({
+    Key? key,
+    required this.image,
+    required this.onTap,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: CircleAvatar(
+        radius: 75,
+        backgroundColor: Colors.grey[200],
+        backgroundImage: image != null ? FileImage(File(image!.path)) : null,
+        child: image == null
+            ? Icon(
+                Icons.add,
+                color: Colors.grey[400],
+                size: 30,
+              )
+            : null,
       ),
     );
   }
