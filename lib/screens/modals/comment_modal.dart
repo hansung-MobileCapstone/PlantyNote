@@ -33,24 +33,25 @@ class _CommentModalState extends State<CommentModal> {
           msg: "로그인 후 이용해주세요",
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM,
-          backgroundColor: Color(0xFF4B7E5B), // 배경색
-          textColor: Colors.white, // 글자 색
+          backgroundColor: const Color(0xFF4B7E5B),
+          textColor: Colors.white,
           fontSize: 16.0,
         );
         return;
       }
 
-      // Firestore에서 현재 사용자 닉네임 가져오기
+      // Firestore에서 현재 사용자 닉네임 및 프로필 이미지 가져오기
       final userDoc = await FirebaseFirestore.instance
           .collection('users')
           .doc(user.uid)
           .get();
 
       final nickname = userDoc.data()?['nickname'] ?? '알수없음';
+      final profileImageUrl = userDoc.data()?['profileImage'] ??
+          'assets/images/basic_profile.png';
 
+      // 공용 컬렉션 방식에 맞게 댓글 경로 수정
       final commentsRef = FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
           .collection('posts')
           .doc(widget.docId)
           .collection('comments');
@@ -60,6 +61,7 @@ class _CommentModalState extends State<CommentModal> {
         'nickname': nickname,
         'text': commentText,
         'createdAt': FieldValue.serverTimestamp(),
+        'profileImageUrl': profileImageUrl, // 프로필 이미지 URL 추가
       });
 
       _commentController.clear();
@@ -68,8 +70,8 @@ class _CommentModalState extends State<CommentModal> {
         msg: "댓글 추가 성공!",
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
-        backgroundColor: Color(0xFF4B7E5B), // 배경색
-        textColor: Colors.white, // 글자 색
+        backgroundColor: const Color(0xFF4B7E5B),
+        textColor: Colors.white,
         fontSize: 16.0,
       );
     } catch (e) {
@@ -77,8 +79,8 @@ class _CommentModalState extends State<CommentModal> {
         msg: "댓글 추가 실패..",
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
-        backgroundColor: Color(0xFF4B7E5B), // 배경색
-        textColor: Colors.white, // 글자 색
+        backgroundColor: const Color(0xFF4B7E5B),
+        textColor: Colors.white,
         fontSize: 16.0,
       );
     } finally {
@@ -90,9 +92,8 @@ class _CommentModalState extends State<CommentModal> {
 
   @override
   Widget build(BuildContext context) {
+    // 댓글을 조회할 때도 공용 컬렉션 'posts' 아래의 해당 문서에서 가져옵니다.
     final commentsRef = FirebaseFirestore.instance
-        .collection('users')
-        .doc(FirebaseAuth.instance.currentUser!.uid)
         .collection('posts')
         .doc(widget.docId)
         .collection('comments')
@@ -101,7 +102,7 @@ class _CommentModalState extends State<CommentModal> {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.only(
+        borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(10),
           topRight: Radius.circular(10),
         ),
@@ -110,7 +111,7 @@ class _CommentModalState extends State<CommentModal> {
         children: [
           // 모달의 AppBar
           Container(
-            padding: EdgeInsets.symmetric(vertical: 10),
+            padding: const EdgeInsets.symmetric(vertical: 10),
             decoration: const BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.only(
@@ -164,21 +165,24 @@ class _CommentModalState extends State<CommentModal> {
                           itemCount: comments.length,
                           itemBuilder: (context, index) {
                             final commentData =
-                                comments[index].data() as Map<String, dynamic>;
+                            comments[index].data() as Map<String, dynamic>;
                             final userId = commentData['userId'] ?? 'Unknown';
                             final nickname = commentData['nickname'] ?? '알수없음';
                             final text = commentData['text'] ?? '';
                             final createdAt =
-                                commentData['createdAt'] as Timestamp?;
+                            commentData['createdAt'] as Timestamp?;
                             final date = createdAt != null
                                 ? "${createdAt.toDate().year}-${createdAt.toDate().month.toString().padLeft(2, '0')}-${createdAt.toDate().day.toString().padLeft(2, '0')} ${createdAt.toDate().hour.toString().padLeft(2, '0')}:${createdAt.toDate().minute.toString().padLeft(2, '0')}"
                                 : 'Unknown';
+                            final profileImageUrl =
+                                commentData['profileImageUrl'] ?? '';
 
                             return CommentItem(
                               userId: userId,
                               nickname: nickname,
                               text: text,
                               date: date,
+                              profileImageUrl: profileImageUrl,
                             );
                           },
                         );
@@ -203,7 +207,7 @@ class _CommentModalState extends State<CommentModal> {
   }
 }
 
-// 입력 필드, 버튼
+// 입력 필드와 버튼을 구성하는 위젯
 class _InputSection extends StatelessWidget {
   final TextEditingController controller;
   final VoidCallback onSubmit;
@@ -275,24 +279,23 @@ class _InputSection extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 minimumSize: const Size(40, 40),
-                // 최소 크기
                 padding: EdgeInsets.zero,
               ),
               child: isSubmitting
                   ? const CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      strokeWidth: 2,
-                    )
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                strokeWidth: 2,
+              )
                   : const Center(
-                      child: Text(
-                        "입력",
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
+                child: Text(
+                  "입력",
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
             ),
           ),
         ],

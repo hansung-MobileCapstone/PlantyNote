@@ -212,8 +212,6 @@ class _MainScreenState extends State<MainScreen> {
   Widget _makeCarousel(User user) {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
           .collection('posts')
           .orderBy('createdAt', descending: true)
           .limit(5)
