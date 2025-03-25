@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'; // Firebase Firestore 임포트
 import 'package:firebase_auth/firebase_auth.dart'; // Firebase Auth 임포트
 import '../../widgets/components/bottom_navigation_bar.dart';
+import '../../util/LocalNotification.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -54,6 +55,16 @@ class _MainScreenState extends State<MainScreen> {
                   const SizedBox(height: 50),
                   _recentPosts(user),
                   const SizedBox(height: 10),
+                  GestureDetector( // 푸시알림 테스트용(삭제예정)
+                    onTap: () {
+                      LocalNotification.sendNotifications(user.uid);
+                    },
+                    child: const Icon(
+                      Icons.notifications, // 아이콘 변경 가능
+                      size: 30,
+                      color: Colors.green, // 원하는 색상 설정
+                    ),
+                  ),
                 ],
               ),
             ),
