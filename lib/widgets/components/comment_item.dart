@@ -5,17 +5,24 @@ class CommentItem extends StatelessWidget {
   final String nickname;
   final String text;
   final String date;
+  final String profileImageUrl; // 프로필 이미지 URL
 
   const CommentItem({
-    super.key,
+    Key? key,
     required this.userId,
     required this.nickname,
     required this.text,
     required this.date,
-  });
+    required this.profileImageUrl,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    // profileImageUrl이 http로 시작하면 NetworkImage, 그렇지 않으면 AssetImage 사용
+    final ImageProvider imageProvider = profileImageUrl.startsWith('http')
+        ? NetworkImage(profileImageUrl)
+        : AssetImage(profileImageUrl);
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 5),
       child: Container(
@@ -27,6 +34,12 @@ class CommentItem extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // 프로필 이미지
+            CircleAvatar(
+              backgroundImage: imageProvider,
+              radius: 15,
+            ),
+            const SizedBox(width: 10),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -36,7 +49,7 @@ class CommentItem extends StatelessWidget {
                       Text(
                         nickname,
                         style: const TextStyle(
-                          fontSize: 10, // 고정된 이름 글씨 크기
+                          fontSize: 10,
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
                         ),
@@ -51,19 +64,14 @@ class CommentItem extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 3), // 이름과 댓글 간격
-                  Row(
-                    children: [
-                      const SizedBox(width: 25),
-                      Text(
-                        text,
-                        style: const TextStyle(
-                          fontSize: 12, // 고정된 댓글 글씨 크기
-                          color: Colors.black87,
-                        ),
-                        textAlign: TextAlign.left,
-                      ),
-                    ],
+                  const SizedBox(height: 3),
+                  Text(
+                    text,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.black87,
+                    ),
+                    textAlign: TextAlign.left,
                   ),
                 ],
               ),

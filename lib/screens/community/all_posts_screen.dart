@@ -23,9 +23,9 @@ class _AllPostsScreenState extends State<AllPostsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // 로그인 여부 확인 (로그인하지 않아도 읽을 수 있도록 보안 규칙 확인 필요)
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      // 로그인 안된 경우
       return const Scaffold(
         body: Center(child: Text("로그인 후 이용해주세요.")),
       );
@@ -36,16 +36,13 @@ class _AllPostsScreenState extends State<AllPostsScreen> {
       appBar: _buildAppBar(),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
-            .collection('users')
-            .doc(user.uid)
-            .collection('posts')
+            .collection('posts') // 공용 컬렉션에서 조회
             .orderBy('createdAt', descending: true)
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
-
           final docs = snapshot.data?.docs ?? [];
           if (docs.isEmpty) {
             return const Center(
@@ -65,26 +62,39 @@ class _AllPostsScreenState extends State<AllPostsScreen> {
             itemBuilder: (context, index) {
               final postData = docs[index].data() as Map<String, dynamic>;
               final docId = docs[index].id;
-              final name = postData['name'] ?? '알수없음';
-              final profileImage = postData['profileImage'] ?? '';
+              final userId = postData['userId'];
               final contents = postData['contents'] ?? '';
               final imageUrls = List<String>.from(postData['imageUrl'] ?? []);
-              final details =
-                  List<Map<String, dynamic>>.from(postData['details'] ?? []);
+              final details = List<Map<String, dynamic>>.from(postData['details'] ?? []);
 
-              return GestureDetector(
-                onTap: () {
-                  // docId 전달 및 디버그 출력
-                  print("Clicked post with docId: $docId"); // 디버그 출력
-                  context.push('/community/detail', extra: {'docId': docId});
+              // 사용자 ID를 이용해 최신 사용자 정보를 가져옴
+              return FutureBuilder<DocumentSnapshot>(
+                future: FirebaseFirestore.instance.collection('users').doc(userId).get(),
+                builder: (context, userSnapshot) {
+                  if (userSnapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (!userSnapshot.hasData || userSnapshot.data?.data() == null) {
+                    return const Center(child: Text("사용자 정보를 불러오지 못했습니다."));
+                  }
+                  final userData = userSnapshot.data!.data() as Map<String, dynamic>;
+                  final name = userData['nickname'] ?? '알 수 없음';
+                  final profileImage = userData['profileImage'] ?? 'assets/images/basic_profile.png';
+
+                  return GestureDetector(
+                    onTap: () {
+                      print("Clicked post with docId: $docId");
+                      context.push('/community/detail', extra: {'docId': docId});
+                    },
+                    child: PostItem(
+                      name: name,
+                      profileImage: profileImage,
+                      contents: contents,
+                      imageUrls: imageUrls,
+                      details: details,
+                    ),
+                  );
                 },
-                child: PostItem(
-                  name: name,
-                  profileImage: profileImage,
-                  contents: contents,
-                  imageUrls: imageUrls,
-                  details: details, // details 리스트 전달
-                ),
               );
             },
           );
@@ -109,9 +119,7 @@ class _AllPostsScreenState extends State<AllPostsScreen> {
           fontWeight: FontWeight.bold,
         ),
       ),
-      actions: [
-        _writeButton(),
-      ],
+      actions: [_writeButton()],
     );
   }
 

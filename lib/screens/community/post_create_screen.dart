@@ -30,9 +30,9 @@ class PostCreateScreenState extends State<PostCreateScreen> {
   void initState() {
     super.initState();
     _docId = widget.docId; // widget.docId로 설정
-    print("PostCreateScreen initState with docId: $_docId"); // 디버그 출력
+    print("PostCreateScreen initState with docId: $_docId");
     _loadEditingData();
-    _fetchUserPlants(); // 내 식물 목록 가져오기
+    _fetchUserPlants();
   }
 
   Future<void> _fetchUserPlants() async {
@@ -61,21 +61,15 @@ class PostCreateScreenState extends State<PostCreateScreen> {
 
   Future<void> _loadEditingData() async {
     if (_docId == null) return;
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
-
-    final docRef = FirebaseFirestore.instance
-        .collection('users')
-        .doc(user.uid)
-        .collection('posts')
-        .doc(_docId);
+    // 공용 컬렉션 'posts'에서 게시글을 불러옵니다.
+    final docRef = FirebaseFirestore.instance.collection('posts').doc(_docId);
 
     final docSnap = await docRef.get();
     if (docSnap.exists) {
       _editingPost = docSnap.data();
       _textController.text = _editingPost?['contents'] ?? '';
       final details =
-          List<Map<String, dynamic>>.from(_editingPost?['details'] ?? []);
+      List<Map<String, dynamic>>.from(_editingPost?['details'] ?? []);
       if (details.isNotEmpty && details[0].containsKey('식물 종')) {
         _selectedPlantName = details[0]['식물 종'];
       }
@@ -85,8 +79,8 @@ class PostCreateScreenState extends State<PostCreateScreen> {
         msg: "수정할 게시물을 찾을 수 없습니다.",
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
-        backgroundColor: Color(0xFF812727), // 배경색
-        textColor: Colors.white, // 글자 색
+        backgroundColor: const Color(0xFF812727),
+        textColor: Colors.white,
         fontSize: 16.0,
       );
       if (mounted) context.pop();
@@ -115,26 +109,23 @@ class PostCreateScreenState extends State<PostCreateScreen> {
         msg: "로그인 후 이용해주세요",
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
-        backgroundColor: Color(0xFF812727), // 배경색
-        textColor: Colors.white, // 글자 색
+        backgroundColor: const Color(0xFF812727),
+        textColor: Colors.white,
         fontSize: 16.0,
       );
       return;
     }
 
-    // Firestore에서 현재 사용자 닉네임, 프로필 가져오기
-    final userDoc = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(user.uid)
-        .get();
+    // 게시글 저장 시 사용자 정보는 따로 저장하지 않고, userId만 저장합니다.
+    // 공용 컬렉션 'posts'에 저장합니다.
+    final postsRef = FirebaseFirestore.instance.collection('posts');
 
-    final nickname = userDoc.data()?['nickname'] ?? '알수없음';
-    final profileImage = userDoc.data()?['profileImage'] ?? '';
-
+    // 로딩 다이얼로그 표시
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => const Center(child: CircularProgressIndicator()),
+      builder: (context) =>
+      const Center(child: CircularProgressIndicator()),
     );
 
     try {
@@ -144,14 +135,14 @@ class PostCreateScreenState extends State<PostCreateScreen> {
           final fileName =
               '${DateTime.now().millisecondsSinceEpoch}_${img.name}';
           final storageRef =
-              FirebaseStorage.instance.ref('post_images/$fileName');
+          FirebaseStorage.instance.ref('post_images/$fileName');
           await storageRef.putFile(File(img.path));
           final downloadUrl = await storageRef.getDownloadURL();
           newImageUrls.add(downloadUrl);
         }
       }
 
-      // 선택한 식물의 정보를 가져오기
+      // 선택한 식물 정보를 가져옵니다.
       String selectedPlantName = _selectedPlantName ?? '선택안함';
       Map<String, dynamic>? plantData;
 
@@ -169,44 +160,34 @@ class PostCreateScreenState extends State<PostCreateScreen> {
         }
       }
 
-      // 'details' 필드 구성 (환경 필드 제거)
       final details = [
         {'식물 종': selectedPlantName},
         {'물 주기': plantData?['waterCycle']?.toString() ?? '정보 없음'},
-        {'분갈이 주기': plantData?['fertilizerCycle']?.toString() ?? '정보 없음'},
-        // { '환경': plantData?['environment']?.toString() ?? '정보 없음' } // 제거
+        {
+          '분갈이 주기': plantData?['fertilizerCycle']?.toString() ?? '정보 없음'
+        },
       ];
 
-      // 디버그 출력
-      print("Selected Plant Name: $selectedPlantName");
-      print("Plant Data: $plantData");
-      print("Details: $details");
-
-      final postsRef = FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .collection('posts');
-
       if (_docId != null) {
-        // 수정 모드
+        // 수정 모드: 기존 게시글 업데이트
         final docRef = postsRef.doc(_docId);
         final docSnap = await docRef.get();
         if (!docSnap.exists) {
-          context.pop();
+          Navigator.pop(context); // 로딩 닫기
           Fluttertoast.showToast(
             msg: "게시물을 찾을 수 없습니다.",
             toastLength: Toast.LENGTH_SHORT,
             gravity: ToastGravity.BOTTOM,
-            backgroundColor: Color(0xFF812727), // 배경색
-            textColor: Colors.white, // 글자 색
+            backgroundColor: const Color(0xFF812727),
+            textColor: Colors.white,
             fontSize: 16.0,
           );
           return;
         }
         final existingImages =
-            List<String>.from(docSnap.data()?['imageUrl'] ?? []);
+        List<String>.from(docSnap.data()?['imageUrl'] ?? []);
         final updatedImages =
-            newImageUrls.isNotEmpty ? newImageUrls : existingImages;
+        newImageUrls.isNotEmpty ? newImageUrls : existingImages;
 
         await docRef.update({
           'contents': _textController.text.trim(),
@@ -218,11 +199,9 @@ class PostCreateScreenState extends State<PostCreateScreen> {
         if (mounted) Navigator.pop(context);
         if (mounted) context.pop({'docId': _docId, 'action': 'update'});
       } else {
-        // 신규 작성
+        // 신규 작성: 공용 컬렉션에 저장 및 userId 포함
         final newDoc = await postsRef.add({
-          'uid': user.uid,
-          'name': nickname,
-          'profileImage': profileImage,
+          'userId': user.uid,
           'contents': _textController.text.trim(),
           'imageUrl': newImageUrls,
           'details': details,
@@ -230,19 +209,18 @@ class PostCreateScreenState extends State<PostCreateScreen> {
           'updatedAt': FieldValue.serverTimestamp(),
         });
 
-        print("New post created with docId: ${newDoc.id}"); // 디버그 출력
-
-        if (mounted) Navigator.pop(context); // 로딩 닫기
+        print("New post created with docId: ${newDoc.id}");
+        if (mounted) Navigator.pop(context);
         if (mounted) context.pop({'docId': newDoc.id});
       }
     } catch (e) {
-      if (mounted) Navigator.pop(context); // 로딩 닫기
+      if (mounted) Navigator.pop(context);
       Fluttertoast.showToast(
         msg: "등록 실패..",
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
-        backgroundColor: Color(0xFF812727), // 배경색
-        textColor: Colors.white, // 글자 색
+        backgroundColor: const Color(0xFF812727),
+        textColor: Colors.white,
         fontSize: 16.0,
       );
     }
@@ -359,8 +337,7 @@ class PostCreateScreenState extends State<PostCreateScreen> {
                       color: Colors.red,
                       shape: BoxShape.circle,
                     ),
-                    child:
-                        const Icon(Icons.close, size: 15, color: Colors.white),
+                    child: const Icon(Icons.close, size: 15, color: Colors.white),
                   ),
                 ),
               ),
