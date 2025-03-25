@@ -1,13 +1,13 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../widgets/components/bottom_navigation_bar.dart';
 import '../modals/comment_modal.dart';
-import 'dart:io';
 
 class PostDetailScreen extends StatefulWidget {
-  final String? docId; // docId를 생성자로 받아오기
+  final String? docId; // 공용 컬렉션 'posts'에 저장된 문서 ID
 
   const PostDetailScreen({super.key, this.docId});
 
@@ -17,24 +17,27 @@ class PostDetailScreen extends StatefulWidget {
 
 class _PostDetailScreenState extends State<PostDetailScreen> {
   int _selectedIndex = 1; // 네비게이션바 인덱스
-  int _currentImage = 0; // 현재 보여지는 사진
-  bool _isLiked = false; // 하트 상태를 관리하는 변수
+  int _currentImage = 0; // 현재 보여지는 사진 인덱스
+  bool _isLiked = false; // 좋아요 상태
 
-  Future<Map<String, dynamic>?> _fetchPostData() async {
-    final user = FirebaseAuth.instance.currentUser;
-    print(
-        "Fetching post data for user: $user, docId: ${widget.docId}"); // 디버그 출력
-    if (user == null || widget.docId == null) return null;
-
-    final docRef = FirebaseFirestore.instance
-        .collection('users')
-        .doc(user.uid)
-        .collection('posts')
-        .doc(widget.docId);
-
+  /// 게시글과 작성자 정보를 결합하여 반환하는 함수
+  Future<Map<String, dynamic>?> _fetchPostAndUserData() async {
+    if (widget.docId == null) return null;
+    final docRef =
+    FirebaseFirestore.instance.collection('posts').doc(widget.docId);
     final docSnap = await docRef.get();
     if (!docSnap.exists) return null;
-    return docSnap.data();
+    final postData = docSnap.data()!;
+    final userId = postData['userId'];
+    final userSnap =
+    await FirebaseFirestore.instance.collection('users').doc(userId).get();
+    // 결합할 데이터를 생성합니다.
+    Map<String, dynamic> combined = {};
+    combined.addAll(postData);
+    if (userSnap.exists && userSnap.data() != null) {
+      combined['user'] = userSnap.data();
+    }
+    return combined;
   }
 
   void _onItemTapped(int index) {
@@ -59,11 +62,8 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
             ),
             TextButton(
               onPressed: () async {
-                final user = FirebaseAuth.instance.currentUser;
-                if (user != null && widget.docId != null) {
+                if (widget.docId != null) {
                   await FirebaseFirestore.instance
-                      .collection('users')
-                      .doc(user.uid)
                       .collection('posts')
                       .doc(widget.docId)
                       .delete();
@@ -101,18 +101,18 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    print("PostDetailScreen docId: ${widget.docId}"); // 디버그 출력
+    print("PostDetailScreen docId: ${widget.docId}");
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: _buildAppBar(),
       body: FutureBuilder<Map<String, dynamic>?>(
-        future: _fetchPostData(),
+        future: _fetchPostAndUserData(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
-          final post = snapshot.data;
-          if (post == null) {
+          final combined = snapshot.data;
+          if (combined == null) {
             return const Center(
               child: Text(
                 "게시물을 찾을 수 없습니다.",
@@ -120,22 +120,23 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
               ),
             );
           }
-
-          final name = post['name'] ?? '사용자';
-          final contents = post['contents'] ?? '';
-          final images = List<String>.from(post['imageUrl'] ?? []);
+          // 작성자 정보는 combined['user']에 저장되어 있습니다.
+          final userData =
+              combined['user'] as Map<String, dynamic>? ?? <String, dynamic>{};
+          final name = userData['nickname'] ?? '사용자';
+          final profileImage = userData['profileImage'] ?? '';
+          final contents = combined['contents'] ?? '';
+          final images = List<String>.from(combined['imageUrl'] ?? []);
           if (images.isEmpty) {
             images.add('assets/images/sample_post.png');
           }
-
           final details =
-              List<Map<String, dynamic>>.from(post['details'] ?? []);
+          List<Map<String, dynamic>>.from(combined['details'] ?? []);
 
           // 세부 정보 추출
           final String plantSpecies = _getDetail(details, '식물 종');
           final String waterCycle = _getDetail(details, '물 주기');
           final String fertilizerCycle = _getDetail(details, '분갈이 주기');
-          // final String environment = _getDetail(details, '환경'); // 환경 정보 제거
 
           return LayoutBuilder(
             builder: (context, constraints) {
@@ -144,12 +145,11 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                   Expanded(
                     child: SingleChildScrollView(
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 0, horizontal: 18),
+                        padding: const EdgeInsets.symmetric(horizontal: 18),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _profileSection(name),
+                            _profileSection(name, profileImage),
                             const SizedBox(height: 10),
                             _postImageSlider(images),
                             const SizedBox(height: 5),
@@ -160,8 +160,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                       ),
                     ),
                   ),
-                  _plantDetails(waterCycle, fertilizerCycle),
-                ],
+                  _plantDetails(plantSpecies, waterCycle, fertilizerCycle),                ],
               );
             },
           );
@@ -174,7 +173,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     );
   }
 
-  // 세부 정보를 추출하는 헬퍼 함수
+  /// 세부 정보를 추출하는 헬퍼 함수
   String _getDetail(List<Map<String, dynamic>> details, String key) {
     for (var detail in details) {
       if (detail.containsKey(key)) {
@@ -194,8 +193,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
               color: Color(0xFF7D7D7D), size: 24),
           onPressed: () {
             if (widget.docId != null) {
-              print(
-                  "Navigating to edit post with docId: ${widget.docId}"); // 디버그 출력
+              print("Navigating to edit post with docId: ${widget.docId}");
               context.push('/community/create', extra: {'docId': widget.docId});
             } else {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -215,13 +213,16 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     );
   }
 
-  Widget _profileSection(String name) {
+  /// 작성자 프로필 섹션 (프로필 이미지와 닉네임 표시)
+  Widget _profileSection(String name, String profileImage) {
     return Center(
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const CircleAvatar(
-            backgroundImage: AssetImage('assets/images/profile.png'),
+          CircleAvatar(
+            backgroundImage: profileImage.isNotEmpty
+                ? NetworkImage(profileImage)
+                : const AssetImage('assets/images/profile.png') as ImageProvider,
             radius: 15,
           ),
           const SizedBox(width: 10),
@@ -255,18 +256,12 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                 if (image.startsWith('http')) {
                   return ClipRRect(
                     borderRadius: BorderRadius.circular(10),
-                    child: Image.network(
-                      image,
-                      fit: BoxFit.cover,
-                    ),
+                    child: Image.network(image, fit: BoxFit.cover),
                   );
                 } else if (image.startsWith('assets/')) {
                   return ClipRRect(
                     borderRadius: BorderRadius.circular(10),
-                    child: Image.asset(
-                      image,
-                      fit: BoxFit.fill,
-                    ),
+                    child: Image.asset(image, fit: BoxFit.fill),
                   );
                 } else {
                   return ClipRRect(
@@ -281,7 +276,8 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
             top: 8,
             right: 8,
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              padding:
+              const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
                 color: Colors.black.withOpacity(0.6),
                 borderRadius: BorderRadius.circular(50),
@@ -308,8 +304,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
         Row(
           children: [
             IconButton(
-              icon:
-                  const Icon(Icons.comment, color: Color(0xFF4B7E5B), size: 24),
+              icon: const Icon(Icons.comment, color: Color(0xFF4B7E5B), size: 24),
               onPressed: () {
                 _showCommentModal(context);
               },
@@ -342,40 +337,35 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     );
   }
 
-  // 식물 세부 정보 표시 (환경 정보 제거)
-  Widget _plantDetails(String waterCycle, String fertilizerCycle) {
+  Widget _plantDetails(String plantSpecies, String waterCycle, String fertilizerCycle) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 3),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          _informationRow('식물 종', plantSpecies),
+          const SizedBox(height: 8),
           _informationRow('물 주기', waterCycle),
           const SizedBox(height: 8),
           _informationRow('분갈이 주기', fertilizerCycle),
-          // '환경' 정보 제거
         ],
       ),
     );
   }
 
-  // 개별 정보 행
+
   Widget _informationRow(String label, String value) {
     return Row(
       children: [
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
           decoration: BoxDecoration(
-            border: Border.all(
-              color: const Color(0x804B7E5B),
-            ),
+            border: Border.all(color: const Color(0x804B7E5B)),
             borderRadius: BorderRadius.circular(50),
           ),
           child: Text(
             label,
-            style: const TextStyle(
-              fontSize: 10,
-              color: Color(0xFF7D7D7D),
-            ),
+            style: const TextStyle(fontSize: 10, color: Color(0xFF7D7E5B)),
           ),
         ),
         const SizedBox(width: 5),

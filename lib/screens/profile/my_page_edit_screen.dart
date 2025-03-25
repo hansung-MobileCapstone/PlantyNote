@@ -407,7 +407,7 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
             ? FileImage(File(_image!.path))
             : (_profileImageUrl != null && _profileImageUrl!.startsWith('http'))
             ? NetworkImage(_profileImageUrl!)
-            : AssetImage('assets/images/basic_profile.png') as ImageProvider,
+            : AssetImage('assets/images/profile.png') as ImageProvider,
         child: _image == null && _profileImageUrl == null
             ? Icon(
           Icons.add, // 이미지가 없을 때 추가 아이콘 표시
