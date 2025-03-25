@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../widgets/components/notificaiton_item.dart';
 
 class NotificationScreen extends StatefulWidget  {
   const NotificationScreen({super.key});
@@ -8,40 +11,71 @@ class NotificationScreen extends StatefulWidget  {
 }
 
 class NotificationScreenState extends State<NotificationScreen> {
-  final List<Map<String, dynamic>> notifications = [ // 예시 데이터
-    {
-      'title': '콩이 물주기',
-      'time': '3분 전',
-      'description': '반려식물 콩이 물 줄 시간 입니다.',
-      'isRead': false, // 확인하지 않은 알람
-    },
-    {
-      'title': '팔이 물주기',
-      'time': '15분 전',
-      'description': '반려식물 팔이 물 줄 시간 입니다.',
-      'isRead': false, // 확인하지 않은 알람
-    },
-    {
-      'title': '팔이 물주기',
-      'time': '3일 전',
-      'description': '반려식물 팔이 물 줄 시간 입니다.',
-      'isRead': true, // 확인된 알람
-    },
-    {
-      'title': '콩이 물주기',
-      'time': '7일 전',
-      'description': '반려식물 콩이 물 줄 시간 입니다.',
-      'isRead': true, // 확인된 알람
-    },
-  ];
+  // 알림 목록
+  List<Map<String, dynamic>> notifications = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadNotifications();
+  }
+
+  // 알림 목록 불러오기, 배열에 저장
+  void _loadNotifications() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+    if (userId == null) return;
+
+    // SharedPreferences에서 알림 목록 불러오기
+    List<String>? storedNotifications = prefs.getStringList('notifications_$userId');
+    List<Map<String, dynamic>> loadedNotifications = [];
+
+    if (storedNotifications != null) {
+      for (var notificationData in storedNotifications) {
+        // 알림 데이터를 파싱(날짜, 제목, 내용, 읽음여부)
+        var notificationParts = notificationData.split('|');
+        if (notificationParts.length == 5) {
+          loadedNotifications.add({
+            'title': notificationParts[1],
+            'date': notificationParts[0],
+            'message': notificationParts[2],
+            'isRead': notificationParts[4] == 'read', // "unread" or "read"
+          });
+        }
+      }
+    }
+
+    setState(() {
+      notifications = loadedNotifications;
+    });
+  }
+
+  // 읽음 상태가 변경되었을 때 호출되는 함수
+  void _onReadStatusChanged(int index, bool isRead) async {
+    final prefs = await SharedPreferences.getInstance();
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+    if (userId == null) return;
+
+    // SharedPreferences에 상태 저장
+    List<String>? storedNotifications = prefs.getStringList('notifications_$userId');
+    if (storedNotifications != null) {
+      String notification = storedNotifications[index];
+      List<String> notificationParts = notification.split('|');
+
+      // 읽음으로 변경
+      notificationParts[4] = isRead ? 'read' : 'unread';
+      storedNotifications[index] = notificationParts.join('|');
+
+      prefs.setStringList('notifications_$userId', storedNotifications);
+    }
+
+    setState(() {
+      notifications[index]['isRead'] = isRead;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    final titleStyle = TextStyle(fontSize: 16, fontWeight: FontWeight.w500); // 알림 제목
-    final descriptionStyle = TextStyle(fontSize: 14, color: Color(0xFF747474)); // 알림 멘트
-    final timeStyle = TextStyle(fontSize: 12, color: Color(0xFF7E7E7E)); // 알림 시간
-    final unreadBackground = Colors.green.withOpacity(0.1); // 확인하지 않은 알림 색
-    final readBackground = Colors.white; // 확인한 알림 색
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -49,43 +83,16 @@ class NotificationScreenState extends State<NotificationScreen> {
       body: ListView.builder(
         itemCount: notifications.length,
         itemBuilder: (context, index) {
-          final notification = notifications[index];
-          return GestureDetector( // 알림
-            onTap: () { // 읽지 않은 알림을 누르면 팝업창 띄우기
-              if (!notification['isRead']) {
-                _showNotificationDialog(context, notification, index);
-              }
-            },
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-              color: notification['isRead'] ? readBackground : unreadBackground,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(Icons.water_drop, color: Color(0xFF8FD7FF), size: 24),
-                  SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Text(notification['title'], style: titleStyle),
-                            Spacer(),
-                            Text(notification['time'], style: timeStyle),
-                          ],
-                        ),
-                        SizedBox(height: 4),
-                        Text(notification['description'], style: descriptionStyle),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
+          return NotificationItem(
+            title: notifications[index]['title']!,
+            date: notifications[index]['date']!,
+            message: notifications[index]['message']!,
+            isRead: notifications[index]['isRead']!,
+            onReadStatusChanged: (isRead) => _onReadStatusChanged(index, isRead),
           );
         },
       ),
+
     );
   }
 
@@ -103,49 +110,6 @@ class NotificationScreenState extends State<NotificationScreen> {
         ),
       ),
       centerTitle: true,
-      actions: [
-        IconButton(
-          icon: Icon(Icons.search, color: Colors.black), // 검색 아이콘
-          onPressed: () {
-            // 검색 기능 추가 가능
-          },
-        ),
-      ],
-    );
-  }
-
-  // 팝업창 함수
-  void _showNotificationDialog(BuildContext context, Map<String, dynamic> notification, int index) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(notification['title']), // 알림 제목
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(notification['description']), // 알림 내용
-              SizedBox(height: 10),
-              Text(
-                '받은 시간: ${notification['time']}',
-                style: TextStyle(fontSize: 12, color: Colors.grey),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  notifications[index]['isRead'] = true; // 읽음 상태로 변경
-                });
-                Navigator.of(context).pop(); // 팝업창 닫기
-              },
-              child: Text('닫기'),
-            ),
-          ],
-        );
-      },
     );
   }
 }

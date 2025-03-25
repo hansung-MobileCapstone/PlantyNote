@@ -1,8 +1,8 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:cloud_firestore/cloud_firestore.dart'; // Firebase Firestore 임포트
-import 'package:firebase_auth/firebase_auth.dart'; // Firebase Auth 임포트
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../widgets/components/bottom_navigation_bar.dart';
 import '../../util/LocalNotification.dart';
 
@@ -61,6 +61,16 @@ class _MainScreenState extends State<MainScreen> {
                     },
                     child: const Icon(
                       Icons.notifications, // 아이콘 변경 가능
+                      size: 30,
+                      color: Colors.green, // 원하는 색상 설정
+                    ),
+                  ),
+                  GestureDetector( // 푸시알림 테스트용(삭제예정)
+                    onTap: () {
+                      LocalNotification.clearAllSharedPreferences();
+                    },
+                    child: const Icon(
+                      Icons.water, // 아이콘 변경 가능
                       size: 30,
                       color: Colors.green, // 원하는 색상 설정
                     ),

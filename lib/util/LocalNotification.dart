@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LocalNotification {
   // 플러그인 인스턴스 생성
@@ -16,8 +17,31 @@ class LocalNotification {
   StreamController<String?>.broadcast();
 
   // 푸시 알림 탭 했을 때 호출되는 함수
-  static void onNotificationTap(NotificationResponse notificationResponse) {
-    notificationStream.add(notificationResponse.payload!);
+  static void onNotificationTap(NotificationResponse notificationResponse) async {
+    final String payload = notificationResponse.payload ?? "";
+
+    // 알림을 클릭했을 때 SharedPreferences 상태 업데이트
+    final prefs = await SharedPreferences.getInstance();
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+    if (userId == null) return;
+
+    // 사용자별 알림 로드
+    List<String>? storedNotifications = prefs.getStringList('notifications_$userId');
+
+    if (storedNotifications != null) {
+      // 알림을 읽음으로 상태 변경
+      List<String> updatedNotifications = storedNotifications.map((notification) {
+        if (notification.contains(payload)) {
+          return notification.replaceAll('unread', 'read');
+        }
+        return notification;
+      }).toList();
+
+      // 업데이트된 알림 저장
+      prefs.setStringList('notifications_$userId', updatedNotifications);
+    }
+
+    notificationStream.add(payload);  // 클릭된 알림의 payload 추가
   }
 
   // 플러그인 초기화
@@ -73,6 +97,14 @@ class LocalNotification {
     required String body,
     required String payload,
   }) async {
+    // 현재 사용자 uid
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+    if (userId == null) return;
+
+    // 저장할 날짜 포맷팅(yy-mm-dd)
+    DateTime now = DateTime.now();
+    String formattedDate = '${now.year.toString().substring(2, 4)}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+
     const AndroidNotificationDetails androidNotificationDetails =
     AndroidNotificationDetails('channel 1', 'channel 1 name',
         channelDescription: 'channel 1 desc',
@@ -85,6 +117,16 @@ class LocalNotification {
 
     await _flutterLocalNotificationsPlugin
         .show(DateTime.now().millisecondsSinceEpoch ~/ 1000, title, body, notificationDetails, payload: payload);
+
+    // 알림 데이터를 SharedPreferences에 저장 by uID
+    final prefs = await SharedPreferences.getInstance();
+    final notificationData = '$formattedDate|$title|$body|$payload|unread';
+    List<String>? storedNotifications = prefs.getStringList('notifications_$userId');
+
+    storedNotifications ??= [];
+    storedNotifications.add(notificationData);
+
+    prefs.setStringList('notifications_$userId', storedNotifications);
   }
 
   // 물 줄 시간이 된 식물들을 체크하고 푸시알림
@@ -102,7 +144,7 @@ class LocalNotification {
         if (data["dDayWater"] == 0) {
           await showSimpleNotification(
             title: "물 주기 알림",
-            body: "${data["plantname"]}에게 물을 주는 날 이에요! 🌱",
+            body: "오늘은 ${data["plantname"]}에게 물을 주는 날 이에요! 🌱",
             payload: doc.id,
           );
         }
@@ -111,4 +153,11 @@ class LocalNotification {
       print("알림 전송 중 오류 발생: $e");
     }
   }
+
+  // SharedPreferences 비우기
+  static void clearAllSharedPreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();  // SharedPreferences의 모든 데이터를 삭제
+  }
+
 }
