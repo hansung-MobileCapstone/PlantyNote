@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../widgets/components/bottom_navigation_bar.dart';
 import '../../widgets/components/plant_list_item.dart';
+import '../../util/calculateDday.dart';
 
 class MyPlantCollectionScreen extends StatefulWidget {
   const MyPlantCollectionScreen({super.key});
@@ -68,8 +69,7 @@ class _MyPlantCollectionScreenState extends State<MyPlantCollectionScreen> {
               final dDayWater = plant['dDayWater'] ?? 0; // 물 d-day
 
               // 함께한 D-Day 계산
-              final dDayTogether =
-                  DateTime.now().difference(meetingDate).inDays + 1;
+              final dDayTogether = calculateLife(meetingDate);
 
               // PlantListItem 위젯 생성
               return Column(

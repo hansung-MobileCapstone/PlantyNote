@@ -8,6 +8,7 @@ import 'dart:io';
 import '../modals/cycle_setting_modal.dart';
 import '../modals/calendar_modal.dart';
 import 'package:plant/widgets/inputs/temperature_slider.dart';
+import '../../util/calculateDday.dart';
 
 class MyPlantRegisterScreen extends StatefulWidget {
   final Map<String, dynamic>? plantData; // 수정 모드일 경우 식물 데이터를 전달받음
@@ -56,12 +57,6 @@ class _MyPlantRegisterScreenState extends State<MyPlantRegisterScreen> {
     if (widget.isEditing && widget.plantData != null) {
       _initializeDataForEdit();
     }
-  }
-
-  // D-Day 계산 함수
-  int calculateDday(DateTime date, double cycleDays) {
-    final nextDate = date.add(Duration(days: cycleDays.toInt()));
-    return nextDate.difference(DateTime.now()).inDays;
   }
 
   // 수정 모드일 경우 데이터 초깃값
@@ -124,7 +119,7 @@ class _MyPlantRegisterScreenState extends State<MyPlantRegisterScreen> {
           'temperature': temperature,
           'meetingDate': meetingDate.toIso8601String(),
           'waterDate': waterDate.toIso8601String(),
-          'dDayWater': calculateDday(waterDate, waterCycle),
+          'dDayWater': calculateWater(waterDate, waterCycle),
           'imageUrl':
               _image != null ? _image!.path : widget.plantData?['imageUrl'],
           'updatedAt': FieldValue.serverTimestamp(),
@@ -151,7 +146,7 @@ class _MyPlantRegisterScreenState extends State<MyPlantRegisterScreen> {
           'temperature': temperature,
           'meetingDate': meetingDate.toIso8601String(),
           'waterDate': waterDate.toIso8601String(),
-          'dDayWater': calculateDday(waterDate, waterCycle),
+          'dDayWater': calculateWater(waterDate, waterCycle),
           'imageUrl': _image != null ? _image!.path : null,
           'createdAt': FieldValue.serverTimestamp(),
         });

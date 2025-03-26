@@ -8,6 +8,7 @@ import '../modals/memo_create_modal.dart';
 import '../modals/timeline_modal.dart';
 import '../../widgets/components/memo_item.dart';
 import 'dart:io';
+import '../../util/calculateDday.dart';
 
 class MyPlantTimelineScreen extends StatefulWidget {
   final String plantId;
@@ -72,8 +73,7 @@ class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
           final file = File(imageUrl);
 
           // 함께한 D-Day 계산
-          final dDayTogether =
-              DateTime.now().difference(meetingDate).inDays + 1;
+          final dDayTogether = calculateLife(meetingDate);
 
           return SingleChildScrollView(
             child: Column(
@@ -92,9 +92,9 @@ class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
                   sunlightLevel: sunlightLevel,
                   waterLevel: waterLevel,
                   temperature: temperature,
-                  dDayWater: _calculateDday(waterDate, waterCycle),
-                  dDayFertilizer: _calculateDday(waterDate, fertilizerCycle * 30),
-                  dDayRepotting: _calculateDday(waterDate, repottingCycle * 30),
+                  dDayWater: calculateWater(waterDate, waterCycle * 1.0),
+                  dDayFertilizer: calculateWater(meetingDate, fertilizerCycle * 30.0),
+                  dDayRepotting: calculateWater(meetingDate, repottingCycle * 30.0),
                 ),
                 const Divider(
                   color: Color(0xFF7D7D7D),
@@ -150,12 +150,6 @@ class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
         ),
       ),
     );
-  }
-
-  // D-Day 계산 함수
-  int _calculateDday(DateTime date, int cycleDays) {
-    final nextDate = date.add(Duration(days: cycleDays));
-    return nextDate.difference(DateTime.now()).inDays;
   }
 
   // 상단 바
