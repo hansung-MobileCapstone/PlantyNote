@@ -80,15 +80,11 @@ class LocalNotification {
     );
 
     // 로그인 상태 체크 후 알림 보내기
-    await _checkLoginAndSendNotifications();
-  }
-
-  // 로그인 상태 확인 후 알림 보내기
-  static Future _checkLoginAndSendNotifications() async {
-    User? user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      await sendNotifications(user.uid);  // 로그인된 유저에 대해서만 알림 전송
-    }
+    FirebaseAuth.instance.authStateChanges().listen((User? user) {
+      if (user != null) {
+        sendNotifications(user.uid); // 로그인한 순간 알림 전송
+      }
+    });
   }
 
   // 일반 푸시알람 보내기
