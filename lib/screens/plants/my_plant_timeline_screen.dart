@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import '../modals/notification_setting_modal.dart';
 import '../modals/memo_create_modal.dart';
 import '../modals/timeline_modal.dart';
 import '../../widgets/components/memo_item.dart';
@@ -525,15 +524,6 @@ class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
           style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF697386)),
         ),
         const Spacer(),
-        IconButton(
-          icon: const Icon(Icons.alarm_outlined, color: Color(0xFF4B7E5B)),
-          onPressed: () {
-            showDialog(
-              context: context,
-              builder: (context) => const NotificationSettingModal(),
-            );
-          },
-        ),
         const SizedBox(width: 10),
         Switch(
           value: isNotificationEnabled,

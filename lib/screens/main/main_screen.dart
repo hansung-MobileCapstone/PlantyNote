@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../widgets/components/bottom_navigation_bar.dart';
-import '../../util/LocalNotification.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
