@@ -55,26 +55,6 @@ class _MainScreenState extends State<MainScreen> {
                   const SizedBox(height: 50),
                   _recentPosts(user),
                   const SizedBox(height: 10),
-                  GestureDetector( // 푸시알림 테스트용(삭제예정)
-                    onTap: () {
-                      LocalNotification.sendNotifications(user.uid);
-                    },
-                    child: const Icon(
-                      Icons.notifications, // 아이콘 변경 가능
-                      size: 30,
-                      color: Colors.green, // 원하는 색상 설정
-                    ),
-                  ),
-                  GestureDetector( // 푸시알림 테스트용(삭제예정)
-                    onTap: () {
-                      LocalNotification.clearAllSharedPreferences();
-                    },
-                    child: const Icon(
-                      Icons.water, // 아이콘 변경 가능
-                      size: 30,
-                      color: Colors.green, // 원하는 색상 설정
-                    ),
-                  ),
                 ],
               ),
             ),

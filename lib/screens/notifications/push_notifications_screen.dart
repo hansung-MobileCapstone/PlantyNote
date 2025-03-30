@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../widgets/components/notificaiton_item.dart';
+import '../../util/LocalNotification.dart';
+import 'package:go_router/go_router.dart';
 
 class NotificationScreen extends StatefulWidget  {
   const NotificationScreen({super.key});
@@ -74,6 +76,34 @@ class NotificationScreenState extends State<NotificationScreen> {
     });
   }
 
+  // 삭제 확인 팝업
+  void _showDeleteDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("알림 지우기"),
+          content: Text("모든 알림을 삭제합니다."),
+          actions: [
+            TextButton(
+              onPressed: () {
+                context.pop(); // 팝업 닫기
+              },
+              child: Text("아니오"),
+            ),
+            TextButton(
+              onPressed: () {
+                LocalNotification.clearAllSharedPreferences();
+                context.pop(); // 팝업 닫기
+              },
+              child: Text("예"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
 
@@ -110,6 +140,15 @@ class NotificationScreenState extends State<NotificationScreen> {
         ),
       ),
       centerTitle: true,
+      actions: [
+        IconButton( // 삭제 버튼
+          icon: const Icon(
+              Icons.delete_outlined, color: Color(0xFFDA2525), size: 24),
+          onPressed: () {
+            _showDeleteDialog(context); // 삭제 팝업 표시
+          },
+        ),
+      ],
     );
   }
 }
