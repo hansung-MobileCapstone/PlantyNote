@@ -79,6 +79,9 @@ class LocalNotification {
       onDidReceiveBackgroundNotificationResponse: onNotificationTap,
     );
 
+    tz.initializeTimeZones();
+    tz.setLocalLocation(tz.getLocation('Asia/Seoul'));
+
     // 로그인 상태 체크 후 알림 보내기
     FirebaseAuth.instance.authStateChanges().listen((User? user) {
       if (user != null) {
@@ -101,6 +104,12 @@ class LocalNotification {
     DateTime now = DateTime.now();
     String formattedDate = '${now.year.toString().substring(2, 4)}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
 
+    // 알림 보낼 시간 설정 (오전 8시)
+    final scheduledTime = tz.TZDateTime.from(
+      DateTime.now().copyWith(hour: 8, minute: 0, second: 0),
+      tz.local,
+    );
+
     const AndroidNotificationDetails androidNotificationDetails =
     AndroidNotificationDetails('channel 1', 'channel 1 name',
         channelDescription: 'channel 1 desc',
@@ -111,8 +120,16 @@ class LocalNotification {
     const NotificationDetails notificationDetails =
     NotificationDetails(android: androidNotificationDetails);
 
-    await _flutterLocalNotificationsPlugin
-        .show(DateTime.now().millisecondsSinceEpoch ~/ 1000, title, body, notificationDetails, payload: payload);
+    await _flutterLocalNotificationsPlugin.zonedSchedule(
+        DateTime.now().millisecondsSinceEpoch ~/ 1000,
+        title,
+        body,
+        scheduledTime,
+        notificationDetails,
+        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+        matchDateTimeComponents: DateTimeComponents.time,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+    );
 
     // 알림 데이터를 SharedPreferences에 저장 by uID
     final prefs = await SharedPreferences.getInstance();
