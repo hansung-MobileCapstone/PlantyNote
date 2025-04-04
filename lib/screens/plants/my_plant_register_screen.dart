@@ -149,6 +149,7 @@ class _MyPlantRegisterScreenState extends State<MyPlantRegisterScreen> {
           'dDayWater': calculateWater(waterDate, waterCycle),
           'imageUrl': _image != null ? _image!.path : null,
           'createdAt': FieldValue.serverTimestamp(),
+          'isNotificationEnabled': true,
         });
 
         Fluttertoast.showToast(

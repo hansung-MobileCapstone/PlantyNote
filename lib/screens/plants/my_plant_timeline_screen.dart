@@ -26,6 +26,26 @@ class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
   void initState() {
     super.initState();
     plantDataFuture = _fetchPlantData();
+
+    _loadNotificationStatus(); // 알림 토글값 불러오는 함수
+  }
+
+  void _loadNotificationStatus() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final doc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .collection('plants')
+        .doc(widget.plantId)
+        .get();
+
+    if (doc.exists) {
+      setState(() {
+        isNotificationEnabled = doc.data()?['isNotificationEnabled'] ?? false;
+      });
+    }
   }
 
   Future<DocumentSnapshot<Map<String, dynamic>>> _fetchPlantData() async {
@@ -527,10 +547,20 @@ class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
         const SizedBox(width: 10),
         Switch(
           value: isNotificationEnabled,
-          onChanged: (value) {
+          onChanged: (value) async {
             setState(() {
               isNotificationEnabled = value;
             });
+
+            final user = FirebaseAuth.instance.currentUser;
+            if (user != null) {
+            await FirebaseFirestore.instance
+                .collection('users')
+                .doc(user.uid)
+                .collection('plants')
+                .doc(widget.plantId)
+                .update({'isNotificationEnabled': value});
+            }
           },
           activeColor: Color(0xFFFFFFFF), // 활성 상태의 thumb 색상
           activeTrackColor: Color(0xFF4B7E5B), // 활성 상태의 track 색상

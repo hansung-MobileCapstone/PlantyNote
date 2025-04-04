@@ -106,7 +106,7 @@ class LocalNotification {
 
     // 알림 보낼 시간 설정 (오전 8시)
     final scheduledTime = tz.TZDateTime.from(
-      DateTime.now().copyWith(hour: 8, minute: 0, second: 0),
+      DateTime.now().copyWith(hour: 0, minute: 36, second: 0),
       tz.local,
     );
 
@@ -154,12 +154,15 @@ class LocalNotification {
 
       for (var doc in snapshot.docs) {
         var data = doc.data();
-        if (data["dDayWater"] == 0) {
-          await showSimpleNotification(
-            title: "물 주기 알림",
-            body: "오늘은 ${data["plantname"]}에게 물을 주는 날 이에요! 🌱",
-            payload: doc.id,
-          );
+
+        if (data["isNotificationEnabled"]) { // 알림 토글이 On인 경우만
+          if (data["dDayWater"] == 0) {
+            await showSimpleNotification(
+              title: "물 주기 알림",
+              body: "오늘은 ${data["plantname"]}에게 물을 주는 날 이에요! 🌱",
+              payload: doc.id,
+            );
+          }
         }
       }
     } catch (e) {
