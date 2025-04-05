@@ -7,6 +7,7 @@ import './plants_routes.dart';
 import './community_routes.dart';
 import './profile_routes.dart';
 import './onboarding_routes.dart';
+import './map_routes.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -18,6 +19,7 @@ class AppRouter {
       ...PlantsRoutes.getRoutes(),
       ...CommunityRoutes.getRoutes(),
       ...ProfileRoutes.getRoutes(),
+      ...MapRoutes.getRoutes(),
     ],
   );
 }

@@ -12,7 +12,7 @@ class MyPageScreen extends StatefulWidget {
 }
 
 class MyPageScreenState extends State<MyPageScreen> {
-  int _selectedIndex = 2; // 네비게이션 인덱스
+  int _selectedIndex = 3; // 네비게이션 인덱스
 
   // 사용자 정보 변수
   String _nickname = ''; // 이름 (닉네임)
