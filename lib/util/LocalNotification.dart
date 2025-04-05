@@ -106,7 +106,7 @@ class LocalNotification {
 
     // 알림 보낼 시간 설정 (오전 8시)
     final scheduledTime = tz.TZDateTime.from(
-      DateTime.now().copyWith(hour: 0, minute: 36, second: 0),
+      DateTime.now().copyWith(hour: 8, minute: 0, second: 0),
       tz.local,
     );
 
