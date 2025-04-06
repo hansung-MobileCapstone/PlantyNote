@@ -83,7 +83,9 @@ class PostItem extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 10,
-              backgroundImage: NetworkImage(profileImage),
+              backgroundImage: profileImage.startsWith('http')
+                  ? NetworkImage(profileImage)
+                  : AssetImage(profileImage) as ImageProvider,
             ),
             const SizedBox(width: 8),
             Text(
