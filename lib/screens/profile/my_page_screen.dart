@@ -65,6 +65,31 @@ class MyPageScreenState extends State<MyPageScreen> {
     _fetchUserData(); // 사용자 데이터 가져오기
   }
 
+  // 이미지 URL을 받아서, asset이면 Image.asset, 네트워크 URL이면 Image.network를 리턴하는 헬퍼 함수
+  Widget _buildGridImage(String imageUrl) {
+    if (imageUrl.startsWith('assets/')) {
+      return Image.asset(
+        imageUrl,
+        fit: BoxFit.cover,
+      );
+    } else {
+      return Image.network(
+        imageUrl,
+        fit: BoxFit.cover,
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return Center(child: CircularProgressIndicator());
+        },
+        errorBuilder: (context, error, stackTrace) {
+          return Image.asset(
+            'assets/images/default_image.png',
+            fit: BoxFit.cover,
+          );
+        },
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -353,20 +378,7 @@ class MyPageScreenState extends State<MyPageScreen> {
               },
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(10),
-                child: Image.network(
-                  imageUrls[index],
-                  fit: BoxFit.cover,
-                  loadingBuilder: (context, child, loadingProgress) {
-                    if (loadingProgress == null) return child;
-                    return Center(child: CircularProgressIndicator());
-                  },
-                  errorBuilder: (context, error, stackTrace) {
-                    return Image.asset(
-                      'assets/images/default_image.png',
-                      fit: BoxFit.cover,
-                    );
-                  },
-                ),
+                child: _buildGridImage(imageUrls[index]),
               ),
             );
           },
