@@ -1,3 +1,4 @@
+// ✅ search_screen.dart
 import 'package:flutter/material.dart';
 import '../../widgets/components/bottom_navigation_bar.dart';
 import 'package:go_router/go_router.dart';
@@ -10,9 +11,11 @@ class SearchScreen extends StatefulWidget {
 }
 
 class SearchScreenState extends State<SearchScreen> {
-  int _selectedIndex = 1; // 네비게이션바 인덱스
-  int selectedTab = 0; // 실시간, 일간, 주간, 월간 탭 상태
-  String? selectedRecentSearch; // 선택된 최근 검색어
+  int _selectedIndex = 1;
+  int selectedTab = 0;
+  String? selectedRecentSearch;
+  final TextEditingController _searchController = TextEditingController();
+
   final List<String> recentSearches = ["고목나무", "알라비", "레몬 나무"];
   final List<String> popularSearches = [
     "고목나무",
@@ -25,8 +28,13 @@ class SearchScreenState extends State<SearchScreen> {
 
   void _onItemTapped(int index) {
     setState(() {
-      _selectedIndex = index; // 인덱스 상태 업데이트
+      _selectedIndex = index;
     });
+  }
+
+  void _goToSearchResult(String keyword) {
+    if (keyword.trim().isEmpty) return;
+    context.push('/main/search/result', extra: {'keyword': keyword.trim()});
   }
 
   @override
@@ -39,24 +47,18 @@ class SearchScreenState extends State<SearchScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(height: 10), // 화면 상단 여백
-            _searchBar(), // 검색 바
-            SizedBox(height: 20),
-            Text(
-              "최근 검색어",
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 10),
-            _recentSearch(), // 최근 검색어 목록
-            SizedBox(height: 20),
-            Text(
-              "인기 검색어",
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 10),
-            _popularSearchTap(), // 인기 검색어 탭
-            SizedBox(height: 20),
-            _popularSearch(), // 인기 검색어 목록
+            const SizedBox(height: 10),
+            _searchBar(),
+            const SizedBox(height: 20),
+            const Text("최근 검색어", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 10),
+            _recentSearch(),
+            const SizedBox(height: 20),
+            const Text("인기 검색어", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 10),
+            _popularSearchTap(),
+            const SizedBox(height: 20),
+            _popularSearch(),
           ],
         ),
       ),
@@ -67,24 +69,18 @@ class SearchScreenState extends State<SearchScreen> {
     );
   }
 
-  // 상단 바
   AppBar _buildAppBar() {
     return AppBar(
       backgroundColor: Colors.white,
-      title: Text(
+      title: const Text(
         '게시물 검색',
-        style: TextStyle(
-          color: Colors.black,
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
-        ),
+        style: TextStyle(color: Colors.black, fontSize: 16, fontWeight: FontWeight.bold),
       ),
       centerTitle: true,
       elevation: 0,
     );
   }
 
-  // 검색 바
   Widget _searchBar() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 1),
@@ -96,116 +92,85 @@ class SearchScreenState extends State<SearchScreen> {
         ),
         child: Row(
           children: [
-            SizedBox(width: 16),
+            const SizedBox(width: 16),
             Expanded(
               child: TextField(
-                decoration: InputDecoration(
+                controller: _searchController,
+                decoration: const InputDecoration(
                   hintText: '궁금한 식물을 검색해 보세요!',
                   hintStyle: TextStyle(color: Color(0xFFB3B3B3)),
                   border: InputBorder.none,
                 ),
-                style: TextStyle(color: Colors.black),
-                onChanged: (value) {
-                  // 검색 입력값 처리
-                },
+                style: const TextStyle(color: Colors.black),
               ),
             ),
-            SizedBox(width: 8),
+            const SizedBox(width: 8),
             GestureDetector(
               onTap: () {
-                // 검색 필터 로직
-                context.push('/community'); // 전체게시물페이지로 이동
+                _goToSearchResult(_searchController.text);
               },
-              child: Icon(Icons.search, color: Color(0xFFB3B3B3)),
+              child: const Icon(Icons.search, color: Color(0xFFB3B3B3)),
             ),
-            SizedBox(width: 16), // 우측 패딩
+            const SizedBox(width: 16),
           ],
         ),
       ),
     );
   }
 
-  // 최근 검색어 목록
   Widget _recentSearch() {
     return Wrap(
       spacing: 8,
-      children: recentSearches
-          .map(
-            (search) =>
-            GestureDetector(
-              onTap: () {
-                setState(() {
-                  selectedRecentSearch = search;
-                });
-              },
-              child: Container(
-                padding:
-                EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                decoration: BoxDecoration(
-                  color: selectedRecentSearch == search
-                      ? Colors.grey[300] // 선택 시 회색
-                      : Colors.white, // 기본 흰색
-                  border: Border.all(color: Colors.grey[400]!),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Text(
-                  search,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.black,
-                  ),
-                ),
-              ),
+      children: recentSearches.map((search) {
+        return GestureDetector(
+          onTap: () {
+            setState(() {
+              selectedRecentSearch = search;
+            });
+            _goToSearchResult(search);
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: selectedRecentSearch == search ? Colors.grey[300] : Colors.white,
+              border: Border.all(color: Colors.grey[400]!),
+              borderRadius: BorderRadius.circular(16),
             ),
-      )
-          .toList(),
+            child: Text(search, style: const TextStyle(fontSize: 14, color: Colors.black)),
+          ),
+        );
+      }).toList(),
     );
   }
 
-  // 인기 검색어 탭 (실시간, 일간, 주간, 월간)
   Widget _popularSearchTap() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
-      children: tabs
-          .asMap()
-          .entries
-          .map(
-            (entry) =>
-            GestureDetector(
-              onTap: () {
-                setState(() {
-                  selectedTab = entry.key;
-                });
-              },
-              child: Container(
-                margin: EdgeInsets.only(right: 10),
-                padding:
-                EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                decoration: BoxDecoration(
-                  color: selectedTab == entry.key
-                      ? Colors.green[800] // 터치 시 초록색
-                      : Colors.white, // 기본은 흰색
-                  border: Border.all(
-                    color: Colors.grey[300]!, // 테두리 색상
-                  ),
-                  borderRadius: BorderRadius.circular(30),
-                ),
-                child: Text(
-                  entry.value,
-                  style: TextStyle(
-                    color: selectedTab == entry.key
-                        ? Colors.white
-                        : Colors.black, // 터치 전 검정색
-                  ),
-                ),
-              ),
+      children: tabs.asMap().entries.map((entry) {
+        return GestureDetector(
+          onTap: () {
+            setState(() {
+              selectedTab = entry.key;
+            });
+          },
+          child: Container(
+            margin: const EdgeInsets.only(right: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: selectedTab == entry.key ? Colors.green[800] : Colors.white,
+              border: Border.all(color: Colors.grey[300]!),
+              borderRadius: BorderRadius.circular(30),
             ),
-      )
-          .toList(),
+            child: Text(
+              entry.value,
+              style: TextStyle(color: selectedTab == entry.key ? Colors.white : Colors.black),
+            ),
+          ),
+        );
+      }).toList(),
     );
   }
 
-  // 인기 검색어 목록
   Widget _popularSearch() {
     return Expanded(
       child: ListView.builder(
@@ -213,14 +178,10 @@ class SearchScreenState extends State<SearchScreen> {
         itemBuilder: (context, index) {
           return Padding(
             padding: const EdgeInsets.symmetric(vertical: 4.0),
-            child: Text(
-              "${index + 1}. ${popularSearches[index]}",
-              style: TextStyle(fontSize: 16),
-            ),
+            child: Text("${index + 1}. ${popularSearches[index]}", style: const TextStyle(fontSize: 16)),
           );
         },
       ),
     );
   }
-
 }
