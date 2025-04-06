@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-// 게시물 하나
 class PostItem extends StatelessWidget {
   final String name;
   final String profileImage;
   final String contents;
   final List<String> imageUrls;
   final List<Map<String, dynamic>> details;
+  final String? keyword;
 
   const PostItem({
     super.key,
@@ -15,9 +15,9 @@ class PostItem extends StatelessWidget {
     required this.contents,
     required this.imageUrls,
     required this.details,
+    this.keyword,
   });
 
-  // 세부 정보를 추출하는 헬퍼 함수
   String _getDetail(String key) {
     for (var detail in details) {
       if (detail.containsKey(key)) {
@@ -27,45 +27,74 @@ class PostItem extends StatelessWidget {
     return '정보 없음';
   }
 
+  TextSpan _highlight(String text, {TextStyle? style}) {
+    if (keyword == null || keyword!.isEmpty) {
+      return TextSpan(text: text, style: style);
+    }
+
+    final lowerText = text.toLowerCase();
+    final lowerKeyword = keyword!.toLowerCase();
+
+    if (!lowerText.contains(lowerKeyword)) {
+      return TextSpan(text: text, style: style);
+    }
+
+    final spans = <TextSpan>[];
+    int start = 0;
+    int index;
+
+    while ((index = lowerText.indexOf(lowerKeyword, start)) != -1) {
+      if (start < index) {
+        spans.add(TextSpan(text: text.substring(start, index), style: style));
+      }
+      spans.add(TextSpan(
+        text: text.substring(index, index + keyword!.length),
+        style: style?.copyWith(
+          fontWeight: FontWeight.bold,
+          backgroundColor: Colors.yellow.withOpacity(0.5),
+        ),
+      ));
+      start = index + keyword!.length;
+    }
+
+    if (start < text.length) {
+      spans.add(TextSpan(text: text.substring(start), style: style));
+    }
+
+    return TextSpan(children: spans);
+  }
+
   @override
   Widget build(BuildContext context) {
-    // 세부 정보 추출
     final String plantSpecies = _getDetail('식물 종');
     final String waterCycle = _getDetail('물 주기');
     final String fertilizerCycle = _getDetail('분갈이 주기');
 
     return SizedBox(
-      height: 140, // Card 높이를 약간 늘림
+      height: 140,
       child: Card(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         elevation: 4,
         color: const Color(0xFFF5F5F5),
         margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center, // 모든 요소를 중앙 정렬
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const SizedBox(width: 10), // 왼쪽 여백
+            const SizedBox(width: 10),
             _postImage(),
-            const SizedBox(width: 16), // 이미지와 텍스트 간격
-            Expanded(
-              child: _postContent(), // 텍스트 내용
-            ),
-            const SizedBox(width: 10), // 텍스트와 세로선 간격
-            Container(
-              width: 1,
-              height: 100, // 세로선 고정 높이
-              color: const Color(0xFF7D7D7D),
-            ),
-            const SizedBox(width: 10), // 세로선과 식물 정보 간격
+            const SizedBox(width: 16),
+            Expanded(child: _postContent()),
+            const SizedBox(width: 10),
+            Container(width: 1, height: 100, color: const Color(0xFF7D7D7D)),
+            const SizedBox(width: 10),
             _plantInformation(plantSpecies, waterCycle, fertilizerCycle),
-            const SizedBox(width: 10), // 오른쪽 여백
+            const SizedBox(width: 10),
           ],
         ),
       ),
     );
   }
 
-  // 올린 이미지
   Widget _postImage() {
     return SizedBox(
       width: 100,
@@ -105,11 +134,10 @@ class PostItem extends StatelessWidget {
     );
   }
 
-  // 올린 글
   Widget _postContent() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.center, // 세로 중앙 정렬
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Row(
           children: [
@@ -118,35 +146,36 @@ class PostItem extends StatelessWidget {
               backgroundImage: NetworkImage(profileImage),
             ),
             const SizedBox(width: 8),
-            Text(
-              name,
-              style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.bold,
+            RichText(
+              text: _highlight(
+                name,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
               ),
             ),
           ],
         ),
         const SizedBox(height: 8),
-        Text(
-          contents,
-          style: const TextStyle(
-            fontSize: 11,
-            color: Color(0xFF7D7D7D),
+        RichText(
+          text: _highlight(
+            contents,
+            style: const TextStyle(
+              fontSize: 11,
+              color: Color(0xFF7D7D7D),
+            ),
           ),
-          maxLines: 3,
-          overflow: TextOverflow.ellipsis,
         ),
       ],
     );
   }
 
-  // 식물 정보
-  Widget _plantInformation(
-      String plantSpecies, String waterCycle, String fertilizerCycle) {
+  Widget _plantInformation(String plantSpecies, String waterCycle, String fertilizerCycle) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.center, // 세로 중앙 정렬
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         _informationRow('식물 종', plantSpecies),
         const SizedBox(height: 8),
@@ -157,33 +186,29 @@ class PostItem extends StatelessWidget {
     );
   }
 
-  // 개별 정보 행
   Widget _informationRow(String label, String value) {
     return Row(
       children: [
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
           decoration: BoxDecoration(
-            border: Border.all(
-              color: const Color(0x804B7E5B),
-            ),
+            border: Border.all(color: const Color(0x804B7E5B)),
             borderRadius: BorderRadius.circular(50),
           ),
           child: Text(
             label,
-            style: const TextStyle(
-              fontSize: 7,
-              color: Color(0xFF7D7D7D),
-            ),
+            style: const TextStyle(fontSize: 7, color: Color(0xFF7D7D7D)),
           ),
         ),
         const SizedBox(width: 8),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 7,
-            color: Color(0xFF616161),
-            fontWeight: FontWeight.bold,
+        RichText(
+          text: _highlight(
+            value,
+            style: const TextStyle(
+              fontSize: 7,
+              color: Color(0xFF616161),
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
       ],
