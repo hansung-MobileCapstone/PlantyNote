@@ -289,6 +289,91 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
     }
   }
 
+  // 나의 게시물 개수를 실시간으로 보여주는 위젯
+  Widget _myPostsNumber() {
+    if (_user == null) return SizedBox.shrink();
+    return StreamBuilder<QuerySnapshot>(
+      stream: _firestore
+          .collection('posts')
+          .where('userId', isEqualTo: _user!.uid)
+          .snapshots(),
+      builder: (context, snapshot) {
+        int count = 0;
+        if (snapshot.hasData) {
+          count = snapshot.data!.docs.length;
+        }
+        return Padding(
+          padding: const EdgeInsets.only(left: 6.0),
+          child: Text(
+            '나의 게시물 : $count',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey,
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // 나의 게시물들을 조회 (공용 컬렉션 "posts"에서 현재 사용자의 게시물을 가져옴)
+  Widget _myPosts() {
+    if (_user == null) {
+      return Center(child: Text('로그인 후 이용해주세요.'));
+    }
+
+    return StreamBuilder<QuerySnapshot>(
+      stream: _firestore
+          .collection('posts')
+          .where('userId', isEqualTo: _user!.uid)
+          .orderBy('createdAt', descending: true)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError || !snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return Center(child: Text('작성한 게시물이 없습니다.'));
+        }
+
+        final docs = snapshot.data!.docs;
+
+        // 이미지 URL만 추출하여 리스트 생성
+        final imageUrls = docs.map((doc) {
+          final data = doc.data() as Map<String, dynamic>;
+          final imageUrlList = List<String>.from(data['imageUrl'] ?? []);
+          return imageUrlList.isNotEmpty ? imageUrlList[0] : null;
+        }).where((url) => url != null).cast<String>().toList();
+
+        if (imageUrls.isEmpty) {
+          return Center(child: Text('게시물에 이미지가 없습니다.'));
+        }
+
+        return GridView.builder(
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 3,
+            crossAxisSpacing: 8,
+            mainAxisSpacing: 8,
+          ),
+          itemCount: imageUrls.length,
+          itemBuilder: (context, index) {
+            return GestureDetector(
+              onTap: () {
+                final docId = docs[index].id;
+                context.push('/community/detail', extra: {'docId': docId});
+              },
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: _buildGridImage(imageUrls[index]),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -342,10 +427,10 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
               indent: 5,
               endIndent: 5,
             ),
-            _myPostsNumber(),
+            _myPostsNumber(), // 나의 게시물 개수 표시
             SizedBox(height: 12),
             Expanded(
-              child: _myPosts(), // 내가 쓴 게시물 조회 (수정됨)
+              child: _myPosts(), // 내가 쓴 게시물 조회
             ),
             Align(
               // 계정 탈퇴 버튼
@@ -567,75 +652,6 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
           ),
         ],
       ),
-    );
-  }
-
-  // 나의 게시물 개수 텍스트
-  Widget _myPostsNumber() {
-    return Padding(
-      padding: const EdgeInsets.only(left: 6.0),
-      child: Text(
-        '나의 게시물 : ',
-        style:
-        TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey),
-      ),
-    );
-  }
-
-  // 내가 쓴 게시물을 "posts" 컬렉션에서 조회
-  Widget _myPosts() {
-    if (_user == null) {
-      return Center(child: Text('로그인 후 이용해주세요.'));
-    }
-
-    return StreamBuilder<QuerySnapshot>(
-      stream: _firestore
-          .collection('posts')
-          .where('userId', isEqualTo: _user!.uid)
-          .orderBy('createdAt', descending: true)
-          .snapshots(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
-        }
-        if (snapshot.hasError || !snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return Center(child: Text('작성한 게시물이 없습니다.'));
-        }
-
-        final docs = snapshot.data!.docs;
-
-        // 이미지 URL만 추출하여 리스트 생성
-        final imageUrls = docs.map((doc) {
-          final data = doc.data() as Map<String, dynamic>;
-          final imageUrlList = List<String>.from(data['imageUrl'] ?? []);
-          return imageUrlList.isNotEmpty ? imageUrlList[0] : null;
-        }).where((url) => url != null).cast<String>().toList();
-
-        if (imageUrls.isEmpty) {
-          return Center(child: Text('게시물에 이미지가 없습니다.'));
-        }
-
-        return GridView.builder(
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3,
-            crossAxisSpacing: 8,
-            mainAxisSpacing: 8,
-          ),
-          itemCount: imageUrls.length,
-          itemBuilder: (context, index) {
-            return GestureDetector(
-              onTap: () {
-                final docId = docs[index].id;
-                context.push('/community/detail', extra: {'docId': docId});
-              },
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: _buildGridImage(imageUrls[index]),
-              ),
-            );
-          },
-        );
-      },
     );
   }
 }
