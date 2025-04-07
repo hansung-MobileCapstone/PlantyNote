@@ -1,8 +1,8 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:cloud_firestore/cloud_firestore.dart'; // Firebase Firestore 임포트
-import 'package:firebase_auth/firebase_auth.dart'; // Firebase Auth 임포트
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../widgets/components/bottom_navigation_bar.dart';
 
 class MainScreen extends StatefulWidget {

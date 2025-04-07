@@ -3,11 +3,11 @@ import 'package:go_router/go_router.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import '../modals/notification_setting_modal.dart';
 import '../modals/memo_create_modal.dart';
 import '../modals/timeline_modal.dart';
 import '../../widgets/components/memo_item.dart';
 import 'dart:io';
+import '../../util/calculateDday.dart';
 
 class MyPlantTimelineScreen extends StatefulWidget {
   final String plantId;
@@ -20,12 +20,32 @@ class MyPlantTimelineScreen extends StatefulWidget {
 
 class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
   late Future<DocumentSnapshot<Map<String, dynamic>>> plantDataFuture;
-  bool isNotificationEnabled = false;
+  bool isNotificationEnabled = true;
 
   @override
   void initState() {
     super.initState();
     plantDataFuture = _fetchPlantData();
+
+    _loadNotificationStatus(); // 알림 토글값 불러오는 함수
+  }
+
+  void _loadNotificationStatus() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final doc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .collection('plants')
+        .doc(widget.plantId)
+        .get();
+
+    if (doc.exists) {
+      setState(() {
+        isNotificationEnabled = doc.data()?['isNotificationEnabled'] ?? false;
+      });
+    }
   }
 
   Future<DocumentSnapshot<Map<String, dynamic>>> _fetchPlantData() async {
@@ -72,8 +92,7 @@ class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
           final file = File(imageUrl);
 
           // 함께한 D-Day 계산
-          final dDayTogether =
-              DateTime.now().difference(meetingDate).inDays + 1;
+          final dDayTogether = calculateLife(meetingDate);
 
           return SingleChildScrollView(
             child: Column(
@@ -92,9 +111,9 @@ class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
                   sunlightLevel: sunlightLevel,
                   waterLevel: waterLevel,
                   temperature: temperature,
-                  dDayWater: _calculateDday(waterDate, waterCycle),
-                  dDayFertilizer: _calculateDday(waterDate, fertilizerCycle * 30),
-                  dDayRepotting: _calculateDday(waterDate, repottingCycle * 30),
+                  dDayWater: calculateWater(waterDate, waterCycle * 1.0),
+                  dDayFertilizer: calculateWater(meetingDate, fertilizerCycle * 30.0),
+                  dDayRepotting: calculateWater(meetingDate, repottingCycle * 30.0),
                 ),
                 const Divider(
                   color: Color(0xFF7D7D7D),
@@ -150,12 +169,6 @@ class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
         ),
       ),
     );
-  }
-
-  // D-Day 계산 함수
-  int _calculateDday(DateTime date, int cycleDays) {
-    final nextDate = date.add(Duration(days: cycleDays));
-    return nextDate.difference(DateTime.now()).inDays;
   }
 
   // 상단 바
@@ -531,22 +544,23 @@ class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
           style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF697386)),
         ),
         const Spacer(),
-        IconButton(
-          icon: const Icon(Icons.alarm_outlined, color: Color(0xFF4B7E5B)),
-          onPressed: () {
-            showDialog(
-              context: context,
-              builder: (context) => const NotificationSettingModal(),
-            );
-          },
-        ),
         const SizedBox(width: 10),
         Switch(
           value: isNotificationEnabled,
-          onChanged: (value) {
+          onChanged: (value) async {
             setState(() {
               isNotificationEnabled = value;
             });
+
+            final user = FirebaseAuth.instance.currentUser;
+            if (user != null) {
+            await FirebaseFirestore.instance
+                .collection('users')
+                .doc(user.uid)
+                .collection('plants')
+                .doc(widget.plantId)
+                .update({'isNotificationEnabled': value});
+            }
           },
           activeColor: Color(0xFFFFFFFF), // 활성 상태의 thumb 색상
           activeTrackColor: Color(0xFF4B7E5B), // 활성 상태의 track 색상
