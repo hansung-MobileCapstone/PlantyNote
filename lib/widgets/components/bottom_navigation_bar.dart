@@ -17,6 +17,7 @@ class MyBottomNavigationBar extends StatelessWidget {
       backgroundColor: Colors.white,
       elevation: 0, // 그림자 제거
       currentIndex: selectedIndex,
+      type: BottomNavigationBarType.fixed,
       onTap: (index) {
         _navigatePage(context, index); // 페이지 이동
         onItemTapped(index); // 상태 업데이트
@@ -27,8 +28,7 @@ class MyBottomNavigationBar extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               _greenBar(visible: selectedIndex == 0),
-              Icon(Icons.eco, size: 32,
-                  color: selectedIndex == 0 ? Colors.grey : Colors.grey[400]),
+              Icon(Icons.eco, size: 32,)
             ],
           ),
           label: '',
@@ -38,8 +38,7 @@ class MyBottomNavigationBar extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               _greenBar(visible: selectedIndex == 1),
-              Icon(Icons.menu_book, size: 32,
-                  color: selectedIndex == 1 ? Colors.grey : Colors.grey[400]),
+              Icon(Icons.menu_book, size: 32)
             ],
           ),
           label: '',
@@ -49,15 +48,24 @@ class MyBottomNavigationBar extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               _greenBar(visible: selectedIndex == 2),
-              Icon(Icons.person, size: 32,
-                  color: selectedIndex == 2 ? Colors.grey : Colors.grey[400]),
+              Icon(Icons.map, size: 32,)
+            ],
+          ),
+          label: '',
+        ),
+        BottomNavigationBarItem(
+          icon: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _greenBar(visible: selectedIndex == 3),
+              Icon(Icons.person, size: 32,)
             ],
           ),
           label: '',
         ),
       ],
-      selectedItemColor: Colors.grey,
-      unselectedItemColor: Colors.grey[400],
+      selectedItemColor: Color(0xFF4B7E5B),
+      unselectedItemColor: Colors.grey,
       showSelectedLabels: false,
       showUnselectedLabels: false,
     );
@@ -68,7 +76,7 @@ class MyBottomNavigationBar extends StatelessWidget {
     if (!visible) return SizedBox.shrink(); // false면 빈 위젯
     return Container(
       height: 3,
-      width: 80,
+      width: 75,
       color: Color(0xFF4B7E5B),
       margin: EdgeInsets.only(bottom: 5),
     );
@@ -84,6 +92,9 @@ class MyBottomNavigationBar extends StatelessWidget {
         context.go('/main'); // 메인 페이지
         break;
       case 2:
+        context.go('/map'); // 지도 페이지
+        break;
+      case 3:
         context.go('/profile'); // 마이 페이지
         break;
       default:
