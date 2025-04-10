@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../widgets/components/bottom_navigation_bar.dart';
 import '../../widgets/components/plant_list_item.dart';
+import '../../util/calculateDday.dart';
 
 class MyPlantCollectionScreen extends StatefulWidget {
   const MyPlantCollectionScreen({super.key});
@@ -65,20 +66,10 @@ class _MyPlantCollectionScreenState extends State<MyPlantCollectionScreen> {
               final plantName = plant['plantname'] ?? '식물 이름 없음'; // 식물 이름
               final imageUrl = plant['imageUrl'] ?? ''; // 이미지 URL
               final meetingDate = DateTime.parse(plant['meetingDate']); // 처음 만난 날
-              final waterDate = DateTime.parse(plant['waterDate']); // 마지막 물 준 날
-              final waterCycle = (plant['waterCycle'] ?? 0).toInt(); // 물 주기
+              final dDayWater = plant['dDayWater'] ?? 0; // 물 d-day
 
               // 함께한 D-Day 계산
-              final dDayTogether =
-                  DateTime.now().difference(meetingDate).inDays + 1;
-
-              // 물 주는 D-Day 계산
-              final nextWaterDate = DateTime(
-                waterDate.year,
-                waterDate.month,
-                waterDate.day,
-              ).add(Duration(days: waterCycle));
-              final dDayWater = nextWaterDate.difference(DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day)).inDays;
+              final dDayTogether = calculateLife(meetingDate);
 
               // PlantListItem 위젯 생성
               return Column(
