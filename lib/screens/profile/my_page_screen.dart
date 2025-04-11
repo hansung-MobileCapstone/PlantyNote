@@ -17,7 +17,10 @@ class MyPageScreenState extends State<MyPageScreen> {
   // 사용자 정보 변수
   String _nickname = ''; // 이름 (닉네임)
   String _bio = ''; // 소개문
-  String? _profileImageUrl; // 프로필 이미지 URL 추가
+  String? _profileImageUrl; // 프로필 이미지 URL
+
+  // 식물 개수는 Firestore에서 동적으로 가져옵니다.
+  int _plantCount = 0;
 
   void _onItemTapped(int index) {
     setState(() {
@@ -25,15 +28,14 @@ class MyPageScreenState extends State<MyPageScreen> {
     });
   }
 
-  // 식물 개수는 Firestore에서 동적으로 가져옵니다.
-  int _plantCount = 0;
-
   Future<void> _fetchUserData() async {
     try {
       User? user = FirebaseAuth.instance.currentUser;
       if (user != null) {
-        DocumentSnapshot userDoc =
-        await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+        DocumentSnapshot userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .get();
 
         if (userDoc.exists) {
           setState(() {
@@ -42,11 +44,11 @@ class MyPageScreenState extends State<MyPageScreen> {
             _profileImageUrl = userDoc.get('profileImage') as String?;
           });
 
-          // 사용자의 식물 개수 가져오기 (예시: 'plants' 컬렉션을 사용한다고 가정)
+          // 사용자의 식물 개수 가져오기 (예: 'plants' 컬렉션 사용)
           QuerySnapshot plantSnapshot = await FirebaseFirestore.instance
               .collection('users')
               .doc(user.uid)
-              .collection('plants') // 식물이 저장된 컬렉션 이름
+              .collection('plants')
               .get();
 
           setState(() {
@@ -63,6 +65,31 @@ class MyPageScreenState extends State<MyPageScreen> {
   void initState() {
     super.initState();
     _fetchUserData(); // 사용자 데이터 가져오기
+  }
+
+  // 이미지 URL을 받아서, asset이면 Image.asset, 네트워크 URL이면 Image.network를 리턴하는 헬퍼 함수
+  Widget _buildGridImage(String imageUrl) {
+    if (imageUrl.startsWith('assets/')) {
+      return Image.asset(
+        imageUrl,
+        fit: BoxFit.cover,
+      );
+    } else {
+      return Image.network(
+        imageUrl,
+        fit: BoxFit.cover,
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return Center(child: CircularProgressIndicator());
+        },
+        errorBuilder: (context, error, stackTrace) {
+          return Image.asset(
+            'assets/images/default_image.png',
+            fit: BoxFit.cover,
+          );
+        },
+      );
+    }
   }
 
   @override
@@ -100,7 +127,7 @@ class MyPageScreenState extends State<MyPageScreen> {
                       children: [
                         _editProfileButton(), // 프로필 수정 버튼
                         SizedBox(width: 10),
-                        _plantsNumber(), // 내식물모음페이지에 있는 식물 개수
+                        _plantsNumber(), // 내 식물 개수
                       ],
                     ),
                   ),
@@ -109,13 +136,12 @@ class MyPageScreenState extends State<MyPageScreen> {
             ),
             SizedBox(height: 10),
             Divider(
-              // 구분선
               color: Color(0xFF4B7E5B),
               thickness: 0.7,
               indent: 5,
               endIndent: 5,
             ),
-            _myPostsNumber(),
+            _myPostsNumber(), // "나의 게시물" 개수를 실시간으로 표시
             SizedBox(height: 12),
             Expanded(
               child: _myPosts(), // 나의 게시물들
@@ -124,7 +150,6 @@ class MyPageScreenState extends State<MyPageScreen> {
         ),
       ),
       bottomNavigationBar: MyBottomNavigationBar(
-        // 하단 네비게이션바
         selectedIndex: _selectedIndex,
         onItemTapped: _onItemTapped,
       ),
@@ -145,11 +170,10 @@ class MyPageScreenState extends State<MyPageScreen> {
         ),
       ),
       actions: [
-        // 오른쪽 끝 배치
+        // 오른쪽 끝 로그아웃 버튼
         Padding(
           padding: const EdgeInsets.only(right: 18.0),
           child: InkWell(
-            // 로그아웃 버튼
             onTap: () {
               _showLogoutDialog(context);
             },
@@ -184,8 +208,8 @@ class MyPageScreenState extends State<MyPageScreen> {
             ),
             TextButton(
               onPressed: () async {
-                await FirebaseAuth.instance.signOut(); // 로그아웃 처리
-                context.go('/start/login'); // 로그인페이지로 이동
+                await FirebaseAuth.instance.signOut();
+                context.go('/start/login');
               },
               child: Text("예"),
             ),
@@ -200,7 +224,6 @@ class MyPageScreenState extends State<MyPageScreen> {
     String? displayImageUrl = _profileImageUrl;
 
     if (displayImageUrl != null && displayImageUrl.startsWith('http')) {
-      // 캐시 무효화를 위해 타임스탬프 추가
       displayImageUrl = '$displayImageUrl?${DateTime.now().millisecondsSinceEpoch}';
     }
 
@@ -224,7 +247,6 @@ class MyPageScreenState extends State<MyPageScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            // 닉네임
             _nickname.isNotEmpty ? _nickname : '이름 없음',
             style: TextStyle(
               fontSize: 18,
@@ -234,7 +256,6 @@ class MyPageScreenState extends State<MyPageScreen> {
           ),
           SizedBox(height: 4),
           Text(
-            // 소개 글
             _bio.isNotEmpty ? _bio : '소개문을 입력해주세요.',
             style: TextStyle(
               fontSize: 12,
@@ -250,10 +271,9 @@ class MyPageScreenState extends State<MyPageScreen> {
   Widget _editProfileButton() {
     return ElevatedButton(
       onPressed: () async {
-        // 프로필 수정 페이지로 이동 후, 업데이트 여부에 따라 데이터 다시 가져오기
         final isUpdated = await context.push<bool>('/profile/edit');
         if (isUpdated == true) {
-          _fetchUserData(); // 데이터 다시 가져오기
+          _fetchUserData();
         }
       },
       style: ElevatedButton.styleFrom(
@@ -264,7 +284,7 @@ class MyPageScreenState extends State<MyPageScreen> {
     );
   }
 
-  // 내식물모음페이지에 있는 식물 개수
+  // 내 식물 개수
   Widget _plantsNumber() {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -290,18 +310,36 @@ class MyPageScreenState extends State<MyPageScreen> {
     );
   }
 
-  // 나의 게시물 개수
+  // "나의 게시물" 개수를 실시간으로 보여주는 위젯
   Widget _myPostsNumber() {
-    return Padding(
-      padding: const EdgeInsets.only(left: 6.0),
-      child: Text(
-        '나의 게시물 : ',
-        style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey),
-      ),
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user == null) return SizedBox.shrink();
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('posts')
+          .where('userId', isEqualTo: user.uid)
+          .snapshots(),
+      builder: (context, snapshot) {
+        int count = 0;
+        if (snapshot.hasData) {
+          count = snapshot.data!.docs.length;
+        }
+        return Padding(
+          padding: const EdgeInsets.only(left: 6.0),
+          child: Text(
+            '나의 게시물 : $count',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey,
+            ),
+          ),
+        );
+      },
     );
   }
 
-  // 나의 게시물들
+  // 나의 게시물들 (공용 컬렉션 "posts"에서 현재 사용자의 게시물을 가져옴)
   Widget _myPosts() {
     User? user = FirebaseAuth.instance.currentUser;
     if (user == null) {
@@ -324,7 +362,6 @@ class MyPageScreenState extends State<MyPageScreen> {
 
         final docs = snapshot.data!.docs;
 
-        // 이미지 URL만 추출하여 리스트 생성
         final imageUrls = docs.map((doc) {
           final data = doc.data() as Map<String, dynamic>;
           final imageUrlList = List<String>.from(data['imageUrl'] ?? []);
@@ -347,26 +384,12 @@ class MyPageScreenState extends State<MyPageScreen> {
           itemBuilder: (context, index) {
             return GestureDetector(
               onTap: () {
-                // 클릭 시 상세 페이지로 이동, docId 전달 필요
                 final docId = docs[index].id;
                 context.push('/community/detail', extra: {'docId': docId});
               },
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(10),
-                child: Image.network(
-                  imageUrls[index],
-                  fit: BoxFit.cover,
-                  loadingBuilder: (context, child, loadingProgress) {
-                    if (loadingProgress == null) return child;
-                    return Center(child: CircularProgressIndicator());
-                  },
-                  errorBuilder: (context, error, stackTrace) {
-                    return Image.asset(
-                      'assets/images/default_image.png',
-                      fit: BoxFit.cover,
-                    );
-                  },
-                ),
+                child: _buildGridImage(imageUrls[index]),
               ),
             );
           },

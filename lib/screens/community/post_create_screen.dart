@@ -142,6 +142,11 @@ class PostCreateScreenState extends State<PostCreateScreen> {
         }
       }
 
+      // 사진이 선택되지 않은 경우 기본 이미지를 추가합니다.
+      if (newImageUrls.isEmpty) {
+        newImageUrls.add('assets/images/tree.png');
+      }
+
       // 선택한 식물 정보를 가져옵니다.
       String selectedPlantName = _selectedPlantName ?? '선택안함';
       Map<String, dynamic>? plantData;

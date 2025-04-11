@@ -80,7 +80,7 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
         'profileImage': downloadUrl,
       });
 
-      if (!mounted) return; // 위젯이 마운트되어 있는지 확인
+      if (!mounted) return;
 
       setState(() {
         _profileImageUrl = downloadUrl;
@@ -127,7 +127,7 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
       if (userDoc.exists) {
         Map<String, dynamic>? data = userDoc.data() as Map<String, dynamic>?;
         if (data != null) {
-          if (!mounted) return; // 위젯이 마운트되어 있는지 확인
+          if (!mounted) return;
           setState(() {
             _nickname = data['nickname'] ?? '';
             _bio = data['bio'] ?? '';
@@ -140,13 +140,13 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
 
             _nameController.text = _nickname;
             _introController.text = _bio;
-            _isLoading = false; // 데이터 로딩 완료
+            _isLoading = false;
           });
         }
       } else {
         if (!mounted) return;
         setState(() {
-          _isLoading = false; // 데이터 로딩 완료
+          _isLoading = false;
         });
       }
     } catch (e) {
@@ -161,7 +161,7 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
       );
       if (!mounted) return;
       setState(() {
-        _isLoading = false; // 데이터 로딩 완료
+        _isLoading = false;
       });
     }
   }
@@ -172,7 +172,7 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
       QuerySnapshot plantSnapshot = await _firestore
           .collection('users')
           .doc(_user!.uid)
-          .collection('plants') // 식물이 저장된 컬렉션 이름
+          .collection('plants')
           .get();
 
       if (!mounted) return;
@@ -182,7 +182,6 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
       });
     } catch (e) {
       print('Error fetching plant count: $e');
-      // Optionally, show a toast or handle the error
     }
   }
 
@@ -205,16 +204,15 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
           actions: [
             TextButton(
               onPressed: () {
-                dialogContext.pop(); // 팝업 닫기 using go_router
+                dialogContext.pop();
               },
               child: Text("아니오"),
             ),
             TextButton(
               onPressed: () async {
-                dialogContext.pop(); // 팝업 닫기 (먼저 실행)
-                await _deleteAccount(); // 비동기 함수 호출
-                // 예를 들어, 탈퇴 후 로그인 화면으로 이동
-                context.go('start/login'); // 필요한 경로로 변경
+                dialogContext.pop();
+                await _deleteAccount();
+                context.go('start/login');
               },
               child: Text("예"),
             ),
@@ -226,7 +224,6 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
 
   Future<void> _deleteAccount() async {
     try {
-      // 계정 탈퇴 로직
       await _auth.currentUser?.delete();
       await _firestore.collection('users').doc(_user!.uid).delete();
       await _firestore.collection('public_users').doc(_user!.uid).delete();
@@ -245,13 +242,12 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
         fontSize: 16.0,
       );
 
-      // 계정 탈퇴 후 로그인 페이지로 이동
       if (!mounted) return;
-      context.go('/start/login'); // 로그인 페이지로 이동
+      context.go('/start/login');
     } catch (e) {
       print('계정 탈퇴 실패: $e');
       Fluttertoast.showToast(
-        msg: "계정 탈퇴 실패: $e",
+        msg: "계정 탈퇴 실패: ${e.toString()}",
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
         backgroundColor: Colors.red,
@@ -268,13 +264,123 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
     super.dispose();
   }
 
+  // 이미지 URL을 받아 asset인지 네트워크 URL인지 체크하는 헬퍼 함수
+  Widget _buildGridImage(String imageUrl) {
+    if (imageUrl.startsWith('assets/')) {
+      return Image.asset(
+        imageUrl,
+        fit: BoxFit.cover,
+      );
+    } else {
+      return Image.network(
+        imageUrl,
+        fit: BoxFit.cover,
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return Center(child: CircularProgressIndicator());
+        },
+        errorBuilder: (context, error, stackTrace) {
+          return Image.asset(
+            'assets/images/default_image.png',
+            fit: BoxFit.cover,
+          );
+        },
+      );
+    }
+  }
+
+  // 나의 게시물 개수를 실시간으로 보여주는 위젯
+  Widget _myPostsNumber() {
+    if (_user == null) return SizedBox.shrink();
+    return StreamBuilder<QuerySnapshot>(
+      stream: _firestore
+          .collection('posts')
+          .where('userId', isEqualTo: _user!.uid)
+          .snapshots(),
+      builder: (context, snapshot) {
+        int count = 0;
+        if (snapshot.hasData) {
+          count = snapshot.data!.docs.length;
+        }
+        return Padding(
+          padding: const EdgeInsets.only(left: 6.0),
+          child: Text(
+            '나의 게시물 : $count',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey,
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // 나의 게시물들을 조회 (공용 컬렉션 "posts"에서 현재 사용자의 게시물을 가져옴)
+  Widget _myPosts() {
+    if (_user == null) {
+      return Center(child: Text('로그인 후 이용해주세요.'));
+    }
+
+    return StreamBuilder<QuerySnapshot>(
+      stream: _firestore
+          .collection('posts')
+          .where('userId', isEqualTo: _user!.uid)
+          .orderBy('createdAt', descending: true)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError || !snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return Center(child: Text('작성한 게시물이 없습니다.'));
+        }
+
+        final docs = snapshot.data!.docs;
+
+        // 이미지 URL만 추출하여 리스트 생성
+        final imageUrls = docs.map((doc) {
+          final data = doc.data() as Map<String, dynamic>;
+          final imageUrlList = List<String>.from(data['imageUrl'] ?? []);
+          return imageUrlList.isNotEmpty ? imageUrlList[0] : null;
+        }).where((url) => url != null).cast<String>().toList();
+
+        if (imageUrls.isEmpty) {
+          return Center(child: Text('게시물에 이미지가 없습니다.'));
+        }
+
+        return GridView.builder(
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 3,
+            crossAxisSpacing: 8,
+            mainAxisSpacing: 8,
+          ),
+          itemCount: imageUrls.length,
+          itemBuilder: (context, index) {
+            return GestureDetector(
+              onTap: () {
+                final docId = docs[index].id;
+                context.push('/community/detail', extra: {'docId': docId});
+              },
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: _buildGridImage(imageUrls[index]),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: _buildAppBar(), // 상단 바
       body: _isLoading
-          ? Center(child: CircularProgressIndicator()) // 데이터 로딩 중일 때 로딩 표시
+          ? Center(child: CircularProgressIndicator())
           : Padding(
         padding: const EdgeInsets.only(right: 18.0, left: 18.0),
         child: Column(
@@ -307,7 +413,7 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
                       children: [
                         _editCompleteButton(), // 수정 완료 버튼
                         SizedBox(width: 10),
-                        _plantsNumber(), // 내식물모음페이지에 있는 식물 개수
+                        _plantsNumber(), // 내식물 개수
                       ],
                     ),
                   ),
@@ -316,23 +422,21 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
             ),
             SizedBox(height: 10),
             Divider(
-              // 구분선
               color: Color(0xFF4B7E5B),
               thickness: 0.7,
               indent: 5,
               endIndent: 5,
             ),
-            _myPostsNumber(),
+            _myPostsNumber(), // 나의 게시물 개수 표시
             SizedBox(height: 12),
             Expanded(
-              child: _myPosts(), // 나의 게시물들 (동적으로 가져옴)
+              child: _myPosts(), // 내가 쓴 게시물 조회
             ),
             Align(
-              // 계정탈퇴 버튼
+              // 계정 탈퇴 버튼
               alignment: Alignment.center,
               child: InkWell(
                 onTap: () {
-                  // 계정 탈퇴 로직
                   _showWithdrawDialog(context);
                 },
                 child: Padding(
@@ -352,7 +456,6 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
         ),
       ),
       bottomNavigationBar: MyBottomNavigationBar(
-        // 하단 네비게이션바
         selectedIndex: _selectedIndex,
         onItemTapped: _onItemTapped,
       ),
@@ -374,11 +477,9 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
         ),
       ),
       actions: [
-        // 오른쪽 끝 배치
         Padding(
           padding: const EdgeInsets.only(right: 18.0),
           child: InkWell(
-            // PW변경 버튼
             onTap: () {
               _showPasswordChangeModal();
             },
@@ -399,10 +500,10 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
   // 사진 등록 ImagePicker
   Widget _imagePicker() {
     return GestureDetector(
-      onTap: _pickImage, // 새로운 사진 선택 가능
+      onTap: _pickImage,
       child: CircleAvatar(
-        radius: 50, // 동그란 모양의 크기 (지름의 절반)
-        backgroundColor: Colors.grey[200], // 배경색
+        radius: 50,
+        backgroundColor: Colors.grey[200],
         backgroundImage: _image != null
             ? FileImage(File(_image!.path))
             : (_profileImageUrl != null && _profileImageUrl!.startsWith('http'))
@@ -410,11 +511,11 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
             : AssetImage('assets/images/profile.png') as ImageProvider,
         child: _image == null && _profileImageUrl == null
             ? Icon(
-          Icons.add, // 이미지가 없을 때 추가 아이콘 표시
+          Icons.add,
           color: Colors.grey[400],
           size: 30,
         )
-            : null, // 이미지가 있으면 아이콘 표시 안함
+            : null,
       ),
     );
   }
@@ -445,7 +546,7 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
                 color: Color(0xFF4B7E5B),
               ),
               inputFormatters: [
-                LengthLimitingTextInputFormatter(10), // 글자 수 제한 10자
+                LengthLimitingTextInputFormatter(10),
               ],
               decoration: InputDecoration(
                 border: InputBorder.none,
@@ -500,7 +601,6 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
   Future<void> _saveProfile() async {
     if (_user == null) return;
     try {
-      // Firestore에 데이터 업데이트
       await _firestore.collection('users').doc(_user!.uid).update({
         'nickname': _nameController.text,
         'bio': _introController.text,
@@ -515,7 +615,7 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
       );
 
       if (!mounted) return;
-      context.pop(true); // 변경 사항이 있음을 알림
+      context.pop(true);
     } catch (e) {
       print('Error updating profile: ${e.toString()}');
       Fluttertoast.showToast(
@@ -529,7 +629,7 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
     }
   }
 
-  // 내식물모음페이지에 있는 식물 개수
+  // 내식물 개수
   Widget _plantsNumber() {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -552,90 +652,6 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
           ),
         ],
       ),
-    );
-  }
-
-  // 나의 게시물 개수
-  Widget _myPostsNumber() {
-    return Padding(
-      padding: const EdgeInsets.only(left: 6.0),
-      child: Text(
-        '나의 게시물 : ',
-        style:
-        TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey),
-      ),
-    );
-  }
-
-  // 나의 게시물들 (동적으로 가져오기)
-  Widget _myPosts() {
-    if (_user == null) {
-      return Center(child: Text('로그인 후 이용해주세요.'));
-    }
-
-    return StreamBuilder<QuerySnapshot>(
-      stream: _firestore
-          .collection('users')
-          .doc(_user!.uid)
-          .collection('posts')
-          .orderBy('createdAt', descending: true)
-          .snapshots(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
-        }
-        if (snapshot.hasError || !snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return Center(child: Text('작성한 게시물이 없습니다.'));
-        }
-
-        final docs = snapshot.data!.docs;
-
-        // 이미지 URL만 추출하여 리스트 생성
-        final imageUrls = docs.map((doc) {
-          final data = doc.data() as Map<String, dynamic>;
-          final imageUrlList = List<String>.from(data['imageUrl'] ?? []);
-          return imageUrlList.isNotEmpty ? imageUrlList[0] : null;
-        }).where((url) => url != null).cast<String>().toList();
-
-        if (imageUrls.isEmpty) {
-          return Center(child: Text('게시물에 이미지가 없습니다.'));
-        }
-
-        return GridView.builder(
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3,
-            crossAxisSpacing: 8,
-            mainAxisSpacing: 8,
-          ),
-          itemCount: imageUrls.length,
-          itemBuilder: (context, index) {
-            return GestureDetector(
-              onTap: () {
-                // 클릭 시 상세 페이지로 이동, docId 전달 필요
-                final docId = docs[index].id;
-                context.push('/community/detail', extra: {'docId': docId});
-              },
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Image.network(
-                  imageUrls[index],
-                  fit: BoxFit.cover,
-                  loadingBuilder: (context, child, loadingProgress) {
-                    if (loadingProgress == null) return child;
-                    return Center(child: CircularProgressIndicator());
-                  },
-                  errorBuilder: (context, error, stackTrace) {
-                    return Image.asset(
-                      'assets/images/default_image.png',
-                      fit: BoxFit.cover,
-                    );
-                  },
-                ),
-              ),
-            );
-          },
-        );
-      },
     );
   }
 }
