@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../widgets/components/bottom_navigation_bar.dart';
 
 class MapScreen extends StatefulWidget {
@@ -23,6 +24,13 @@ class _MapScreenState extends State<MapScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: _buildAppBar(),
+      body: GoogleMap(
+        initialCameraPosition: CameraPosition(
+          target: LatLng(37.583078, 127.010667), // 한성대학교
+          zoom: 17,
+        ),
+        zoomGesturesEnabled: true,
+      ),
       bottomNavigationBar: MyBottomNavigationBar(
         selectedIndex: _selectedIndex,
         onItemTapped: _onItemTapped,
