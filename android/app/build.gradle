@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id "com.android.application"
     // START: FlutterFire Configuration
@@ -6,6 +8,15 @@ plugins {
     id "kotlin-android"
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id "dev.flutter.flutter-gradle-plugin"
+}
+
+def dotenv = new Properties()
+
+def envFile =  file("${rootProject.projectDir}/../.env")
+if (envFile.exists()) {
+    envFile.withInputStream { stream -> dotenv.load(stream) }
+} else {
+    throw new FileNotFoundException("Could not find .env file at: ${envFile.path}")
 }
 
 android {
@@ -31,6 +42,12 @@ android {
         targetSdk = 35
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+
+        def androidMapkey = dotenv['ANDROID_MAPS_API_KEY']
+        if (androidMapkey == null) {
+            throw new FileNotFoundException("ANDROID_MAPS_API_KEY not found in .env file")
+        }
+        manifestPlaceholders += [ANDROID_MAPS_API_KEY: androidMapkey]
     }
 
     buildTypes {

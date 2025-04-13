@@ -1,5 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import '../routes/app_router.dart';
@@ -12,8 +14,23 @@ FlutterLocalNotificationsPlugin();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
+  await sendApiKeyToNative();
   await initService();
   runApp(const MyApp());
+}
+
+// GoogleMap API Key 전달
+const platform = MethodChannel('com.example.env_channel');
+
+Future<void> sendApiKeyToNative() async {
+  final androidMapKey = dotenv.env['ANDROID_MAPS_API_KEY'];
+  final iosMapKey = dotenv.env['IOS_MAPS_API_KEY'];
+
+  await platform.invokeMethod('setApiKeys', {
+    "androidMapKey": androidMapKey,
+    "iosMapKey": iosMapKey,
+  });
 }
 
 // 초기 구동

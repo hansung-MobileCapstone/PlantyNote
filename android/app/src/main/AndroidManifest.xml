@@ -46,7 +46,7 @@
             android:value="2" />
 <!--        google map-->
         <meta-data android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyC9G1_bm7_BUKf40pMTr57ikiE8OjyuV1g"/>
+            android:value="${ANDROID_MAPS_API_KEY}"/>
 
         <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver" />
         <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver">
