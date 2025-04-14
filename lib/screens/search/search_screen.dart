@@ -1,7 +1,7 @@
-// ✅ search_screen.dart
 import 'package:flutter/material.dart';
-import '../../widgets/components/bottom_navigation_bar.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../widgets/components/bottom_navigation_bar.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -12,19 +12,15 @@ class SearchScreen extends StatefulWidget {
 
 class SearchScreenState extends State<SearchScreen> {
   int _selectedIndex = 1;
-  int selectedTab = 0;
   String? selectedRecentSearch;
   final TextEditingController _searchController = TextEditingController();
+  List<String> recentSearches = [];
 
-  final List<String> recentSearches = ["고목나무", "알라비", "레몬 나무"];
-  final List<String> popularSearches = [
-    "고목나무",
-    "쉐프렐라",
-    "레몬 나무",
-    "홍콩 야자",
-    "유칼립투스"
-  ];
-  final List<String> tabs = ["실시간", "일간", "주간", "월간"];
+  @override
+  void initState() {
+    super.initState();
+    _loadRecentSearches();
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -32,8 +28,32 @@ class SearchScreenState extends State<SearchScreen> {
     });
   }
 
+  Future<void> _loadRecentSearches() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      recentSearches = prefs.getStringList('recent_searches') ?? [];
+    });
+  }
+
+  Future<void> _addRecentSearch(String keyword) async {
+    final prefs = await SharedPreferences.getInstance();
+    recentSearches.remove(keyword); // 중복 제거
+    recentSearches.insert(0, keyword); // 앞으로 추가
+    await prefs.setStringList('recent_searches', recentSearches);
+    setState(() {});
+  }
+
+  Future<void> _clearRecentSearches() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('recent_searches');
+    setState(() {
+      recentSearches.clear();
+    });
+  }
+
   void _goToSearchResult(String keyword) {
     if (keyword.trim().isEmpty) return;
+    _addRecentSearch(keyword.trim());
     context.push('/main/search/result', extra: {'keyword': keyword.trim()});
   }
 
@@ -50,15 +70,18 @@ class SearchScreenState extends State<SearchScreen> {
             const SizedBox(height: 10),
             _searchBar(),
             const SizedBox(height: 20),
-            const Text("최근 검색어", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text("최근 검색어", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                TextButton(
+                  onPressed: _clearRecentSearches,
+                  child: const Text("전체 삭제", style: TextStyle(fontSize: 12, color: Colors.grey)),
+                ),
+              ],
+            ),
             const SizedBox(height: 10),
             _recentSearch(),
-            const SizedBox(height: 20),
-            const Text("인기 검색어", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 10),
-            _popularSearchTap(),
-            const SizedBox(height: 20),
-            _popularSearch(),
           ],
         ),
       ),
@@ -119,6 +142,10 @@ class SearchScreenState extends State<SearchScreen> {
   }
 
   Widget _recentSearch() {
+    if (recentSearches.isEmpty) {
+      return const Text("최근 검색어가 없습니다.", style: TextStyle(color: Colors.grey));
+    }
+
     return Wrap(
       spacing: 8,
       children: recentSearches.map((search) {
@@ -140,48 +167,6 @@ class SearchScreenState extends State<SearchScreen> {
           ),
         );
       }).toList(),
-    );
-  }
-
-  Widget _popularSearchTap() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: tabs.asMap().entries.map((entry) {
-        return GestureDetector(
-          onTap: () {
-            setState(() {
-              selectedTab = entry.key;
-            });
-          },
-          child: Container(
-            margin: const EdgeInsets.only(right: 10),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: selectedTab == entry.key ? Colors.green[800] : Colors.white,
-              border: Border.all(color: Colors.grey[300]!),
-              borderRadius: BorderRadius.circular(30),
-            ),
-            child: Text(
-              entry.value,
-              style: TextStyle(color: selectedTab == entry.key ? Colors.white : Colors.black),
-            ),
-          ),
-        );
-      }).toList(),
-    );
-  }
-
-  Widget _popularSearch() {
-    return Expanded(
-      child: ListView.builder(
-        itemCount: popularSearches.length,
-        itemBuilder: (context, index) {
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4.0),
-            child: Text("${index + 1}. ${popularSearches[index]}", style: const TextStyle(fontSize: 16)),
-          );
-        },
-      ),
     );
   }
 }
