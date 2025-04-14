@@ -116,3 +116,6 @@ google-services.json
 
 # Android Profiling
 *.hprof
+
+# Project Settings
+*.env
