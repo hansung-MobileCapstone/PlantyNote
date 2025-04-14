@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
 
+// 게시물 하나를 나타내는 위젯
 class PostItem extends StatelessWidget {
   final String name;
   final String profileImage;
@@ -18,6 +20,7 @@ class PostItem extends StatelessWidget {
     this.keyword,
   });
 
+  // 세부 정보를 추출하는 헬퍼 함수
   String _getDetail(String key) {
     for (var detail in details) {
       if (detail.containsKey(key)) {
@@ -27,6 +30,26 @@ class PostItem extends StatelessWidget {
     return '정보 없음';
   }
 
+  // imageUrl이 asset 경로인지, 네트워크 URL인지 체크하는 헬퍼 함수
+  Widget _buildImage(String imageUrl, {double width = 90, double height = 90}) {
+    if (imageUrl.startsWith('assets/')) {
+      return Image.asset(
+        imageUrl,
+        width: width,
+        height: height,
+        fit: BoxFit.cover,
+      );
+    } else {
+      return Image.network(
+        imageUrl,
+        width: width,
+        height: height,
+        fit: BoxFit.cover,
+      );
+    }
+  }
+
+  // 키워드가 있을 경우 해당 텍스트 일부를 하이라이트하는 헬퍼 함수
   TextSpan _highlight(String text, {TextStyle? style}) {
     if (keyword == null || keyword!.isEmpty) {
       return TextSpan(text: text, style: style);
@@ -64,37 +87,7 @@ class PostItem extends StatelessWidget {
     return TextSpan(children: spans);
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final String plantSpecies = _getDetail('식물 종');
-    final String waterCycle = _getDetail('물 주기');
-    final String fertilizerCycle = _getDetail('분갈이 주기');
-
-    return SizedBox(
-      height: 140,
-      child: Card(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        elevation: 4,
-        color: const Color(0xFFF5F5F5),
-        margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            const SizedBox(width: 10),
-            _postImage(),
-            const SizedBox(width: 16),
-            Expanded(child: _postContent()),
-            const SizedBox(width: 10),
-            Container(width: 1, height: 100, color: const Color(0xFF7D7D7D)),
-            const SizedBox(width: 10),
-            _plantInformation(plantSpecies, waterCycle, fertilizerCycle),
-            const SizedBox(width: 10),
-          ],
-        ),
-      ),
-    );
-  }
-
+  // 게시글에 등록된 이미지를 표시하는 위젯
   Widget _postImage() {
     return SizedBox(
       width: 100,
@@ -105,35 +98,22 @@ class PostItem extends StatelessWidget {
               left: 10,
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(10),
-                child: Image.network(
-                  imageUrls[1],
-                  width: 90,
-                  height: 90,
-                  fit: BoxFit.cover,
-                ),
+                child: _buildImage(imageUrls[1]),
               ),
             ),
           ClipRRect(
             borderRadius: BorderRadius.circular(10),
             child: imageUrls.isNotEmpty
-                ? Image.network(
-              imageUrls[0],
-              width: 90,
-              height: 90,
-              fit: BoxFit.cover,
-            )
-                : Image.network(
-              'https://res.cloudinary.com/heyset/image/upload/v1689582418/buukmenow-folder/no-image-icon-0.jpg',
-              width: 90,
-              height: 90,
-              fit: BoxFit.cover,
-            ),
+                ? _buildImage(imageUrls[0])
+                : _buildImage(
+                    'https://res.cloudinary.com/heyset/image/upload/v1689582418/buukmenow-folder/no-image-icon-0.jpg'),
           ),
         ],
       ),
     );
   }
 
+  // 게시글 내용을 표시하는 위젯 (RichText로 하이라이트 적용)
   Widget _postContent() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -143,7 +123,9 @@ class PostItem extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 10,
-              backgroundImage: NetworkImage(profileImage),
+              backgroundImage: profileImage.startsWith('http')
+                  ? NetworkImage(profileImage)
+                  : AssetImage(profileImage) as ImageProvider,
             ),
             const SizedBox(width: 8),
             RichText(
@@ -172,6 +154,7 @@ class PostItem extends StatelessWidget {
     );
   }
 
+  // 식물 정보를 표시하는 위젯
   Widget _plantInformation(String plantSpecies, String waterCycle, String fertilizerCycle) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -186,6 +169,7 @@ class PostItem extends StatelessWidget {
     );
   }
 
+  // 개별 정보 행을 표시하는 위젯 (하이라이트 적용)
   Widget _informationRow(String label, String value) {
     return Row(
       children: [
@@ -197,7 +181,7 @@ class PostItem extends StatelessWidget {
           ),
           child: Text(
             label,
-            style: const TextStyle(fontSize: 7, color: Color(0xFF7D7D7D)),
+            style: const TextStyle(fontSize: 7, color: Color(0xFF7D7D7B)),
           ),
         ),
         const SizedBox(width: 8),
@@ -212,6 +196,37 @@ class PostItem extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final String plantSpecies = _getDetail('식물 종');
+    final String waterCycle = _getDetail('물 주기');
+    final String fertilizerCycle = _getDetail('분갈이 주기');
+
+    return SizedBox(
+      height: 140,
+      child: Card(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        elevation: 4,
+        color: const Color(0xFFF5F5F5),
+        margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const SizedBox(width: 10),
+            _postImage(),
+            const SizedBox(width: 16),
+            Expanded(child: _postContent()),
+            const SizedBox(width: 10),
+            Container(width: 1, height: 100, color: const Color(0xFF7D7D7D)),
+            const SizedBox(width: 10),
+            _plantInformation(plantSpecies, waterCycle, fertilizerCycle),
+            const SizedBox(width: 10),
+          ],
+        ),
+      ),
     );
   }
 }
