@@ -72,10 +72,15 @@ class _MapScreenState extends State<MapScreen> {
               _mapController = controller; // 구글맵 컨트롤러
             },
           ),
-          Positioned( // 현재위치 버튼
+          Positioned( // 현재 위치 버튼
             bottom: 90,
             right: 15,
             child: _currentLocationButton(),
+          ),
+          Positioned( // 식물 등록 버튼
+            bottom: 30,
+            right: 16,
+            child: _writeButton(),
           ),
         ],
       ),
@@ -110,6 +115,20 @@ class _MapScreenState extends State<MapScreen> {
       iconSize: 45,
       onPressed: getGeoData,
       tooltip: '내 위치로 이동',
+    );
+  }
+
+  // 식물 등록 버튼 위젯
+  Widget _writeButton() {
+    return IconButton(
+      onPressed: () {
+        context.push('/map/create');
+      },
+      icon: const Icon(
+        Icons.add_circle,
+        color: Color(0xFF4B7E5B),
+        size: 45,
+      ),
     );
   }
 
