@@ -94,7 +94,7 @@ class MapCreateScreenState extends State<MapCreateScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 5),
+              const SizedBox(height: 8),
               Text(" 설정 위치: 서울특별시 성북구 보문로 168", // 설정 위치
                 style: TextStyle(
                   color: Colors.black,
