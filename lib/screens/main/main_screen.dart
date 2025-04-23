@@ -116,10 +116,7 @@ class _MainScreenState extends State<MainScreen> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: InkWell(
-<<<<<<< HEAD
         // 리플 효과
-=======
->>>>>>> main
         onTap: () {
           context.go('/main/search'); // /main/search로 이동
         },
@@ -161,12 +158,7 @@ class _MainScreenState extends State<MainScreen> {
         const SizedBox(height: 25),
         Center(
           child: ClipRRect(
-<<<<<<< HEAD
-            // border-radius 주기 위함
-            borderRadius: BorderRadius.circular(10), // 둥근 모서리
-=======
             borderRadius: BorderRadius.circular(10),
->>>>>>> main
             child: Image.asset(
               'assets/images/main_plant.png',
               width: 280,
