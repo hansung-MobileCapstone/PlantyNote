@@ -15,41 +15,39 @@ class _MapScreenState extends State<MapScreen> {
   GoogleMapController? _mapController; // 구글맵 컨트롤러
   LatLng? _currentPosition;
 
-  void _onItemTapped(int index) { // 인덱스 상태관리
-    setState(() {
-      _selectedIndex = index;
-    });
+  @override
+  void initState() {
+    super.initState();
+    _checkLocation(); // ✅ 변경됨: 진입 시 위치 요청
   }
 
-  Future<void> getGeoData() async {
-    // 위치 권한 확인
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied ||
-        permission == LocationPermission.deniedForever) {
-      permission = await Geolocator.requestPermission();
-      if (permission != LocationPermission.always &&
-          permission != LocationPermission.whileInUse) {
-        return Future.error('위치 권한이 없습니다.');
-      }
+  // 현재 위치 요청
+  Future<void> _checkLocation() async {
+    final permission = await Geolocator.checkPermission();
+
+    if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever) {
+      final newPermission = await Geolocator.requestPermission();
+      if (newPermission != LocationPermission.always && newPermission != LocationPermission.whileInUse) return;
     }
 
-    Position position = await Geolocator.getCurrentPosition(); // 현재 위치 가져오기
-
+    final position = await Geolocator.getCurrentPosition();
     setState(() {
       _currentPosition = LatLng(position.latitude, position.longitude);
     });
 
-    // 현재 위치로 이동
     if (_mapController != null) {
       _mapController!.animateCamera(
         CameraUpdate.newCameraPosition(
-          CameraPosition(
-            target: _currentPosition!,
-            zoom: 18,
-          ),
+          CameraPosition(target: _currentPosition!, zoom: 18),
         ),
       );
     }
+  }
+
+  void _onItemTapped(int index) { // 인덱스 상태관리
+    setState(() {
+      _selectedIndex = index;
+    });
   }
 
   @override
@@ -113,7 +111,7 @@ class _MapScreenState extends State<MapScreen> {
       icon: Icon(Icons.my_location),
       color: Colors.red,
       iconSize: 45,
-      onPressed: getGeoData,
+      onPressed: _checkLocation,
       tooltip: '내 위치로 이동',
     );
   }
@@ -122,7 +120,13 @@ class _MapScreenState extends State<MapScreen> {
   Widget _writeButton() {
     return IconButton(
       onPressed: () {
-        context.push('/map/create');
+        if (_currentPosition != null) {
+          context.push('/map/create', extra: _currentPosition); // 위치 전달
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('현재 위치를 불러오는 중입니다..')),
+          );
+        }
       },
       icon: const Icon(
         Icons.add_circle,

@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class MapCreateScreen extends StatefulWidget {
-  final String? mapId;
-  const MapCreateScreen({super.key, this.mapId});
+  final LatLng? initPosition;
+  const MapCreateScreen({super.key, this.initPosition});
 
   @override
   MapCreateScreenState createState() => MapCreateScreenState();
@@ -17,6 +19,54 @@ class MapCreateScreenState extends State<MapCreateScreen> {
   final List<XFile?> _images = [];
   final ImagePicker _picker = ImagePicker();
   final TextEditingController _textController = TextEditingController();
+
+  String _currentAddress = '위치 없음';
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initPosition != null) {
+      _latLngToAddress(widget.initPosition!);
+    }
+  }
+
+  // 주소 포맷팅 -> android, ios가 다르게 나와서
+  String _formatAddress(Placemark place) {
+    final street = place.street ?? '';
+    final isStreetInvalid = street.trim().toLowerCase() == 'south korea';
+
+    final fallbackStreet = [
+      place.thoroughfare,
+      place.subThoroughfare
+    ].where((e) => e != null && e.isNotEmpty).join(' ');
+
+    return [
+      place.administrativeArea, // 시
+      place.subAdministrativeArea?.isNotEmpty == true
+          ? place.subAdministrativeArea
+          : place.subLocality,   // 구/동
+      isStreetInvalid ? fallbackStreet : street // 도로명
+    ].where((e) => e != null && e.isNotEmpty).join(' ');
+  }
+
+  // 위치를 주소로 매핑
+  Future<void> _latLngToAddress(LatLng latLng) async {
+    try {
+      final placemarks = await placemarkFromCoordinates(
+        latLng.latitude,
+        latLng.longitude,
+      );
+      final place = placemarks.first;
+      //print(place); // 디버깅용
+      setState(() {
+        _currentAddress = _formatAddress(place);
+      });
+    } catch (e) {
+      setState(() {
+        _currentAddress = '주소를 불러올 수 없습니다';
+      });
+    }
+  }
 
   // 이미지 선택
   Future<void> _pickImage() async {
@@ -95,7 +145,7 @@ class MapCreateScreenState extends State<MapCreateScreen> {
                 ],
               ),
               const SizedBox(height: 8),
-              Text(" 설정 위치: 서울특별시 성북구 보문로 168", // 설정 위치
+              Text(" 설정 위치: $_currentAddress", // 현재 위치
                 style: TextStyle(
                   color: Colors.black,
                   fontSize: 13,
