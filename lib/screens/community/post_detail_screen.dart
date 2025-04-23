@@ -220,11 +220,12 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
         mainAxisSize: MainAxisSize.min,
         children: [
           CircleAvatar(
-            backgroundImage: profileImage.isNotEmpty
+            backgroundImage: profileImage.isNotEmpty && profileImage.startsWith('http')
                 ? NetworkImage(profileImage)
-                : const AssetImage('assets/images/profile.png') as ImageProvider,
+                : AssetImage('assets/images/profile.png') as ImageProvider,
             radius: 15,
           ),
+
           const SizedBox(width: 10),
           Text(
             name,

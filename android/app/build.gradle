@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id "com.android.application"
     // START: FlutterFire Configuration
@@ -8,9 +10,18 @@ plugins {
     id "dev.flutter.flutter-gradle-plugin"
 }
 
+def dotenv = new Properties()
+
+def envFile =  file("${rootProject.projectDir}/../.env")
+if (envFile.exists()) {
+    envFile.withInputStream { stream -> dotenv.load(stream) }
+} else {
+    throw new FileNotFoundException("Could not find .env file at: ${envFile.path}")
+}
+
 android {
     namespace = "com.example.plant"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 35
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -28,9 +39,15 @@ android {
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = 23
-        targetSdk = flutter.targetSdkVersion
+        targetSdk = 35
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+
+        def androidMapkey = dotenv['ANDROID_MAPS_API_KEY']
+        if (androidMapkey == null) {
+            throw new FileNotFoundException("ANDROID_MAPS_API_KEY not found in .env file")
+        }
+        manifestPlaceholders += [ANDROID_MAPS_API_KEY: androidMapkey]
     }
 
     buildTypes {

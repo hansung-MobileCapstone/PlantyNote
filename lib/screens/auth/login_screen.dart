@@ -84,6 +84,7 @@ class LoginScreenState extends State<LoginScreen> {
                 _loginButton(context), // 로그인 버튼
                 const SizedBox(height: 5),
                 _signupButton(context), // 회원가입 버튼
+                const SizedBox(height: 10),
               ],
             ),
           ),

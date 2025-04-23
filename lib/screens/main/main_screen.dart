@@ -1,8 +1,8 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:cloud_firestore/cloud_firestore.dart'; // Firebase Firestore 임포트
-import 'package:firebase_auth/firebase_auth.dart'; // Firebase Auth 임포트
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../widgets/components/bottom_navigation_bar.dart';
 import 'package:plant/widgets/components/plant_expert_banner.dart';
 
@@ -90,14 +90,14 @@ class _MainScreenState extends State<MainScreen> {
   // 상단 로고 위젯
   Widget _logoImage() {
     return Row(
-      mainAxisSize: MainAxisSize.min, // 크기를 내용에 맞춤
-      crossAxisAlignment: CrossAxisAlignment.center, // 가로축 정렬
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Image.asset(
           'assets/images/logo.png',
-          height: 32, // 로고 크기를 조정
+          height: 32,
         ),
-        const SizedBox(width: 7), // 로고와 텍스트 간격
+        const SizedBox(width: 7),
         Text(
           'PlantyNote',
           style: TextStyle(
@@ -116,7 +116,10 @@ class _MainScreenState extends State<MainScreen> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: InkWell(
+<<<<<<< HEAD
         // 리플 효과
+=======
+>>>>>>> main
         onTap: () {
           context.go('/main/search'); // /main/search로 이동
         },
@@ -124,12 +127,12 @@ class _MainScreenState extends State<MainScreen> {
         child: Container(
           height: 35,
           decoration: BoxDecoration(
-            color: const Color(0x264B7E5B), // 배경색
+            color: const Color(0x264B7E5B),
             borderRadius: BorderRadius.circular(15),
           ),
           child: Row(
             children: const [
-              SizedBox(width: 16), // 좌측 패딩
+              SizedBox(width: 16),
               Icon(Icons.search, color: Color(0xFFB3B3B3)),
               SizedBox(width: 8),
               Text(
@@ -158,13 +161,17 @@ class _MainScreenState extends State<MainScreen> {
         const SizedBox(height: 25),
         Center(
           child: ClipRRect(
+<<<<<<< HEAD
             // border-radius 주기 위함
             borderRadius: BorderRadius.circular(10), // 둥근 모서리
+=======
+            borderRadius: BorderRadius.circular(10),
+>>>>>>> main
             child: Image.asset(
-              'assets/images/main_plant.png', // 이미지 경로
-              width: 280, // 고정 너비
-              height: 380, // 고정 높이
-              fit: BoxFit.fill, // 전체 채우기
+              'assets/images/main_plant.png',
+              width: 280,
+              height: 380,
+              fit: BoxFit.fill,
             ),
           ),
         ),
@@ -195,13 +202,13 @@ class _MainScreenState extends State<MainScreen> {
             ],
           ),
         ),
-        const SizedBox(height: 15), // 간격을 화면 크기에 상관없이 고정
+        const SizedBox(height: 15),
         _makeCarousel(user),
       ],
     );
   }
 
-  // 캐러셀
+  // 캐러셀 (Firestore에서 게시글 가져오기)
   Widget _makeCarousel(User user) {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
@@ -214,11 +221,9 @@ class _MainScreenState extends State<MainScreen> {
           return const Center(child: CircularProgressIndicator());
         }
         if (snapshot.hasError) {
-          // 오류 발생 시 기본 이미지만 표시
           return _defaultCarousel();
         }
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          // 데이터가 없을 경우 기본 이미지만 표시
           return _defaultCarousel();
         }
 
@@ -239,11 +244,9 @@ class _MainScreenState extends State<MainScreen> {
             .where((post) => post['imageUrl']!.isNotEmpty)
             .toList();
 
-        // 최대 5개의 이미지로 제한
         final limitedPosts = posts.take(5).toList();
 
         if (limitedPosts.isEmpty) {
-          // 이미지가 하나도 없을 경우 기본 이미지 표시
           return _defaultCarousel();
         }
 
@@ -268,9 +271,8 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
-  // 기본 캐러셀 (오류 발생 시 표시)
+  // 기본 캐러셀 (오류 또는 데이터 없음 시)
   Widget _defaultCarousel() {
-    // 기본 이미지 리스트 (원하는 대로 수정 가능)
     final defaultImages = [
       'assets/images/default_post.png',
       'assets/images/default_post.png',
@@ -298,27 +300,26 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   // 캐러셀 이미지 아이템
-  Widget _carouselImageItem(String imageUrl,
-      {bool isAsset = false, String? docId}) {
-    final double itemWidth = 150; // 고정 너비
-    final double itemHeight = 150; // 고정 높이
+  Widget _carouselImageItem(String imageUrl, {bool isAsset = false, String? docId}) {
+    final double itemWidth = 150;
+    final double itemHeight = 150;
 
     return GestureDetector(
       onTap: () {
         if (docId != null) {
-          // 이미지 클릭 시 상세 페이지로 이동, docId 전달
           context.push('/community/detail', extra: {'docId': docId});
         }
       },
       child: Container(
         width: itemWidth,
-        margin: const EdgeInsets.symmetric(horizontal: 9), // 간격 고정
+        margin: const EdgeInsets.symmetric(horizontal: 9),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10), // 둥근 모서리
+          borderRadius: BorderRadius.circular(10),
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(10), // 둥근 모서리
-          child: isAsset
+          borderRadius: BorderRadius.circular(10),
+          // imageUrl이 asset 경로인지 자동 체크하여 처리
+          child: imageUrl.startsWith('assets/')
               ? Image.asset(
                   imageUrl,
                   width: itemWidth,
