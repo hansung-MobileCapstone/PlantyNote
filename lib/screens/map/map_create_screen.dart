@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geocoding/geocoding.dart';
@@ -6,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:plant/screens/modals/location_modal.dart';
 
 class MapCreateScreen extends StatefulWidget {
   final LatLng? initPosition;
@@ -29,6 +31,27 @@ class MapCreateScreenState extends State<MapCreateScreen> {
       _latLngToAddress(widget.initPosition!);
     }
   }
+
+  // 현재 위치 새로고침
+  Future<void> _getCurrentAddress() async {
+    try {
+      final permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever) {
+        final newPermission = await Geolocator.requestPermission();
+        if (newPermission == LocationPermission.denied || newPermission == LocationPermission.deniedForever) {
+          Fluttertoast.showToast(msg: '위치 권한이 필요합니다.');
+          return;
+        }
+      }
+
+      final position = await Geolocator.getCurrentPosition();
+      final currentLatLng = LatLng(position.latitude, position.longitude);
+      await _latLngToAddress(currentLatLng);
+    } catch (e) {
+      Fluttertoast.showToast(msg: '현재 위치를 불러오지 못했습니다.');
+    }
+  }
+
 
   // 주소 포맷팅 -> android, ios가 다르게 나와서
   String _formatAddress(Placemark place) {
@@ -134,13 +157,24 @@ class MapCreateScreenState extends State<MapCreateScreen> {
                   _setLocationButton(
                     icon: Icons.my_location,
                     label: '현재 위치 불러오기',
-                    onPressed: () { },
+                      onPressed: _getCurrentAddress,
                   ),
-                  SizedBox(width: 12),
+                  const SizedBox(width: 12),
                   _setLocationButton(
                     icon: Icons.pin_drop,
-                    label: '지도에서 선택',
-                    onPressed: () { },
+                    label: '위치 직접 선택',
+                    onPressed: () async {
+                      final selectedAddress = await showDialog<String>(
+                        context: context,
+                        builder: (context) => const LocationModal(),
+                      );
+
+                      if (selectedAddress != null && selectedAddress.trim().isNotEmpty) {
+                        setState(() {
+                          _currentAddress = selectedAddress; // 설정 위치 변경
+                        });
+                      }
+                    },
                   ),
                 ],
               ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import '../../widgets/components/bottom_navigation_bar.dart';
 
 class MapScreen extends StatefulWidget {
@@ -18,7 +19,7 @@ class _MapScreenState extends State<MapScreen> {
   @override
   void initState() {
     super.initState();
-    _checkLocation(); // ✅ 변경됨: 진입 시 위치 요청
+    _checkLocation(); // 위치 요청
   }
 
   // 현재 위치 요청
@@ -60,7 +61,7 @@ class _MapScreenState extends State<MapScreen> {
         children: [
           GoogleMap(
             initialCameraPosition: CameraPosition(
-              target: LatLng(37.583078, 127.010667), // 한성대학교
+              target: LatLng(37.583078, 127.010667), // 성북구청
               zoom: 18,
             ),
             zoomGesturesEnabled: true,
@@ -117,14 +118,20 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   // 식물 등록 버튼 위젯
+  // 식물 등록 버튼 위젯
   Widget _writeButton() {
     return IconButton(
       onPressed: () {
         if (_currentPosition != null) {
           context.push('/map/create', extra: _currentPosition); // 위치 전달
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('현재 위치를 불러오는 중입니다..')),
+          Fluttertoast.showToast(
+            msg: "현재 위치를 불러오는 중입니다..",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            backgroundColor: const Color(0xFF4B7E5B),
+            textColor: Colors.white,
+            fontSize: 16.0,
           );
         }
       },
@@ -135,5 +142,6 @@ class _MapScreenState extends State<MapScreen> {
       ),
     );
   }
+
 
 }
