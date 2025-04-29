@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:geocoding/geocoding.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:plant/screens/modals/location_modal.dart';
+import 'package:plant/util/addressAndLatLng.dart';
+
 
 class MapCreateScreen extends StatefulWidget {
   final LatLng? initPosition;
@@ -28,8 +31,16 @@ class MapCreateScreenState extends State<MapCreateScreen> {
   void initState() {
     super.initState();
     if (widget.initPosition != null) {
-      _latLngToAddress(widget.initPosition!);
+      _loadAddressToLatLng(widget.initPosition!);
     }
+  }
+
+  // 좌표를 주소로 변환
+  Future<void> _loadAddressToLatLng(LatLng latLng) async {
+    final address = await latLngToAddressString(latLng); // ✅ 유틸 함수 사용
+    setState(() {
+      _currentAddress = address;
+    });
   }
 
   // 현재 위치 새로고침
@@ -46,48 +57,9 @@ class MapCreateScreenState extends State<MapCreateScreen> {
 
       final position = await Geolocator.getCurrentPosition();
       final currentLatLng = LatLng(position.latitude, position.longitude);
-      await _latLngToAddress(currentLatLng);
+      await _loadAddressToLatLng(currentLatLng);
     } catch (e) {
       Fluttertoast.showToast(msg: '현재 위치를 불러오지 못했습니다.');
-    }
-  }
-
-
-  // 주소 포맷팅 -> android, ios가 다르게 나와서
-  String _formatAddress(Placemark place) {
-    final street = place.street ?? '';
-    final isStreetInvalid = street.trim().toLowerCase() == 'south korea';
-
-    final fallbackStreet = [
-      place.thoroughfare,
-      place.subThoroughfare
-    ].where((e) => e != null && e.isNotEmpty).join(' ');
-
-    return [
-      place.administrativeArea, // 시
-      place.subAdministrativeArea?.isNotEmpty == true
-          ? place.subAdministrativeArea
-          : place.subLocality,   // 구/동
-      isStreetInvalid ? fallbackStreet : street // 도로명
-    ].where((e) => e != null && e.isNotEmpty).join(' ');
-  }
-
-  // 위치를 주소로 매핑
-  Future<void> _latLngToAddress(LatLng latLng) async {
-    try {
-      final placemarks = await placemarkFromCoordinates(
-        latLng.latitude,
-        latLng.longitude,
-      );
-      final place = placemarks.first;
-      //print(place); // 디버깅용
-      setState(() {
-        _currentAddress = _formatAddress(place);
-      });
-    } catch (e) {
-      setState(() {
-        _currentAddress = '주소를 불러올 수 없습니다';
-      });
     }
   }
 
@@ -108,7 +80,7 @@ class MapCreateScreenState extends State<MapCreateScreen> {
     });
   }
 
-  // 식물 게시
+  // 지도식물 게시
   Future<void> _submitPost() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
@@ -123,14 +95,66 @@ class MapCreateScreenState extends State<MapCreateScreen> {
       return;
     }
 
+    final mapsRef = FirebaseFirestore.instance.collection('maps');
+
     // 로딩 다이얼로그 표시
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) =>
-      const Center(child: CircularProgressIndicator()),
+      builder: (context) => const Center(child: CircularProgressIndicator()),
     );
+
+    try {
+      List<String> newImageUrls = [];
+      for (var img in _images) {
+        if (img != null) {
+          final file = File(img.path);
+          final fileName = '${DateTime.now().millisecondsSinceEpoch}_${img.name}';
+          final storageRef = FirebaseStorage.instance.ref('map_images/$fileName');
+          await storageRef.putFile(file);
+          final downloadUrl = await storageRef.getDownloadURL();
+          newImageUrls.add(downloadUrl);
+        }
+      }
+
+      // 주소 → 좌표 변환
+      final LatLng? selectedLatLng = await addressToLatLng(_currentAddress);
+      if (selectedLatLng == null) {
+        Navigator.pop(context);
+        Fluttertoast.showToast(msg: '선택한 위치의 좌표를 찾을 수 없습니다.');
+        return;
+      }
+
+      // 신규 등록
+      final newDoc = await mapsRef.add({
+        'userId': user.uid,
+        'contents': _textController.text.trim(),
+        'imageUrls': newImageUrls,
+        'address': _currentAddress,
+        'lat': selectedLatLng.latitude,
+        'lng': selectedLatLng.longitude,
+        'createdAt': FieldValue.serverTimestamp(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+
+      print("New map post created with docId: ${newDoc.id}");
+      if (mounted) Navigator.pop(context);
+      if (mounted) context.go('/map'); // MapScreen으로 이동
+      Fluttertoast.showToast(msg: '등록 성공!');
+    } catch (e) {
+      if (mounted) Navigator.pop(context);
+      debugPrint('등록 실패: $e');
+      Fluttertoast.showToast(
+        msg: "등록 실패..",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: const Color(0xFF812727),
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+    }
   }
+
 
   @override
   Widget build(BuildContext context) {
