@@ -16,13 +16,22 @@ class _MapScreenState extends State<MapScreen> {
   int _selectedIndex = 2; // 네비게이션바 인덱스
   GoogleMapController? _mapController; // 구글맵 컨트롤러
   LatLng? _currentPosition;
-
-  Set<Marker> _markers = {}; // 마커 상태 변수
+  BitmapDescriptor? _customIcon; // 커스텀 마커
 
   @override
   void initState() {
     super.initState();
     _checkLocation(); // 위치 요청
+    _loadCustomMarker(); // 커스텀 마커 로드
+  }
+
+  // 커스텀 마커 로드
+  Future<void> _loadCustomMarker() async {
+    _customIcon = await BitmapDescriptor.asset(
+      ImageConfiguration(size: Size(38, 48)),
+      'assets/images/map_marker.png',
+    );
+    setState(() {});
   }
 
   // 현재 위치 요청
@@ -89,12 +98,12 @@ class _MapScreenState extends State<MapScreen> {
               // 그룹별 Marker 생성
               final markers = grouped.entries.map((entry) {
                 final latlng = entry.key;
-                final docList = entry.value;
+                //final docList = entry.value;
                 final markerId = '${latlng.latitude}_${latlng.longitude}';
                 return Marker(
                   markerId: MarkerId(markerId),
                   position: latlng,
-                  infoWindow: const InfoWindow(),
+                  icon: _customIcon ?? BitmapDescriptor.defaultMarker,
                   onTap: () {
                     // 지도식물상세 페이지로 이동
                     // context.push('/map/detail', extra: docList);
