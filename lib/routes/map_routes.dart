@@ -1,6 +1,7 @@
 import 'package:go_router/go_router.dart';
 
 // Screens
+import '../screens/map/map_detail_screen.dart';
 import '../screens/map/map_screen.dart';
 import '../screens/map/map_create_screen.dart';
 
@@ -16,7 +17,7 @@ class MapRoutes {
         ),
         GoRoute(
           path: 'detail', // /map/detail
-          builder: (context, state) => MapScreen(), // 변경 예정
+          builder: (context, state) => MapDetailScreen(itemCount: 2), // 수정 예정
         ),
       ],
     ),
