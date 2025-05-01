@@ -91,7 +91,8 @@ class LocationModalState extends State<LocationModal> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      backgroundColor: Colors.white,
       child: SingleChildScrollView(
         child: Container(
           padding: const EdgeInsets.all(20),
