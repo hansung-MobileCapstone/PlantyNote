@@ -37,7 +37,7 @@ class MapCreateScreenState extends State<MapCreateScreen> {
 
   // 좌표를 주소로 변환
   Future<void> _loadAddressToLatLng(LatLng latLng) async {
-    final address = await latLngToAddressString(latLng); // ✅ 유틸 함수 사용
+    final address = await latLngToAddressString(latLng); // /util
     setState(() {
       _currentAddress = address;
     });
