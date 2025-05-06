@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
@@ -18,6 +19,7 @@ class LocationModalState extends State<LocationModal> {
   final _locationController = TextEditingController();
   List<dynamic> _suggestions = [];
   String? _selectedAddress;
+  LatLng? _selectedLatLng; // 좌표 저장
 
   // 구글맵 api key 불러오기
   String get _apiKey => Platform.isAndroid
@@ -76,11 +78,17 @@ class LocationModalState extends State<LocationModal> {
 
     if (response.statusCode == 200) {
       final json = jsonDecode(response.body);
-      final address = json['result']['formatted_address'];
+      final result = json['result'];
+      final address = result['formatted_address'];
+      final loc = result['geometry']['location'];
+      final lat = (loc['lat'] as num).toDouble();
+      final lng = (loc['lng'] as num).toDouble();
+
 
       _locationController.removeListener(_onSearchChanged); // 재검색 트리거 방지
       setState(() {
         _selectedAddress = address;
+        _selectedLatLng = LatLng(lat, lng);
         _locationController.text = address; // 설정위치 업데이트
         _suggestions = [];
       });
@@ -188,16 +196,13 @@ class LocationModalState extends State<LocationModal> {
   Widget _submitButton() {
     return ElevatedButton(
       onPressed: () {
-        if (_locationController.text.trim().isNotEmpty) {
-          context.pop(_selectedAddress); // 설정한 위치를 MapCreateScreen으로 전송
+        if (_selectedAddress != null && _selectedLatLng != null) {
+          Navigator.of(context).pop({ // showDialog는 goRouter 불가임.
+            'address': _selectedAddress!,
+            'latLng': _selectedLatLng!,
+          });
         } else {
-          Fluttertoast.showToast(
-            msg: "위치를 설정해주세요.",
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.CENTER,
-            backgroundColor: const Color(0xFFE81010),
-            textColor: Colors.white,
-          );
+          Fluttertoast.showToast(msg: '위치를 선택해주세요.');
         }
       },
       style: ElevatedButton.styleFrom(

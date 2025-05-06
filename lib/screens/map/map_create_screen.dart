@@ -26,11 +26,13 @@ class MapCreateScreenState extends State<MapCreateScreen> {
   final TextEditingController _textController = TextEditingController();
 
   String _currentAddress = '위치 없음';
+  LatLng? _selectedLatLng; // 선택한 위치 좌표 저장
 
   @override
   void initState() {
     super.initState();
     if (widget.initPosition != null) {
+      _selectedLatLng = widget.initPosition;
       _loadAddressToLatLng(widget.initPosition!);
     }
   }
@@ -57,6 +59,9 @@ class MapCreateScreenState extends State<MapCreateScreen> {
 
       final position = await Geolocator.getCurrentPosition();
       final currentLatLng = LatLng(position.latitude, position.longitude);
+      setState(() {
+        _selectedLatLng = currentLatLng; // 현재 위치도 selectedLatLng에 저장
+      });
       await _loadAddressToLatLng(currentLatLng);
     } catch (e) {
       Fluttertoast.showToast(msg: '현재 위치를 불러오지 못했습니다.');
@@ -95,6 +100,11 @@ class MapCreateScreenState extends State<MapCreateScreen> {
       return;
     }
 
+    if (_selectedLatLng == null) { // 좌표 미선택 시
+      Fluttertoast.showToast(msg: '위치를 선택해주세요.');
+      return;
+    }
+
     final mapsRef = FirebaseFirestore.instance.collection('maps');
 
     // 로딩 다이얼로그 표시
@@ -117,13 +127,9 @@ class MapCreateScreenState extends State<MapCreateScreen> {
         }
       }
 
-      // 주소 → 좌표 변환
-      final LatLng? selectedLatLng = await addressToLatLng(_currentAddress);
-      if (selectedLatLng == null) {
-        Navigator.pop(context);
-        Fluttertoast.showToast(msg: '선택한 위치의 좌표를 찾을 수 없습니다.');
-        return;
-      }
+      // 좌표
+      final lat = _selectedLatLng!.latitude;
+      final lng = _selectedLatLng!.longitude;
 
       // 신규 등록
       final newDoc = await mapsRef.add({
@@ -131,8 +137,8 @@ class MapCreateScreenState extends State<MapCreateScreen> {
         'contents': _textController.text.trim(),
         'imageUrls': newImageUrls,
         'address': _currentAddress,
-        'lat': selectedLatLng.latitude,
-        'lng': selectedLatLng.longitude,
+        'lat': lat,
+        'lng': lng,
         'createdAt': FieldValue.serverTimestamp(),
         'updatedAt': FieldValue.serverTimestamp(),
       });
@@ -188,14 +194,17 @@ class MapCreateScreenState extends State<MapCreateScreen> {
                     icon: Icons.pin_drop,
                     label: '위치 직접 선택',
                     onPressed: () async {
-                      final selectedAddress = await showDialog<String>(
+                      final selectedAddress = await showDialog<Map<String, dynamic>>(
                         context: context,
                         builder: (context) => const LocationModal(),
                       );
 
-                      if (selectedAddress != null && selectedAddress.trim().isNotEmpty) {
+                      if (selectedAddress != null &&
+                          selectedAddress['address'] != null &&
+                          selectedAddress['latLng'] != null) {
                         setState(() {
-                          _currentAddress = selectedAddress; // 설정 위치 변경
+                          _currentAddress = selectedAddress['address'] as String;
+                          _selectedLatLng = selectedAddress['latLng'] as LatLng; // 수정: LatLng 저장
                         });
                       }
                     },
