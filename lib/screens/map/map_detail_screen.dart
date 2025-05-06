@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../widgets/components/bottom_navigation_bar.dart';
+import 'package:plant/util/dateFormat.dart';
 //import '../modals/comment_modal.dart';
 
 class MapDetailScreen extends StatefulWidget {
@@ -75,7 +76,7 @@ class _MapDetailScreenState extends State<MapDetailScreen> {
                     ),
                     const SizedBox(height: 5),
                     _postActions( // 날짜
-                      _formatDate(
+                      formatDate(
                         (doc.data()! as Map<String, dynamic>)['createdAt']
                             .toDate(),
                       ),
@@ -288,13 +289,5 @@ class _MapDetailScreenState extends State<MapDetailScreen> {
         style: const TextStyle(fontSize: 13, color: Colors.black),
       ),
     );
-  }
-
-  // Timestamp -> yyyy-MM-dd 포맷
-  String _formatDate(DateTime dt) {
-    final y = dt.year.toString().padLeft(4, '0');
-    final m = dt.month.toString().padLeft(2, '0');
-    final d = dt.day.toString().padLeft(2, '0');
-    return '$y-$m-$d';
   }
 }
