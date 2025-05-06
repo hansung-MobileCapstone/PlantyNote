@@ -12,7 +12,7 @@
 
 
     <application
-        android:label="plant"
+        android:label="PlantyNote"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
