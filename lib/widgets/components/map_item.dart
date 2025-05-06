@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:plant/screens/modals/comment_modal.dart';
 import 'package:plant/util/dateFormat.dart';
 
@@ -23,6 +24,24 @@ class _MapItemState extends State<MapItem> {
     final data = widget.doc.data()! as Map<String, dynamic>;
     _likeCount = data['likesCount'] as int? ?? 0;
     _isLiked = false;
+
+    // 좋아요 여부 체크
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      FirebaseFirestore.instance
+          .collection('maps')
+          .doc(widget.doc.id)
+          .collection('likes')
+          .doc(user.uid)
+          .get()
+          .then((snap) {
+        if (mounted) {
+          setState(() {
+            _isLiked = snap.exists;
+          });
+        }
+      });
+    }
   }
 
   @override
@@ -178,15 +197,31 @@ class _MapItemState extends State<MapItem> {
                 size: 24,
               ),
               onPressed: () async {
+                final user = FirebaseAuth.instance.currentUser;
+                if (user == null) return;
                 final newState = !_isLiked;
+
                 setState(() {
                   _isLiked = newState;
                   _likeCount += newState ? 1 : -1;
                 });
-                await FirebaseFirestore.instance
-                    .collection('maps')
-                    .doc(widget.doc.id)
-                    .update({'likesCount': FieldValue.increment(newState ? 1 : -1)});
+
+                final mapRef = FirebaseFirestore.instance.collection('maps').doc(widget.doc.id);
+                // 좋아요 수 업데이트
+                await mapRef.update({
+                  'likesCount': FieldValue.increment(newState ? 1 : -1),
+                });
+
+                // firebase 컬렉션에 좋아요 반영
+                final likeDoc = mapRef.collection('likes').doc(user.uid);
+                if (newState) {
+                  await likeDoc.set({
+                    'userId': user.uid,
+                    'createdAt': FieldValue.serverTimestamp(),
+                  });
+                } else {
+                  await likeDoc.delete();
+                }
               },
             ),
             Text('$_likeCount'),
