@@ -1,4 +1,5 @@
 import 'package:go_router/go_router.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 // Screens
 import '../screens/map/map_detail_screen.dart';
@@ -13,7 +14,10 @@ class MapRoutes {
       routes: [
         GoRoute(
           path: 'create', // /map/create
-          builder: (context, state) => MapCreateScreen(),
+          builder: (context, state) {
+            final LatLng? position = state.extra as LatLng?; // 위치 전달 받기
+            return MapCreateScreen(initPosition: position);
+          },
         ),
         GoRoute(
           path: 'detail', // /map/detail
