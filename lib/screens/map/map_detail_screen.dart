@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../widgets/components/bottom_navigation_bar.dart';
 import 'package:plant/util/dateFormat.dart';
+
+import '../modals/comment_modal.dart';
 //import '../modals/comment_modal.dart';
 
 class MapDetailScreen extends StatefulWidget {
@@ -80,6 +82,7 @@ class _MapDetailScreenState extends State<MapDetailScreen> {
                         (doc.data()! as Map<String, dynamic>)['createdAt']
                             .toDate(),
                       ),
+                      doc.id,
                     ),
                     const SizedBox(height: 5),
                     _postContent( // 게시물 내용
@@ -164,7 +167,7 @@ class _MapDetailScreenState extends State<MapDetailScreen> {
     );
   }
 
-  /// 작성자 프로필 (프로필 이미지와 닉네임)
+  // 작성자 프로필 (프로필 이미지와 닉네임)
   Widget _profileSection(String name, String profileImage) {
     return Center(
       child: Row(
@@ -251,7 +254,7 @@ class _MapDetailScreenState extends State<MapDetailScreen> {
   }
 
   // 댓글, 하트 아이콘
-  Widget _postActions(String date) {
+  Widget _postActions(String date, String docId) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -264,7 +267,19 @@ class _MapDetailScreenState extends State<MapDetailScreen> {
             IconButton(
               icon: const Icon(Icons.comment, color: Color(0xFF4B7E5B), size: 24),
               onPressed: () {
-                //_showCommentModal(context);
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  builder: (BuildContext ctx) {
+                    return FractionallySizedBox(
+                      heightFactor: 0.85,
+                      child: CommentModal(
+                        docId: docId,
+                        collectionName: 'maps',
+                      ),
+                    );
+                  },
+                );
               },
             ),
             IconButton(
