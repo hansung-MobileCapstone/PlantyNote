@@ -141,6 +141,7 @@ class MapCreateScreenState extends State<MapCreateScreen> {
         'lng': lng,
         'createdAt': FieldValue.serverTimestamp(),
         'updatedAt': FieldValue.serverTimestamp(),
+        'likesCount': 0,
       });
 
       print("New map post created with docId: ${newDoc.id}");

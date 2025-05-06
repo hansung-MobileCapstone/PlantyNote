@@ -1,12 +1,7 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../widgets/components/bottom_navigation_bar.dart';
-import 'package:plant/util/dateFormat.dart';
-
-import '../modals/comment_modal.dart';
-//import '../modals/comment_modal.dart';
+import 'package:plant/widgets/components/map_item.dart';
 
 class MapDetailScreen extends StatefulWidget {
   final List<QueryDocumentSnapshot> docList; // 해당 문서 리스트
@@ -18,8 +13,6 @@ class MapDetailScreen extends StatefulWidget {
 
 class _MapDetailScreenState extends State<MapDetailScreen> {
   int _selectedIndex = 2; // 네비게이션바 인덱스
-  int _currentImage = 0; // 현재 보여지는 사진 인덱스
-  bool _isLiked = false; // 좋아요 상태
 
   void _onItemTapped(int index) {
     setState(() {
@@ -41,59 +34,7 @@ class _MapDetailScreenState extends State<MapDetailScreen> {
             for (var doc in widget.docList) ...[
               const Divider(height: 1),
               const SizedBox(height: 10),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 18),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // 사용자 정보 로드
-                    FutureBuilder<DocumentSnapshot>(
-                      future: FirebaseFirestore.instance
-                          .collection('users')
-                          .doc((doc.data()! as Map<String, dynamic>)['userId'])
-                          .get(),
-                      builder: (context, userSnap) {
-                        if (userSnap.connectionState == ConnectionState.waiting) {
-                          return const SizedBox(
-                            height: 30,
-                            child: Center(child: CircularProgressIndicator()),
-                          );
-                        }
-                        if (!userSnap.hasData || !userSnap.data!.exists) {
-                          return _profileSection('사용자 없음', '');
-                        }
-                        final userData = userSnap.data!.data()! as Map<String, dynamic>;
-                        return _profileSection(
-                          userData['nickname'] as String? ?? '사용자',
-                          userData['profileImage'] as String? ?? '',
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 10),
-                    _postImageSlider( // 올린 사진들
-                      List<String>.from(
-                        (doc.data()! as Map<String, dynamic>)['imageUrls'] ??
-                            ['assets/images/sample_post.png'],
-                      ),
-                    ),
-                    const SizedBox(height: 5),
-                    _postActions( // 날짜
-                      formatDate(
-                        (doc.data()! as Map<String, dynamic>)['createdAt']
-                            .toDate(),
-                      ),
-                      doc.id,
-                    ),
-                    const SizedBox(height: 5),
-                    _postContent( // 게시물 내용
-                      (doc.data()! as Map<String, dynamic>)['contents']
-                      as String? ??
-                          '',
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 10),
+              MapItem(doc: doc), // MapItem 컴포넌트
             ],
           ],
         ),
@@ -163,150 +104,6 @@ class _MapDetailScreenState extends State<MapDetailScreen> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  // 작성자 프로필 (프로필 이미지와 닉네임)
-  Widget _profileSection(String name, String profileImage) {
-    return Center(
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          CircleAvatar(
-            backgroundImage: profileImage.startsWith('http')
-                ? NetworkImage(profileImage)
-                : const AssetImage('assets/images/basic_profile.png') as ImageProvider,
-            radius: 15,
-          ),
-          const SizedBox(width: 10),
-          Text(
-            name,
-            style: const TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // 이미지 슬라이더
-  Widget _postImageSlider(List<String> images) {
-    // 사진이 하나도 없으면 보이지 x
-    if (images.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    return Center(
-      child: Stack(
-        alignment: Alignment.topRight,
-        children: [
-          SizedBox(
-            width: 380,
-            height: 380,
-            child: PageView(
-              onPageChanged: (index) {
-                setState(() {
-                  _currentImage = index;
-                });
-              },
-              children: images.map((image) {
-                if (image.startsWith('http')) {
-                  return ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: Image.network(image, fit: BoxFit.cover),
-                  );
-                } else if (image.startsWith('assets/')) {
-                  return ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: Image.asset(image, fit: BoxFit.fill),
-                  );
-                } else {
-                  return ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: Image.file(File(image), fit: BoxFit.cover),
-                  );
-                }
-              }).toList(),
-            ),
-          ),
-          Positioned(
-            top: 8,
-            right: 8,
-            child: Container(
-              padding:
-              const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.6),
-                borderRadius: BorderRadius.circular(50),
-              ),
-              child: Text(
-                '${_currentImage + 1}/${images.length}',
-                style: const TextStyle(color: Colors.white, fontSize: 12),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // 댓글, 하트 아이콘
-  Widget _postActions(String date, String docId) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          date,
-          style: TextStyle(fontSize: 10, color: Colors.grey),
-        ),
-        Row(
-          children: [
-            IconButton(
-              icon: const Icon(Icons.comment, color: Color(0xFF4B7E5B), size: 24),
-              onPressed: () {
-                showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true,
-                  builder: (BuildContext ctx) {
-                    return FractionallySizedBox(
-                      heightFactor: 0.85,
-                      child: CommentModal(
-                        docId: docId,
-                        collectionName: 'maps',
-                      ),
-                    );
-                  },
-                );
-              },
-            ),
-            IconButton(
-              icon: Icon(
-                _isLiked ? Icons.favorite : Icons.favorite_border,
-                color: const Color(0xFF4B7E5B),
-                size: 24,
-              ),
-              onPressed: () {
-                setState(() {
-                  _isLiked = !_isLiked;
-                });
-              },
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  // 게시물 내용
-  Widget _postContent(String contents) {
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Text(
-        contents,
-        style: const TextStyle(fontSize: 13, color: Colors.black),
       ),
     );
   }
