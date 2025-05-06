@@ -6,8 +6,8 @@ import '../../widgets/components/bottom_navigation_bar.dart';
 //import '../modals/comment_modal.dart';
 
 class MapDetailScreen extends StatefulWidget {
-  final int itemCount; // 더미 데이터 개수
-  const MapDetailScreen({Key? key, required this.itemCount}) : super(key: key);
+  final List<QueryDocumentSnapshot> docList; // 해당 문서 리스트
+  const MapDetailScreen({Key? key, required this.docList}) : super(key: key);
 
   @override
   State<MapDetailScreen> createState() => _MapDetailScreenState();
@@ -35,7 +35,7 @@ class _MapDetailScreenState extends State<MapDetailScreen> {
             // 위치 및 게시물 개수
             _locationBox(),
             // 게시물 목록
-            for (int i = 0; i < widget.itemCount; i++) ...[
+            for (var doc in widget.docList) ...[
               const Divider(height: 1),
               const SizedBox(height: 10),
               Padding(
@@ -43,14 +43,49 @@ class _MapDetailScreenState extends State<MapDetailScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // 더미 데이터
-                    _profileSection('마이클', ''),
+                    // 사용자 정보 로드
+                    FutureBuilder<DocumentSnapshot>(
+                      future: FirebaseFirestore.instance
+                          .collection('users')
+                          .doc((doc.data()! as Map<String, dynamic>)['userId'])
+                          .get(),
+                      builder: (context, userSnap) {
+                        if (userSnap.connectionState == ConnectionState.waiting) {
+                          return const SizedBox(
+                            height: 30,
+                            child: Center(child: CircularProgressIndicator()),
+                          );
+                        }
+                        if (!userSnap.hasData || !userSnap.data!.exists) {
+                          return _profileSection('사용자 없음', '');
+                        }
+                        final userData = userSnap.data!.data()! as Map<String, dynamic>;
+                        return _profileSection(
+                          userData['nickname'] as String? ?? '사용자',
+                          userData['profileImage'] as String? ?? '',
+                        );
+                      },
+                    ),
                     const SizedBox(height: 10),
-                    _postImageSlider(const ['assets/images/sample_post.png']),
+                    _postImageSlider( // 올린 사진들
+                      List<String>.from(
+                        (doc.data()! as Map<String, dynamic>)['imageUrls'] ??
+                            ['assets/images/sample_post.png'],
+                      ),
+                    ),
                     const SizedBox(height: 5),
-                    _postActions('2024.10.04'),
+                    _postActions( // 날짜
+                      _formatDate(
+                        (doc.data()! as Map<String, dynamic>)['createdAt']
+                            .toDate(),
+                      ),
+                    ),
                     const SizedBox(height: 5),
-                    _postContent('장미가 드디어 피었네요~~'),
+                    _postContent( // 게시물 내용
+                      (doc.data()! as Map<String, dynamic>)['contents']
+                      as String? ??
+                          '',
+                    ),
                   ],
                 ),
               ),
@@ -83,6 +118,10 @@ class _MapDetailScreenState extends State<MapDetailScreen> {
 
   // 위치 및 게시물 개수
   Widget _locationBox() {
+    // 첫 번째 문서의 address
+    final firstData = widget.docList.first.data() as Map<String, dynamic>;
+    final address = firstData['address'] as String? ?? '';
+
     return Padding(
       padding: const EdgeInsets.all(15.0),
       child: Container(
@@ -101,7 +140,7 @@ class _MapDetailScreenState extends State<MapDetailScreen> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    '서울 성북구 삼선교로 11길 9',
+                    address,
                     style: const TextStyle(fontSize: 14),
                   ),
                 ),
@@ -113,7 +152,7 @@ class _MapDetailScreenState extends State<MapDetailScreen> {
                 const Icon(Icons.description, color: Colors.black),
                 const SizedBox(width: 8),
                 Text(
-                  '게시물 수 ${widget.itemCount}개',
+                  '게시물 수 ${widget.docList.length}개',
                   style: const TextStyle(fontSize: 14),
                 ),
               ],
@@ -124,19 +163,18 @@ class _MapDetailScreenState extends State<MapDetailScreen> {
     );
   }
 
-  /// 작성자 프로필 (프로필 이미지와 닉네임 표시)
+  /// 작성자 프로필 (프로필 이미지와 닉네임)
   Widget _profileSection(String name, String profileImage) {
     return Center(
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           CircleAvatar(
-            backgroundImage: profileImage.isNotEmpty && profileImage.startsWith('http')
+            backgroundImage: profileImage.startsWith('http')
                 ? NetworkImage(profileImage)
-                : AssetImage('assets/images/profile.png') as ImageProvider,
+                : const AssetImage('assets/images/profile.png') as ImageProvider,
             radius: 15,
           ),
-
           const SizedBox(width: 10),
           Text(
             name,
@@ -250,5 +288,13 @@ class _MapDetailScreenState extends State<MapDetailScreen> {
         style: const TextStyle(fontSize: 13, color: Colors.black),
       ),
     );
+  }
+
+  // Timestamp -> yyyy-MM-dd 포맷
+  String _formatDate(DateTime dt) {
+    final y = dt.year.toString().padLeft(4, '0');
+    final m = dt.month.toString().padLeft(2, '0');
+    final d = dt.day.toString().padLeft(2, '0');
+    return '$y-$m-$d';
   }
 }

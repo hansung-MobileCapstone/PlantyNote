@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -20,8 +21,11 @@ class MapRoutes {
           },
         ),
         GoRoute(
-          path: 'detail', // /map/detail
-          builder: (context, state) => MapDetailScreen(itemCount: 2), // 수정 예정
+          path: '/detail', // /map/detail
+          builder: (context, state) {
+            final docs = state.extra as List<QueryDocumentSnapshot>;
+            return MapDetailScreen(docList: docs);
+          },
         ),
       ],
     ),
