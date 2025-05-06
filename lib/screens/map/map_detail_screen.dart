@@ -173,7 +173,7 @@ class _MapDetailScreenState extends State<MapDetailScreen> {
           CircleAvatar(
             backgroundImage: profileImage.startsWith('http')
                 ? NetworkImage(profileImage)
-                : const AssetImage('assets/images/profile.png') as ImageProvider,
+                : const AssetImage('assets/images/basic_profile.png') as ImageProvider,
             radius: 15,
           ),
           const SizedBox(width: 10),
@@ -191,6 +191,11 @@ class _MapDetailScreenState extends State<MapDetailScreen> {
 
   // 이미지 슬라이더
   Widget _postImageSlider(List<String> images) {
+    // 사진이 하나도 없으면 보이지 x
+    if (images.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
     return Center(
       child: Stack(
         alignment: Alignment.topRight,
