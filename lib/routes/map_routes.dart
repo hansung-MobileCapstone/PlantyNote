@@ -1,7 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 // Screens
+import '../screens/map/map_detail_screen.dart';
 import '../screens/map/map_screen.dart';
 import '../screens/map/map_create_screen.dart';
 
@@ -19,8 +21,11 @@ class MapRoutes {
           },
         ),
         GoRoute(
-          path: 'detail', // /map/detail
-          builder: (context, state) => MapScreen(), // 변경 예정
+          path: '/detail', // /map/detail
+          builder: (context, state) {
+            final docs = state.extra as List<QueryDocumentSnapshot>;
+            return MapDetailScreen(docList: docs);
+          },
         ),
       ],
     ),

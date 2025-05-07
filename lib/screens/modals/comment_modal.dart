@@ -7,8 +7,13 @@ import 'package:fluttertoast/fluttertoast.dart';
 
 class CommentModal extends StatefulWidget {
   final String docId; // 게시물의 docId를 받아오기
+  final String collectionName; // posts인지 maps인지
 
-  const CommentModal({super.key, required this.docId});
+  const CommentModal({
+    Key? key,
+    required this.docId,
+    this.collectionName = 'posts',  // 기본값
+  }) : super(key: key);
 
   @override
   State<CommentModal> createState() => _CommentModalState();
@@ -52,7 +57,7 @@ class _CommentModalState extends State<CommentModal> {
 
       // 공용 컬렉션 방식에 맞게 댓글 경로 수정
       final commentsRef = FirebaseFirestore.instance
-          .collection('posts')
+          .collection(widget.collectionName)
           .doc(widget.docId)
           .collection('comments');
 
@@ -94,7 +99,7 @@ class _CommentModalState extends State<CommentModal> {
   Widget build(BuildContext context) {
     // 댓글을 조회할 때도 공용 컬렉션 'posts' 아래의 해당 문서에서 가져옵니다.
     final commentsRef = FirebaseFirestore.instance
-        .collection('posts')
+        .collection(widget.collectionName)
         .doc(widget.docId)
         .collection('comments')
         .orderBy('createdAt', descending: false);

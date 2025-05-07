@@ -75,6 +75,7 @@ class _MapScreenState extends State<MapScreen> {
           StreamBuilder<QuerySnapshot>(
             stream: FirebaseFirestore.instance
                 .collection('maps') // maps 컬렉션
+                .orderBy('createdAt', descending: true)
                 .snapshots(),
             builder: (context, snapshot) {
               if (snapshot.hasError) {
@@ -98,7 +99,7 @@ class _MapScreenState extends State<MapScreen> {
               // 그룹별 Marker 생성
               final markers = grouped.entries.map((entry) {
                 final latlng = entry.key;
-                //final docList = entry.value;
+                final docList = entry.value;
                 final markerId = '${latlng.latitude}_${latlng.longitude}';
                 return Marker(
                   markerId: MarkerId(markerId),
@@ -106,7 +107,7 @@ class _MapScreenState extends State<MapScreen> {
                   icon: _customIcon ?? BitmapDescriptor.defaultMarker,
                   onTap: () {
                     // 지도식물상세 페이지로 이동
-                    // context.push('/map/detail', extra: docList);
+                    context.push('/map/detail', extra: docList);
                   },
                 );
               }).toSet();
