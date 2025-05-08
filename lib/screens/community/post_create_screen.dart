@@ -212,6 +212,7 @@ class PostCreateScreenState extends State<PostCreateScreen> {
           'details': details,
           'createdAt': FieldValue.serverTimestamp(),
           'updatedAt': FieldValue.serverTimestamp(),
+          'likesCount': 0,
         });
 
         print("New post created with docId: ${newDoc.id}");

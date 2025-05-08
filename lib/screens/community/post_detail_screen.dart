@@ -19,7 +19,8 @@ class PostDetailScreen extends StatefulWidget {
 class _PostDetailScreenState extends State<PostDetailScreen> {
   int _selectedIndex = 1; // 네비게이션바 인덱스
   int _currentImage = 0; // 현재 보여지는 사진 인덱스
-  bool _isLiked = false; // 좋아요 상태
+  late bool _isLiked; // 좋아요 상태
+  late int _likeCount; // 좋아요 개수
 
   /// 게시글과 작성자 정보를 결합하여 반환하는 함수
   Future<Map<String, dynamic>?> _fetchPostAndUserData() async {
@@ -32,6 +33,15 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     final userId = postData['userId'];
     final userSnap =
     await FirebaseFirestore.instance.collection('users').doc(userId).get();
+
+    // 좋아요 상태, 개수 불러오기
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final likeDoc = await docRef.collection('likes').doc(user.uid).get();
+      _isLiked = likeDoc.exists;
+    }
+    _likeCount = postData['likesCount'] ?? 0;
+
     // 결합할 데이터를 생성합니다.
     Map<String, dynamic> combined = {};
     combined.addAll(postData);
@@ -296,6 +306,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     );
   }
 
+  // 날짜, 댓글, 좋아요
   Widget _postActions(String date) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -318,12 +329,35 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                 color: const Color(0xFF4B7E5B),
                 size: 24,
               ),
-              onPressed: () {
+              onPressed: () async {
+                final user = FirebaseAuth.instance.currentUser;
+                if (user == null || widget.docId == null) return;
+
+                final newState = !_isLiked;
                 setState(() {
-                  _isLiked = !_isLiked;
+                  _isLiked = newState;
+                  _likeCount += newState ? 1 : -1;
                 });
+
+                final postRef = FirebaseFirestore.instance.collection('posts').doc(widget.docId);
+                // 좋아요 수 업데이트
+                await postRef.update({
+                  'likesCount': FieldValue.increment(newState ? 1 : -1),
+                });
+
+                // firebase 컬렉션에 좋아요 반영
+                final likeDoc = postRef.collection('likes').doc(user.uid);
+                if (newState) {
+                  await likeDoc.set({
+                    'userId': user.uid,
+                    'createdAt': FieldValue.serverTimestamp(),
+                  });
+                } else {
+                  await likeDoc.delete();
+                }
               },
             ),
+            Text('$_likeCount'),
           ],
         ),
       ],
