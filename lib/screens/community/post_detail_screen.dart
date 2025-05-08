@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../widgets/components/bottom_navigation_bar.dart';
 import '../modals/comment_modal.dart';
+import 'package:plant/util/dateFormat.dart';
 
 class PostDetailScreen extends StatefulWidget {
   final String? docId; // 공용 컬렉션 'posts'에 저장된 문서 ID
@@ -126,6 +127,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
           final name = userData['nickname'] ?? '사용자';
           final profileImage = userData['profileImage'] ?? '';
           final contents = combined['contents'] ?? '';
+          final date = formatDate((combined['createdAt'] as Timestamp).toDate());
           final images = List<String>.from(combined['imageUrl'] ?? []);
           if (images.isEmpty) {
             images.add('assets/images/sample_post.png');
@@ -153,7 +155,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                             const SizedBox(height: 10),
                             _postImageSlider(images),
                             const SizedBox(height: 5),
-                            _postActions(),
+                            _postActions(date),
                             _postContent(contents),
                           ],
                         ),
@@ -294,12 +296,12 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     );
   }
 
-  Widget _postActions() {
+  Widget _postActions(String date) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const Text(
-          '2024.10.04',
+        Text(
+          date,
           style: TextStyle(fontSize: 10, color: Colors.grey),
         ),
         Row(
