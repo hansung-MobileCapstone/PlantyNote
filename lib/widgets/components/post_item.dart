@@ -24,10 +24,10 @@ class PostItem extends StatelessWidget {
   String _getDetail(String key) {
     for (var detail in details) {
       if (detail.containsKey(key)) {
-        return detail[key] ?? '정보 없음';
+        return detail[key] ?? '-';
       }
     }
-    return '정보 없음';
+    return '-';
   }
 
   // imageUrl이 asset 경로인지, 네트워크 URL인지 체크하는 헬퍼 함수
@@ -89,6 +89,7 @@ class PostItem extends StatelessWidget {
 
   // 게시글에 등록된 이미지를 표시하는 위젯
   Widget _postImage() {
+    final String fallbackImage = 'assets/images/default_post.png'; // 기본 이미지
     return SizedBox(
       width: 100,
       child: Stack(
@@ -103,10 +104,9 @@ class PostItem extends StatelessWidget {
             ),
           ClipRRect(
             borderRadius: BorderRadius.circular(10),
-            child: imageUrls.isNotEmpty
-                ? _buildImage(imageUrls[0])
-                : _buildImage(
-                    'https://res.cloudinary.com/heyset/image/upload/v1689582418/buukmenow-folder/no-image-icon-0.jpg'),
+            child: _buildImage(
+              imageUrls.isNotEmpty ? imageUrls[0] : fallbackImage, // 없으면 기본 이미지
+            ),
           ),
         ],
       ),
@@ -185,13 +185,17 @@ class PostItem extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 8),
-        RichText(
-          text: _highlight(
-            value,
-            style: const TextStyle(
-              fontSize: 7,
-              color: Color(0xFF616161),
-              fontWeight: FontWeight.bold,
+        Expanded(
+          child: RichText(
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
+            text: _highlight(
+              value,
+              style: const TextStyle(
+                fontSize: 7,
+                color: Color(0xFF616161),
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ),
@@ -218,11 +222,16 @@ class PostItem extends StatelessWidget {
             const SizedBox(width: 10),
             _postImage(),
             const SizedBox(width: 16),
-            Expanded(child: _postContent()),
+            SizedBox(
+              width: 140,
+              child: _postContent(),
+            ),
             const SizedBox(width: 10),
             Container(width: 1, height: 100, color: const Color(0xFF7D7D7D)),
             const SizedBox(width: 10),
-            _plantInformation(plantSpecies, waterCycle, fertilizerCycle),
+            Expanded(
+              child: _plantInformation(plantSpecies, waterCycle, fertilizerCycle),
+            ),
             const SizedBox(width: 10),
           ],
         ),
