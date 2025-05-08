@@ -21,7 +21,7 @@ class PostCreateScreenState extends State<PostCreateScreen> {
   final ImagePicker _picker = ImagePicker();
   final TextEditingController _textController = TextEditingController();
   String? _selectedPlantName;
-  List<String> _plantNames = ['선택안함']; // 초기값 최소화
+  List<String> _plantNames = ['-']; // 초기값 최소화
 
   String? _docId; // 수정 모드 docId
   Map<String, dynamic>? _editingPost;
@@ -45,7 +45,7 @@ class PostCreateScreenState extends State<PostCreateScreen> {
         .collection('plants')
         .get();
 
-    List<String> plantNames = ['선택안함'];
+    List<String> plantNames = ['-'];
     for (var doc in querySnapshot.docs) {
       final data = doc.data();
       final plantName = data['plantname'] ?? '';
@@ -142,16 +142,11 @@ class PostCreateScreenState extends State<PostCreateScreen> {
         }
       }
 
-      // 사진이 선택되지 않은 경우 기본 이미지를 추가합니다.
-      if (newImageUrls.isEmpty) {
-        newImageUrls.add('assets/images/tree.png');
-      }
-
       // 선택한 식물 정보를 가져옵니다.
-      String selectedPlantName = _selectedPlantName ?? '선택안함';
+      String selectedPlantName = _selectedPlantName ?? '-';
       Map<String, dynamic>? plantData;
 
-      if (selectedPlantName != '선택안함') {
+      if (selectedPlantName != '-') {
         final plantQuery = await FirebaseFirestore.instance
             .collection('users')
             .doc(user.uid)
@@ -167,9 +162,9 @@ class PostCreateScreenState extends State<PostCreateScreen> {
 
       final details = [
         {'식물 종': selectedPlantName},
-        {'물 주기': plantData?['waterCycle']?.toString() ?? '정보 없음'},
+        {'물 주기': plantData?['waterCycle']?.toString() ?? '-'},
         {
-          '분갈이 주기': plantData?['fertilizerCycle']?.toString() ?? '정보 없음'
+          '분갈이 주기': plantData?['fertilizerCycle']?.toString() ?? '-'
         },
       ];
 

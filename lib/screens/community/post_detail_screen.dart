@@ -139,9 +139,6 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
           final contents = combined['contents'] ?? '';
           final date = formatDate((combined['createdAt'] as Timestamp).toDate());
           final images = List<String>.from(combined['imageUrl'] ?? []);
-          if (images.isEmpty) {
-            images.add('assets/images/sample_post.png');
-          }
           final details =
           List<Map<String, dynamic>>.from(combined['details'] ?? []);
 
@@ -252,6 +249,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   }
 
   Widget _postImageSlider(List<String> images) {
+    if (images.isEmpty) return const SizedBox.shrink();
     return Center(
       child: Stack(
         alignment: Alignment.topRight,
