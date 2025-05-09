@@ -12,7 +12,6 @@
 
 
     <application
-        <!--앱 이름-->
         android:label="PlantyNote"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
