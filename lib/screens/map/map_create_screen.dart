@@ -1,13 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:plant/screens/modals/location_modal.dart';
+import 'package:plant/util/addressAndLatLng.dart';
+
 
 class MapCreateScreen extends StatefulWidget {
-  final String? mapId;
-  const MapCreateScreen({super.key, this.mapId});
+  final LatLng? initPosition;
+  const MapCreateScreen({super.key, this.initPosition});
 
   @override
   MapCreateScreenState createState() => MapCreateScreenState();
@@ -17,6 +24,49 @@ class MapCreateScreenState extends State<MapCreateScreen> {
   final List<XFile?> _images = [];
   final ImagePicker _picker = ImagePicker();
   final TextEditingController _textController = TextEditingController();
+
+  String _currentAddress = '위치 없음';
+  LatLng? _selectedLatLng; // 선택한 위치 좌표 저장
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initPosition != null) {
+      _selectedLatLng = widget.initPosition;
+      _loadAddressToLatLng(widget.initPosition!);
+    }
+  }
+
+  // 좌표를 주소로 변환
+  Future<void> _loadAddressToLatLng(LatLng latLng) async {
+    final address = await latLngToAddressString(latLng); // /util
+    setState(() {
+      _currentAddress = address;
+    });
+  }
+
+  // 현재 위치 새로고침
+  Future<void> _getCurrentAddress() async {
+    try {
+      final permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever) {
+        final newPermission = await Geolocator.requestPermission();
+        if (newPermission == LocationPermission.denied || newPermission == LocationPermission.deniedForever) {
+          Fluttertoast.showToast(msg: '위치 권한이 필요합니다.');
+          return;
+        }
+      }
+
+      final position = await Geolocator.getCurrentPosition();
+      final currentLatLng = LatLng(position.latitude, position.longitude);
+      setState(() {
+        _selectedLatLng = currentLatLng; // 현재 위치도 selectedLatLng에 저장
+      });
+      await _loadAddressToLatLng(currentLatLng);
+    } catch (e) {
+      Fluttertoast.showToast(msg: '현재 위치를 불러오지 못했습니다.');
+    }
+  }
 
   // 이미지 선택
   Future<void> _pickImage() async {
@@ -35,7 +85,7 @@ class MapCreateScreenState extends State<MapCreateScreen> {
     });
   }
 
-  // 식물 게시
+  // 지도식물 게시
   Future<void> _submitPost() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
@@ -50,14 +100,68 @@ class MapCreateScreenState extends State<MapCreateScreen> {
       return;
     }
 
+    if (_selectedLatLng == null) { // 좌표 미선택 시
+      Fluttertoast.showToast(msg: '위치를 선택해주세요.');
+      return;
+    }
+
+    final mapsRef = FirebaseFirestore.instance.collection('maps');
+
     // 로딩 다이얼로그 표시
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) =>
-      const Center(child: CircularProgressIndicator()),
+      builder: (context) => const Center(child: CircularProgressIndicator()),
     );
+
+    try {
+      List<String> newImageUrls = [];
+      for (var img in _images) {
+        if (img != null) {
+          final file = File(img.path);
+          final fileName = '${DateTime.now().millisecondsSinceEpoch}_${img.name}';
+          final storageRef = FirebaseStorage.instance.ref('map_images/$fileName');
+          await storageRef.putFile(file);
+          final downloadUrl = await storageRef.getDownloadURL();
+          newImageUrls.add(downloadUrl);
+        }
+      }
+
+      // 좌표
+      final lat = _selectedLatLng!.latitude;
+      final lng = _selectedLatLng!.longitude;
+
+      // 신규 등록
+      final newDoc = await mapsRef.add({
+        'userId': user.uid,
+        'contents': _textController.text.trim(),
+        'imageUrls': newImageUrls,
+        'address': _currentAddress,
+        'lat': lat,
+        'lng': lng,
+        'createdAt': FieldValue.serverTimestamp(),
+        'updatedAt': FieldValue.serverTimestamp(),
+        'likesCount': 0,
+      });
+
+      print("New map post created with docId: ${newDoc.id}");
+      if (mounted) Navigator.pop(context);
+      if (mounted) context.go('/map'); // MapScreen으로 이동
+      Fluttertoast.showToast(msg: '등록 성공!');
+    } catch (e) {
+      if (mounted) Navigator.pop(context);
+      debugPrint('등록 실패: $e');
+      Fluttertoast.showToast(
+        msg: "등록 실패..",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: const Color(0xFF812727),
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+    }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -84,18 +188,32 @@ class MapCreateScreenState extends State<MapCreateScreen> {
                   _setLocationButton(
                     icon: Icons.my_location,
                     label: '현재 위치 불러오기',
-                    onPressed: () { },
+                      onPressed: _getCurrentAddress,
                   ),
-                  SizedBox(width: 12),
+                  const SizedBox(width: 12),
                   _setLocationButton(
                     icon: Icons.pin_drop,
-                    label: '지도에서 선택',
-                    onPressed: () { },
+                    label: '위치 직접 선택',
+                    onPressed: () async {
+                      final selectedAddress = await showDialog<Map<String, dynamic>>(
+                        context: context,
+                        builder: (context) => const LocationModal(),
+                      );
+
+                      if (selectedAddress != null &&
+                          selectedAddress['address'] != null &&
+                          selectedAddress['latLng'] != null) {
+                        setState(() {
+                          _currentAddress = selectedAddress['address'] as String;
+                          _selectedLatLng = selectedAddress['latLng'] as LatLng; // 수정: LatLng 저장
+                        });
+                      }
+                    },
                   ),
                 ],
               ),
               const SizedBox(height: 8),
-              Text(" 설정 위치: 서울특별시 성북구 보문로 168", // 설정 위치
+              Text(" 설정 위치: $_currentAddress", // 현재 위치
                 style: TextStyle(
                   color: Colors.black,
                   fontSize: 13,

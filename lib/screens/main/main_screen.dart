@@ -188,7 +188,7 @@ class _MainScreenState extends State<MainScreen> {
               IconButton(
                 icon: const Icon(Icons.arrow_forward, size: 18),
                 onPressed: () {
-                  context.go('/community'); // 전체게시물페이지로 이동
+                  context.push('/community'); // 전체게시물페이지로 이동
                 },
               ),
             ],
