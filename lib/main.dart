@@ -3,7 +3,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import '../routes/app_router.dart';
 import '../util/LocalNotification.dart';
@@ -15,9 +14,7 @@ FlutterLocalNotificationsPlugin();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // .env 파일 환경변수 로드
   await dotenv.load(fileName: ".env");
-  await Firebase.initializeApp();
   await sendApiKeyToNative();
   await initService();
   runApp(const MyApp());
