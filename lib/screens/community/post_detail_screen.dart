@@ -135,7 +135,9 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
           final userData =
               combined['user'] as Map<String, dynamic>? ?? <String, dynamic>{};
           final name = userData['nickname'] ?? '사용자';
-          final profileImage = userData['profileImage'] ?? '';
+          final profileImage = (userData['profileImage'] as String?)?.isNotEmpty == true
+              ? userData['profileImage'] as String
+              : 'assets/images/basic_profile.png';
           final contents = combined['contents'] ?? '';
           final date = formatDate((combined['createdAt'] as Timestamp).toDate());
           final images = List<String>.from(combined['imageUrl'] ?? []);
@@ -229,12 +231,12 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
         mainAxisSize: MainAxisSize.min,
         children: [
           CircleAvatar(
-            backgroundImage: profileImage.isNotEmpty && profileImage.startsWith('http')
-                ? NetworkImage(profileImage)
-                : AssetImage('assets/images/profile.png') as ImageProvider,
             radius: 15,
+            backgroundColor: Colors.grey[200],
+            backgroundImage: profileImage.startsWith('http')
+                ? NetworkImage(profileImage)
+                : AssetImage('assets/images/basic_profile.png') as ImageProvider,
           ),
-
           const SizedBox(width: 10),
           Text(
             name,

@@ -93,14 +93,18 @@ class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
 
           // 함께한 D-Day 계산
           final dDayTogether = calculateLife(meetingDate);
+          final hasLocalImage = imageUrl.isNotEmpty && File(imageUrl).existsSync();
 
           return SingleChildScrollView(
             child: Column(
               children: [
                 CircleAvatar(
                   radius: 75,
-                  backgroundImage: imageUrl.isNotEmpty
-                      ? FileImage(file)
+                  backgroundColor: Colors.grey[200],
+                  backgroundImage: hasLocalImage
+                  // 로컬 파일이 있으면 FileImage
+                      ? FileImage(File(imageUrl))
+                  // 그렇지 않으면 기본 asset 이미지
                       : const AssetImage('assets/images/default_post.png')
                   as ImageProvider,
                 ),
