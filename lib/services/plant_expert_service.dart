@@ -37,7 +37,7 @@ class PlantExpertService {
         {'role': 'user', 'content': userMessage},
       ],
       'temperature': 0.7,
-      'max_tokens': 150,
+      'max_tokens': 600,
     };
 
     final String body = jsonEncode(bodyData);
