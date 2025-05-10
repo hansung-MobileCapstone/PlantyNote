@@ -8,6 +8,7 @@ import '../../util/calculateDday.dart';
 
 class MyPlantCollectionScreen extends StatefulWidget {
   const MyPlantCollectionScreen({super.key});
+
   @override
   State<MyPlantCollectionScreen> createState() => _MyPlantCollectionScreenState();
 }
@@ -15,7 +16,7 @@ class MyPlantCollectionScreen extends StatefulWidget {
 class _MyPlantCollectionScreenState extends State<MyPlantCollectionScreen> {
   int _selectedIndex = 0; // 네비게이션바 인덱스
 
-  void _onItemTapped(int index) { // 인덱스 상태관리
+  void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
@@ -32,7 +33,7 @@ class _MyPlantCollectionScreenState extends State<MyPlantCollectionScreen> {
         // Firestore에서 식물 데이터 가져오기
         stream: FirebaseFirestore.instance
             .collection('users')
-            .doc(user!.uid) // 현재 로그인된 사용자
+            .doc(user!.uid)
             .collection('plants')
             .snapshots(),
         builder: (context, snapshot) {
@@ -62,25 +63,31 @@ class _MyPlantCollectionScreenState extends State<MyPlantCollectionScreen> {
             padding: const EdgeInsets.all(16),
             itemCount: plants.length,
             itemBuilder: (context, index) {
-              final plant = plants[index]; // 개별 식물 데이터
-              final plantName = plant['plantname'] ?? '식물 이름 없음'; // 식물 이름
-              final imageUrl = plant['imageUrl'] ?? ''; // 이미지 URL
-              final meetingDate = DateTime.parse(plant['meetingDate']); // 처음 만난 날
-              final dDayWater = plant['dDayWater'] ?? 0; // 물 d-day
+              final plantSnap = plants[index];
+              final data = plantSnap.data() as Map<String, dynamic>;
+
+              final plantName     = data['plantname'] as String? ?? '식물 이름 없음';
+              final imageUrl      = data['imageUrl']   as String? ?? '';
+              final meetingDate   = DateTime.parse(data['meetingDate'] as String);
+              final waterCycleInt = data['waterCycle'] as int?    ?? 0;
+              final waterCycle    = waterCycleInt.toDouble();
+              final waterDate     = DateTime.parse(data['waterDate']   as String);
+              final dDayWater     = data.containsKey('dDayWater')
+                  ? data['dDayWater'] as int
+                  : calculateWater(waterDate, waterCycle);
 
               // 함께한 D-Day 계산
               final dDayTogether = calculateLife(meetingDate);
 
-              // PlantListItem 위젯 생성
               return Column(
                 children: [
                   PlantListItem(
-                    plantName: plantName, // 식물 이름
-                    imageUrl: imageUrl, // 이미지 URL
-                    dDayWater: dDayWater, // 물 주는 D-Day
-                    dDayFertilizer: dDayTogether, // 함께한 D-Day
-                    plantId: plant.id, // Firestore 식물 고유 id
-                    waterCycle: plant['waterCycle'], // 물 주기
+                    plantName:      plantName,
+                    imageUrl:       imageUrl,
+                    dDayWater:      dDayWater,
+                    dDayFertilizer: dDayTogether,
+                    plantId:        plantSnap.id,
+                    waterCycle:     waterCycleInt,
                   ),
                   const SizedBox(height: 16),
                 ],
@@ -119,8 +126,7 @@ class _MyPlantCollectionScreenState extends State<MyPlantCollectionScreen> {
   Widget _writeButton() {
     return Padding(
       padding: EdgeInsets.fromLTRB(0, 8, 5, 0),
-      child:
-      Row(
+      child: Row(
         children: [
           Text(
             '추가',
