@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../widgets/components/bottom_navigation_bar.dart';
+import 'package:plant/widgets/components/plant_expert_banner.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -51,6 +52,7 @@ class _MainScreenState extends State<MainScreen> {
                   _searchBar(),
                   const SizedBox(height: 18),
                   _mainContent(),
+                  const PlantExpertBanner(),
                   const SizedBox(height: 50),
                   _recentPosts(user),
                   const SizedBox(height: 10),
@@ -114,6 +116,7 @@ class _MainScreenState extends State<MainScreen> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: InkWell(
+        // 리플 효과
         onTap: () {
           context.go('/main/search'); // /main/search로 이동
         },
@@ -219,15 +222,19 @@ class _MainScreenState extends State<MainScreen> {
         final docs = snapshot.data!.docs;
 
         // 이미지 URL과 docId를 함께 추출하여 리스트 생성
-        final List<Map<String, String>> posts = docs.map((doc) {
-          final data = doc.data() as Map<String, dynamic>;
-          final imageUrlList = List<String>.from(data['imageUrl'] ?? []);
-          final firstImageUrl = imageUrlList.isNotEmpty ? imageUrlList[0] : null;
-          return {
-            'imageUrl': firstImageUrl ?? '',
-            'docId': doc.id,
-          };
-        }).where((post) => post['imageUrl']!.isNotEmpty).toList();
+        final List<Map<String, String>> posts = docs
+            .map((doc) {
+              final data = doc.data() as Map<String, dynamic>;
+              final imageUrlList = List<String>.from(data['imageUrl'] ?? []);
+              final firstImageUrl =
+                  imageUrlList.isNotEmpty ? imageUrlList[0] : null;
+              return {
+                'imageUrl': firstImageUrl ?? '',
+                'docId': doc.id,
+              };
+            })
+            .where((post) => post['imageUrl']!.isNotEmpty)
+            .toList();
 
         final limitedPosts = posts.take(5).toList();
 
@@ -239,7 +246,8 @@ class _MainScreenState extends State<MainScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: CarouselSlider(
             items: limitedPosts.map((post) {
-              return _carouselImageItem(post['imageUrl']!, docId: post['docId']!);
+              return _carouselImageItem(post['imageUrl']!,
+                  docId: post['docId']!);
             }).toList(),
             options: CarouselOptions(
               height: 150,
@@ -305,29 +313,29 @@ class _MainScreenState extends State<MainScreen> {
           // imageUrl이 asset 경로인지 자동 체크하여 처리
           child: imageUrl.startsWith('assets/')
               ? Image.asset(
-            imageUrl,
-            width: itemWidth,
-            height: itemHeight,
-            fit: BoxFit.cover,
-          )
+                  imageUrl,
+                  width: itemWidth,
+                  height: itemHeight,
+                  fit: BoxFit.cover,
+                )
               : Image.network(
-            imageUrl,
-            width: itemWidth,
-            height: itemHeight,
-            fit: BoxFit.cover,
-            loadingBuilder: (context, child, loadingProgress) {
-              if (loadingProgress == null) return child;
-              return const Center(child: CircularProgressIndicator());
-            },
-            errorBuilder: (context, error, stackTrace) {
-              return Image.asset(
-                'assets/images/default_image.png',
-                width: itemWidth,
-                height: itemHeight,
-                fit: BoxFit.cover,
-              );
-            },
-          ),
+                  imageUrl,
+                  width: itemWidth,
+                  height: itemHeight,
+                  fit: BoxFit.cover,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return const Center(child: CircularProgressIndicator());
+                  },
+                  errorBuilder: (context, error, stackTrace) {
+                    return Image.asset(
+                      'assets/images/default_image.png',
+                      width: itemWidth,
+                      height: itemHeight,
+                      fit: BoxFit.cover,
+                    );
+                  },
+                ),
         ),
       ),
     );

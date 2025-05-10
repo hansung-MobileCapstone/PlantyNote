@@ -1,3 +1,6 @@
+### 민감 정보(.env): API 키 등 포함, Git 업로드 금지 ###
+.env
+
 ### IntelliJ IDEA ###
 out/
 !**/src/main/**/out/
