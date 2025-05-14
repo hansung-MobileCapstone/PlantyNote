@@ -84,7 +84,7 @@ class MyPageScreenState extends State<MyPageScreen> {
         },
         errorBuilder: (context, error, stackTrace) {
           return Image.asset(
-            'assets/images/default_image.png',
+            'assets/images/default_post.png',
             fit: BoxFit.cover,
           );
         },
@@ -224,7 +224,9 @@ class MyPageScreenState extends State<MyPageScreen> {
     String? displayImageUrl = _profileImageUrl;
 
     if (displayImageUrl != null && displayImageUrl.startsWith('http')) {
-      displayImageUrl = '$displayImageUrl?${DateTime.now().millisecondsSinceEpoch}';
+      displayImageUrl = '$displayImageUrl?${DateTime
+          .now()
+          .millisecondsSinceEpoch}';
     }
 
     return Padding(
@@ -232,7 +234,8 @@ class MyPageScreenState extends State<MyPageScreen> {
       child: CircleAvatar(
         radius: 50,
         backgroundColor: Colors.grey[200],
-        backgroundImage: displayImageUrl != null && displayImageUrl.startsWith('http')
+        backgroundImage: displayImageUrl != null &&
+            displayImageUrl.startsWith('http')
             ? NetworkImage(displayImageUrl)
             : AssetImage('assets/images/basic_profile.png') as ImageProvider,
       ),
@@ -356,7 +359,8 @@ class MyPageScreenState extends State<MyPageScreen> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(child: CircularProgressIndicator());
         }
-        if (snapshot.hasError || !snapshot.hasData || snapshot.data!.docs.isEmpty) {
+        if (snapshot.hasError || !snapshot.hasData ||
+            snapshot.data!.docs.isEmpty) {
           return Center(child: Text('작성한 게시물이 없습니다.'));
         }
 
@@ -368,10 +372,6 @@ class MyPageScreenState extends State<MyPageScreen> {
           return imageUrlList.isNotEmpty ? imageUrlList[0] : null;
         }).where((url) => url != null).cast<String>().toList();
 
-        if (imageUrls.isEmpty) {
-          return Center(child: Text('게시물에 이미지가 없습니다.'));
-        }
-
         return GridView.builder(
           shrinkWrap: true,
           physics: NeverScrollableScrollPhysics(),
@@ -380,16 +380,24 @@ class MyPageScreenState extends State<MyPageScreen> {
             crossAxisSpacing: 8,
             mainAxisSpacing: 8,
           ),
-          itemCount: imageUrls.length,
+          itemCount: docs.length,
           itemBuilder: (context, index) {
+            final doc = docs[index];
+            final data = doc.data() as Map<String, dynamic>;
+
+            final imageUrlList = List<String>.from(data['imageUrl'] ?? []);
+            final imageUrl = imageUrlList.isNotEmpty
+                ? imageUrlList[0]
+                : 'assets/images/default_post.png';
+
             return GestureDetector(
               onTap: () {
-                final docId = docs[index].id;
+                final docId = doc.id;
                 context.push('/community/detail', extra: {'docId': docId});
               },
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(10),
-                child: _buildGridImage(imageUrls[index]),
+                child: _buildGridImage(imageUrl),
               ),
             );
           },
