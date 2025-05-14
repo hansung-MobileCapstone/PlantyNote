@@ -96,7 +96,7 @@ class LoginScreenState extends State<LoginScreen> {
   // 트리 이미지
   Widget _treeImage(double screenWidth) {
     return Positioned(
-      bottom: 120,
+      bottom: 125,
       left: screenWidth * 0.32,
       child: Opacity(
         opacity: 0.7,
@@ -113,7 +113,7 @@ class LoginScreenState extends State<LoginScreen> {
   Widget _logoImage() {
     return Positioned(
       top: -25,
-      right: -20,
+      right: -10,
       child: Image.asset(
         'assets/images/logo.png',
         width: 60,

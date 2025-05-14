@@ -14,19 +14,19 @@ class PlantExpertBanner extends StatelessWidget {
         context.push('/conversation');
       },
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
         decoration: BoxDecoration(
-          color: Colors.green[50],
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.green, width: 1),
+          color: Color(0xFFC9DDD0),
+          borderRadius: BorderRadius.circular(50),
+          border: Border.all(color: Color(0xFF4B7E5B), width: 1),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: const [
             Icon(
-              Icons.chat_bubble_outline,
-              color: Colors.green,
+              Icons.smart_toy_outlined,
+              color: Color(0xFF4B7E5B),
             ),
             SizedBox(width: 8),
             Flexible(
@@ -35,7 +35,7 @@ class PlantExpertBanner extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: Colors.green,
+                  color: Color(0xFF4B7E5B),
                 ),
                 textAlign: TextAlign.center,
               ),

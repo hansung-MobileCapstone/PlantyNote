@@ -52,10 +52,11 @@ class _MainScreenState extends State<MainScreen> {
                   _searchBar(),
                   const SizedBox(height: 18),
                   _mainContent(),
+                  const SizedBox(height: 30),
                   const PlantExpertBanner(),
-                  const SizedBox(height: 50),
+                  const SizedBox(height: 30),
                   _recentPosts(user),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 30),
                 ],
               ),
             ),
@@ -122,7 +123,7 @@ class _MainScreenState extends State<MainScreen> {
         },
         borderRadius: BorderRadius.circular(15),
         child: Container(
-          height: 35,
+          height: 38,
           decoration: BoxDecoration(
             color: const Color(0x264B7E5B),
             borderRadius: BorderRadius.circular(15),
@@ -222,19 +223,16 @@ class _MainScreenState extends State<MainScreen> {
         final docs = snapshot.data!.docs;
 
         // 이미지 URL과 docId를 함께 추출하여 리스트 생성
-        final List<Map<String, String>> posts = docs
-            .map((doc) {
-              final data = doc.data() as Map<String, dynamic>;
-              final imageUrlList = List<String>.from(data['imageUrl'] ?? []);
-              final firstImageUrl =
-                  imageUrlList.isNotEmpty ? imageUrlList[0] : null;
-              return {
-                'imageUrl': firstImageUrl ?? '',
-                'docId': doc.id,
-              };
-            })
-            .where((post) => post['imageUrl']!.isNotEmpty)
-            .toList();
+        final List<Map<String, String>> posts = docs.map((doc) {
+          final data = doc.data() as Map<String, dynamic>;
+          final imageUrlList = List<String>.from(data['imageUrl'] ?? []);
+          final firstImageUrl = imageUrlList.isNotEmpty ? imageUrlList[0] : null;
+
+          return {
+            'imageUrl': firstImageUrl ?? 'assets/images/default_post.png', // 기본 이미지 경로 설정
+            'docId': doc.id,
+          };
+        }).toList(); // where 필터 제거
 
         final limitedPosts = posts.take(5).toList();
 
@@ -250,7 +248,7 @@ class _MainScreenState extends State<MainScreen> {
                   docId: post['docId']!);
             }).toList(),
             options: CarouselOptions(
-              height: 150,
+              height: 130,
               viewportFraction: 0.4,
               enableInfiniteScroll: false,
               autoPlay: false,
