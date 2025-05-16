@@ -115,44 +115,50 @@ class PostItem extends StatelessWidget {
 
   // 게시글 내용을 표시하는 위젯 (RichText로 하이라이트 적용)
   Widget _postContent() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Row(
-          children: [
-            CircleAvatar(
-              radius: 10,
-              backgroundImage: profileImage.startsWith('http')
-                  ? NetworkImage(profileImage)
-                  : AssetImage(profileImage) as ImageProvider,
-            ),
-            const SizedBox(width: 8),
-            RichText(
-              text: _highlight(
-                name,
-                style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 25),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 10,
+                backgroundImage: profileImage.startsWith('http')
+                    ? NetworkImage(profileImage)
+                    : AssetImage(profileImage) as ImageProvider,
+              ),
+              const SizedBox(width: 8),
+              RichText(
+                text: _highlight(
+                  name,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
                 ),
               ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        RichText(
-          text: _highlight(
-            contents,
-            style: const TextStyle(
-              fontSize: 11,
-              color: Color(0xFF7D7D7D),
-            ),
+            ],
           ),
-        ),
-      ],
+          const SizedBox(height: 8),
+          Text.rich(
+            _highlight(
+              contents,
+              style: const TextStyle(
+                fontSize: 11,
+                color: Color(0xFF7D7D7D),
+              ),
+            ),
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
     );
   }
+
 
   // 식물 정보를 표시하는 위젯
   Widget _plantInformation(String plantSpecies, String waterCycle, String fertilizerCycle) {

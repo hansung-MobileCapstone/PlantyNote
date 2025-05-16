@@ -195,7 +195,7 @@ class _CommentModalState extends State<CommentModal> {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 10.0),
+                    padding: const EdgeInsets.only(bottom: 10),
                     child: _InputSection(
                       controller: _commentController,
                       onSubmit: _submitComment,
@@ -237,7 +237,7 @@ class _InputSection extends StatelessWidget {
           Expanded(
             flex: 85, // TextField 85%
             child: SizedBox(
-              height: 40,
+              height: 38,
               child: TextField(
                 controller: controller,
                 decoration: InputDecoration(

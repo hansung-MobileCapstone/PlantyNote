@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../widgets/components/ConfirmDialog.dart';
 import '../../widgets/components/bottom_navigation_bar.dart';
 import '../modals/comment_modal.dart';
 import 'package:plant/util/dateFormat.dart';
@@ -60,34 +61,24 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   void _showDeleteDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text("게시물 삭제"),
-          content: const Text("정말 삭제하시겠습니까?"),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context); // 모달 닫기
-              },
-              child: const Text("아니오"),
-            ),
-            TextButton(
-              onPressed: () async {
-                if (widget.docId != null) {
-                  await FirebaseFirestore.instance
-                      .collection('posts')
-                      .doc(widget.docId)
-                      .delete();
-                }
-                Navigator.pop(context); // 모달 닫기
-                context.go('/community');
-              },
-              child: const Text("예"),
-            ),
-          ],
-        );
-      },
-    );
+      builder: (context) => ConfirmDialog(
+        title: '게시물 삭제',
+        content: '정말 삭제하시겠습니까?',
+        onConfirm: () {
+          Navigator.pop(context, true); // true 반환
+        },
+      ),
+    ).then((confirmed) async {
+      if (confirmed == true && widget.docId != null) {
+        await FirebaseFirestore.instance
+            .collection('posts')
+            .doc(widget.docId)
+            .delete();
+        if (context.mounted) {
+          context.go('/community');
+        }
+      }
+    });
   }
 
   void _showCommentModal(BuildContext context) {
@@ -112,7 +103,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    print("PostDetailScreen docId: ${widget.docId}");
+    //print("PostDetailScreen docId: ${widget.docId}");
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: _buildAppBar(),
@@ -376,14 +367,14 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
 
   Widget _plantDetails(String plantSpecies, String waterCycle, String fertilizerCycle) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 3),
-      child: Column(
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _informationRow('식물 종', plantSpecies),
-          const SizedBox(height: 8),
+          const SizedBox(width: 10),
           _informationRow('물 주기', waterCycle),
-          const SizedBox(height: 8),
+          const SizedBox(width: 10),
           _informationRow('분갈이 주기', fertilizerCycle),
         ],
       ),

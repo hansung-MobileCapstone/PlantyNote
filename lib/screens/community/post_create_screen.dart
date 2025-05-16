@@ -288,7 +288,7 @@ class PostCreateScreenState extends State<PostCreateScreen> {
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
-          value: _selectedPlantName,
+          value: _plantNames.contains(_selectedPlantName) ? _selectedPlantName : null,
           hint: const Text('식물 이름', style: TextStyle(fontSize: 12)),
           items: _plantNames.map((name) {
             return DropdownMenuItem(
@@ -387,7 +387,7 @@ class PostCreateScreenState extends State<PostCreateScreen> {
   Widget _bottomButton() {
     return Container(
       color: Colors.white,
-      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 18),
+      padding: const EdgeInsets.symmetric(vertical: 25, horizontal: 18),
       child: Row(
         children: [
           Expanded(
