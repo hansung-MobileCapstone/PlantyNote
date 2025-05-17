@@ -355,7 +355,7 @@ class MapCreateScreenState extends State<MapCreateScreen> {
   Widget _bottomButton() {
     return Container(
       color: Colors.white,
-      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 18),
+      padding: const EdgeInsets.symmetric(vertical: 25, horizontal: 18),
       child: Row(
         children: [
           Expanded(

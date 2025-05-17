@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../widgets/components/ConfirmDialog.dart';
 import '../../widgets/profile/change_password_modal.dart';
 import 'package:plant/widgets/components/bottom_navigation_bar.dart';
 import 'package:image_picker/image_picker.dart';
@@ -197,29 +198,21 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
   void _showWithdrawDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (BuildContext dialogContext) {
-        return AlertDialog(
-          title: Text("계정 탈퇴"),
-          content: Text("정말 탈퇴 하시겠습니까?"),
-          actions: [
-            TextButton(
-              onPressed: () {
-                dialogContext.pop();
-              },
-              child: Text("아니오"),
-            ),
-            TextButton(
-              onPressed: () async {
-                dialogContext.pop();
-                await _deleteAccount();
-                context.go('start/login');
-              },
-              child: Text("예"),
-            ),
-          ],
-        );
-      },
-    );
+      builder: (context) => ConfirmDialog(
+        title: '계정 탈퇴',
+        content: '정말 탈퇴 하시겠습니까?',
+        onConfirm: () {
+          Navigator.pop(context, true); // true 반환
+        },
+      ),
+    ).then((confirmed) async {
+      if (confirmed == true) {
+        await _deleteAccount();
+        if (context.mounted) {
+          context.go('/start/login');
+        }
+      }
+    });
   }
 
   Future<void> _deleteAccount() async {
@@ -346,9 +339,9 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
           return imageUrlList.isNotEmpty ? imageUrlList[0] : null;
         }).where((url) => url != null).cast<String>().toList();
 
-        if (imageUrls.isEmpty) {
-          return Center(child: Text('게시물에 이미지가 없습니다.'));
-        }
+        // if (imageUrls.isEmpty) {
+        //   return Center(child: Text('게시물에 이미지가 없습니다.'));
+        // }
 
         return GridView.builder(
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -356,16 +349,21 @@ class MyPageEditScreenState extends State<MyPageEditScreen> {
             crossAxisSpacing: 8,
             mainAxisSpacing: 8,
           ),
-          itemCount: imageUrls.length,
+          itemCount: docs.length,
           itemBuilder: (context, index) {
+            final doc = docs[index];
+            final data = doc.data() as Map<String, dynamic>;
+
+            final imageUrlList = List<String>.from(data['imageUrl'] ?? []);
+            final imageUrl = imageUrlList.isNotEmpty
+                ? imageUrlList[0]
+                : 'assets/images/default_post.png';
+
             return GestureDetector(
-              onTap: () {
-                final docId = docs[index].id;
-                context.push('/community/detail', extra: {'docId': docId});
-              },
+              onTap: null,
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(10),
-                child: _buildGridImage(imageUrls[index]),
+                child: _buildGridImage(imageUrl),
               ),
             );
           },

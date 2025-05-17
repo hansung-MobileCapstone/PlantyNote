@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../widgets/components/ConfirmDialog.dart';
 import '../../widgets/components/bottom_navigation_bar.dart';
 
 class MyPageScreen extends StatefulWidget {
@@ -195,29 +196,23 @@ class MyPageScreenState extends State<MyPageScreen> {
   void _showLogoutDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("로그아웃"),
-          content: Text("로그아웃 하시겠습니까?"),
-          actions: [
-            TextButton(
-              onPressed: () {
-                context.pop(); // 팝업 닫기
-              },
-              child: Text("아니오"),
-            ),
-            TextButton(
-              onPressed: () async {
-                await FirebaseAuth.instance.signOut();
-                context.go('/start/login');
-              },
-              child: Text("예"),
-            ),
-          ],
-        );
-      },
-    );
+      builder: (context) => ConfirmDialog(
+        title: '로그아웃',
+        content: '로그아웃 하시겠습니까?',
+        onConfirm: () {
+          Navigator.pop(context, true); // true 반환
+        },
+      ),
+    ).then((confirmed) async {
+      if (confirmed == true) {
+        await FirebaseAuth.instance.signOut();
+        if (context.mounted) {
+          context.go('/start/login');
+        }
+      }
+    });
   }
+
 
   // 프로필 사진
   Widget _profileImage() {
@@ -365,12 +360,6 @@ class MyPageScreenState extends State<MyPageScreen> {
         }
 
         final docs = snapshot.data!.docs;
-
-        final imageUrls = docs.map((doc) {
-          final data = doc.data() as Map<String, dynamic>;
-          final imageUrlList = List<String>.from(data['imageUrl'] ?? []);
-          return imageUrlList.isNotEmpty ? imageUrlList[0] : null;
-        }).where((url) => url != null).cast<String>().toList();
 
         return GridView.builder(
           shrinkWrap: true,
