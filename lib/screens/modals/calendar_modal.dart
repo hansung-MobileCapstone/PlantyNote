@@ -66,7 +66,7 @@ class _CalendarModalState extends State<CalendarModal> {
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 5),
             // 선택 버튼
             TextButton(
               onPressed: () {
@@ -79,7 +79,7 @@ class _CalendarModalState extends State<CalendarModal> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(50),
                 ),
-                padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 22),
+                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 22),
               ),
               child: const Text(
                 '선택',

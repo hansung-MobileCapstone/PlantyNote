@@ -5,6 +5,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'dart:io';
 
+import 'ConfirmDialog.dart';
+
 // 내 식물 하나
 class PlantListItem extends StatefulWidget  {
   final String plantName;
@@ -143,39 +145,25 @@ class _PlantListItemState extends State<PlantListItem> {
   void _showWateringDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (BuildContext context) => _buildWateringDialog(context),
-    );
+      builder: (context) => ConfirmDialog(
+        title: '물 주기',
+        content: '${widget.plantName}에게 물을 주시겠습니까?',
+        onConfirm: () {
+          Navigator.pop(context, true); // true 반환
+        },
+      ),
+    ).then((confirmed) async {
+      if (confirmed == true) {
+        try {
+          await _updateWaterDate(); // 실제 물 주기 처리
+          _showToast("${widget.plantName}에게 물을 주었습니다!");
+        } catch (e) {
+          _showToast("물 주기 실패..");
+        }
+      }
+    });
   }
 
-  Widget _buildWateringDialog(BuildContext context) {
-    return AlertDialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      title: Text("물 주기"),
-      content: Text("${widget.plantName}에게 물을 주시겠습니까?"),
-      actions: [
-        // 아니오 버튼
-        TextButton(
-          onPressed: () { context.pop(); }, // 팝업 닫기
-          child: const Text("아니오"),
-        ),
-        // 예 버튼
-        TextButton(
-          onPressed: () async {
-            context.pop(); // 팝업 닫기
-            try {
-              await _updateWaterDate(); // 물 주기 로직
-              _showToast("${widget.plantName}에게 물을 주었습니다!");
-            } catch (e) {
-              _showToast("물 주기 실패..");
-            }
-          },
-          child: const Text("예"),
-        ),
-      ],
-    );
-  }
 
   Future<void> _updateWaterDate() async {
     final user = FirebaseAuth.instance.currentUser;
