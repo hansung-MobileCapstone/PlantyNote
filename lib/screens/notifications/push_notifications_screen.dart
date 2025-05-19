@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../widgets/components/ConfirmDialog.dart';
 import '../../widgets/components/notificaiton_item.dart';
 import '../../util/LocalNotification.dart';
 import 'package:go_router/go_router.dart';
@@ -80,29 +81,20 @@ class NotificationScreenState extends State<NotificationScreen> {
   void _showDeleteDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("알림 지우기"),
-          content: Text("모든 알림을 삭제합니다."),
-          actions: [
-            TextButton(
-              onPressed: () {
-                context.pop(); // 팝업 닫기
-              },
-              child: Text("아니오"),
-            ),
-            TextButton(
-              onPressed: () {
-                LocalNotification.clearAllSharedPreferences();
-                context.pop(); // 팝업 닫기
-              },
-              child: Text("예"),
-            ),
-          ],
-        );
-      },
-    );
+      builder: (context) => ConfirmDialog(
+        title: '알림 지우기',
+        content: '모든 알림을 삭제합니다.',
+        onConfirm: () {
+          Navigator.pop(context, true); // true 반환
+        },
+      ),
+    ).then((confirmed) {
+      if (confirmed == true) {
+        LocalNotification.clearAllSharedPreferences();
+      }
+    });
   }
+
 
   @override
   Widget build(BuildContext context) {

@@ -5,6 +5,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'dart:io';
 
+import 'ConfirmDialog.dart';
+
 // 메모 하나
 class MemoItem extends StatelessWidget {
   final String date; // 작성 날짜
@@ -115,11 +117,25 @@ class MemoItem extends StatelessWidget {
                     ),
                   ),
                   SizedBox(height: 7),
-                  if (imageUrl != null && imageUrl.isNotEmpty) // 메모 이미지가 있다면
+                  if (imageUrl != null && imageUrl.isNotEmpty)
                     ClipRRect(
                       borderRadius: BorderRadius.circular(10),
-                      child: Image.file(
-                        File(imageUrl), // 이미지 경로
+                      child: imageUrl.startsWith('http')
+                          ? Image.network(
+                        imageUrl,
+                        width: 150,
+                        height: 150,
+                        fit: BoxFit.cover,
+                      )
+                          : imageUrl.startsWith('assets/')
+                          ? Image.asset(
+                        imageUrl,
+                        width: 150,
+                        height: 150,
+                        fit: BoxFit.fill,
+                      )
+                          : Image.file(
+                        File(imageUrl),
                         width: 150,
                         height: 150,
                         fit: BoxFit.cover,
@@ -129,7 +145,8 @@ class MemoItem extends StatelessWidget {
               ),
             ),
             IconButton( // 삭제 버튼
-              icon: const Icon(Icons.delete_outline, color: Color(0xFFDA2525), size: 16),
+              icon: const Icon(
+                  Icons.delete_outline, color: Color(0xFFDA2525), size: 16),
               onPressed: () {
                 _showDeleteDialog(context); // 삭제 확인 팝업
               },
@@ -144,27 +161,19 @@ class MemoItem extends StatelessWidget {
   void _showDeleteDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("메모 삭제"),
-          content: Text("정말 삭제하시겠습니까?"),
-          actions: [
-            TextButton(
-              onPressed: () {
-                context.pop(); // 팝업 닫기
-              },
-              child: Text("아니오"),
-            ),
-            TextButton(
-              onPressed: () {
-                context.pop();
-                _deleteMemo(context);
-              },
-              child: Text("예"),
-            ),
-          ],
-        );
-      },
-    );
+      builder: (context) =>
+          ConfirmDialog(
+            title: '메모 삭제',
+            content: '정말 삭제하시겠습니까?',
+            onConfirm: () {
+              Navigator.pop(context, true); // true 반환
+            },
+          ),
+    ).then((confirmed) {
+      if (confirmed == true) {
+        _deleteMemo(context);
+      }
+    });
   }
 }
+
