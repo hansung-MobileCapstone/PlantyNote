@@ -72,22 +72,17 @@ class _MyPlantCollectionScreenState extends State<MyPlantCollectionScreen> {
               final waterCycleInt = data['waterCycle'] as int?    ?? 0;
               final waterCycle    = waterCycleInt.toDouble();
               final waterDate     = DateTime.parse(data['waterDate']   as String);
-              final dDayWater     = data.containsKey('dDayWater')
-                  ? data['dDayWater'] as int
-                  : calculateWater(waterDate, waterCycle);
-
-              // 함께한 D-Day 계산
-              final dDayTogether = calculateLife(meetingDate);
+              final dDayWater = calculateWater(waterDate, waterCycle);
 
               return Column(
                 children: [
                   PlantListItem(
-                    plantName:      plantName,
-                    imageUrl:       imageUrl,
-                    dDayWater:      dDayWater,
-                    dDayFertilizer: dDayTogether,
-                    plantId:        plantSnap.id,
-                    waterCycle:     waterCycleInt,
+                    plantName: plantName,
+                    imageUrl: imageUrl,
+                    waterDate: waterDate,
+                    waterCycle: waterCycleInt,
+                    dDayFertilizer: calculateLife(meetingDate),
+                    plantId: plantSnap.id,
                   ),
                   const SizedBox(height: 16),
                 ],
