@@ -504,21 +504,21 @@ class _MyPlantTimelineScreenState extends State<MyPlantTimelineScreen> {
 
   // D-DAY 부분
   Widget _plantDday(int dDayWater, int dDayFertilizer, int dDayRepotting) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text('물', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF697386))),
-        const SizedBox(width: 10),
-        _dDayBadge('D-$dDayWater', Color(0xFF95CED5)),
-        const SizedBox(width: 20),
-        Text('영양제', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF697386))),
-        const SizedBox(width: 10),
-        _dDayBadge('D-$dDayFertilizer', Color(0xFFEAC7A8)),
-        const SizedBox(width: 20),
-        Text('분갈이', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF697386))),
-        const SizedBox(width: 10),
-        _dDayBadge('D-$dDayRepotting', Color(0xFFCABECE)),
-      ],
+    return Center(
+      child: Wrap(
+        alignment: WrapAlignment.center,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        spacing: 10, // 항목 간 간격
+
+        children: [
+          Text('물', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF697386))),
+          _dDayBadge('D-$dDayWater', Color(0xFF95CED5)),
+          Text('영양제', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF697386))),
+          _dDayBadge('D-$dDayFertilizer', Color(0xFFEAC7A8)),
+          Text('분갈이', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF697386))),
+          _dDayBadge('D-$dDayRepotting', Color(0xFFCABECE)),
+        ],
+      ),
     );
   }
 

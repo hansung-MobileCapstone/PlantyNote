@@ -51,7 +51,7 @@ class PlantOnboardingScreen extends StatelessWidget {
   // 트리 이미지
   Widget _treeImage(BuildContext context) {
     return Positioned(
-      bottom: 0,
+      bottom: -10,
       left: 100,
       right: 0,
       child: Image.asset(

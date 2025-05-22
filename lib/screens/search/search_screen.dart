@@ -108,7 +108,7 @@ class SearchScreenState extends State<SearchScreen> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 1),
       child: Container(
-        height: 35,
+        height: 38,
         decoration: BoxDecoration(
           color: const Color(0x264B7E5B),
           borderRadius: BorderRadius.circular(15),
@@ -125,6 +125,9 @@ class SearchScreenState extends State<SearchScreen> {
                   border: InputBorder.none,
                 ),
                 style: const TextStyle(color: Colors.black),
+                onSubmitted: (value) {
+                  _goToSearchResult(value);
+                },
               ),
             ),
             const SizedBox(width: 8),

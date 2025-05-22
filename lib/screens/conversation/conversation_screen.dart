@@ -53,17 +53,20 @@ class _ConversationScreenState extends State<ConversationScreen> {
   Widget _buildMessageWidget(Map<String, String> message) {
     final bool isUserMessage = message['role'] == 'user';
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+      margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
       alignment: isUserMessage ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
         decoration: BoxDecoration(
-          color: isUserMessage ? Colors.green[100] : Colors.grey[200],
-          borderRadius: BorderRadius.circular(12),
+          color: isUserMessage ? Colors.white : Color(0xFFE4ECE6),
+          borderRadius: BorderRadius.circular(20),
+          border: isUserMessage
+              ? Border.all(color: Color(0xFFC9DDD0), width: 1.5)
+              : null, // user인 경우만 빨간 border
         ),
         child: Text(
           message['content'] ?? '',
-          style: const TextStyle(fontSize: 14, color: Colors.black),
+          style: const TextStyle(fontSize: 14, color: Color(0xFF757575)),
         ),
       ),
     );
@@ -72,8 +75,18 @@ class _ConversationScreenState extends State<ConversationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('식물 전문가 PLANTY와 대화'),
+        scrolledUnderElevation: 0,
+        backgroundColor: Colors.white,
+        title: const Text(
+          '식물 전문가 PLANTY',
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ),
       body: SafeArea(
         child: Column(
@@ -101,17 +114,40 @@ class _ConversationScreenState extends State<ConversationScreen> {
                   Expanded(
                     child: TextField(
                       controller: _textController,
-                      decoration: const InputDecoration(
-                        hintText: '궁금한 사항을 입력하세요.',
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        hintText: 'PLANTY에게 궁금한 점을 물어보세요!',
+                        hintStyle: const TextStyle(color: Color(0xFF757575)),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 17, vertical: 8),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(50),
+                          borderSide: const BorderSide(color: Color(0xFFB3B3B3)),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(50),
+                          borderSide: const BorderSide(color: Color(0xFFB3B3B3)),
+                        ),
                       ),
                       onSubmitted: (_) => _submitMessage(),
                     ),
                   ),
                   const SizedBox(width: 6),
-                  IconButton(
-                    icon: const Icon(Icons.send),
-                    onPressed: _submitMessage,
+                  Container(
+                    height: 40,
+
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF4B7E5B),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: TextButton(
+                      onPressed: _submitMessage,
+                      child: const Text(
+                        '입력',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),

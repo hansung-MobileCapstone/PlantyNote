@@ -115,6 +115,7 @@ class PasswordChangeModalState extends State<PasswordChangeModal> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
+      backgroundColor: Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
       ),
@@ -129,16 +130,16 @@ class PasswordChangeModalState extends State<PasswordChangeModal> {
                 '비밀번호 변경',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  fontSize: 22,
+                  fontSize: 18,
                 ),
               ),
               SizedBox(height: 20),
               // 현재 비밀번호 입력 필드
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 12),
+                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 0),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  border: Border.all(color: Colors.green[800]!, width: 3.5),
+                  border: Border.all(color: Color(0xFF4B7E5B), width: 2),
                   borderRadius: BorderRadius.circular(40),
                 ),
                 child: TextField(
@@ -146,7 +147,7 @@ class PasswordChangeModalState extends State<PasswordChangeModal> {
                   obscureText: true,
                   decoration: InputDecoration(
                     hintText: '현재PW : 현재 비밀번호를 입력하세요.',
-                    hintStyle: TextStyle(fontSize: 12, color: Colors.green[800]),
+                    hintStyle: TextStyle(fontSize: 12, color: Color(0x994B7E5B)),
                     border: InputBorder.none,
                   ),
                 ),
@@ -166,10 +167,10 @@ class PasswordChangeModalState extends State<PasswordChangeModal> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12),
+                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 0),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      border: Border.all(color: Colors.green[800]!, width: 3.5),
+                      border: Border.all(color: Color(0xFF4B7E5B), width: 2),
                       borderRadius: BorderRadius.circular(40),
                     ),
                     child: TextField(
@@ -177,7 +178,7 @@ class PasswordChangeModalState extends State<PasswordChangeModal> {
                       obscureText: true,
                       decoration: InputDecoration(
                         hintText: '변경PW : 새로운 비밀번호를 입력하세요.',
-                        hintStyle: TextStyle(fontSize: 12, color: Colors.green[800]),
+                        hintStyle: TextStyle(fontSize: 12, color: Color(0x994B7E5B)),
                         border: InputBorder.none,
                       ),
                     ),
@@ -208,44 +209,50 @@ class PasswordChangeModalState extends State<PasswordChangeModal> {
                 children: [
                   ElevatedButton(
                     onPressed: () {
-                      context.pop(); // 변경된 부분
+                      context.pop();
                     },
                     style: ElevatedButton.styleFrom(
-                      padding:
-                      EdgeInsets.symmetric(horizontal: 30, vertical: 14),
-                      backgroundColor: Colors.grey[200],
-                      foregroundColor: Colors.green[800],
+                      backgroundColor: Color(0xFFE6E6E6),
+                      foregroundColor: Colors.black,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(40),
+                        borderRadius: BorderRadius.circular(50),
                       ),
+                      padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 30),
+                      elevation: 0,
                     ),
-                    child: Text(
+                    child: const Text(
                       '취소',
-                      style: TextStyle(fontSize: 16, color: Colors.green[800]),
+                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
                     ),
                   ),
                   ElevatedButton(
                     onPressed: _isLoading ? null : _changePassword,
                     style: ElevatedButton.styleFrom(
-                      padding:
-                      EdgeInsets.symmetric(horizontal: 30, vertical: 14),
+                      backgroundColor: const Color(0xFF4B7E5B),
                       foregroundColor: Colors.white,
-                      backgroundColor: Colors.green[800],
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(40),
+                        borderRadius: BorderRadius.circular(50),
                       ),
+                      padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 30),
+                      elevation: 0, // 그림자 제거
                     ),
                     child: _isLoading
-                        ? CircularProgressIndicator(
-                      color: Colors.white,
+                        ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
                     )
-                        : Text(
+                        : const Text(
                       '완료',
-                      style: TextStyle(fontSize: 16),
+                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
                     ),
                   ),
                 ],
               ),
+
             ],
           ),
         ),

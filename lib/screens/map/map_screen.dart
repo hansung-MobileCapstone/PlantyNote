@@ -130,12 +130,39 @@ class _MapScreenState extends State<MapScreen> {
           Positioned( // 현재 위치 버튼
             bottom: 90,
             right: 15,
-            child: _currentLocationButton(),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.8),
+                borderRadius: BorderRadius.circular(30),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    spreadRadius: 1,
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: _currentLocationButton(),
+            ),
           ),
           Positioned( // 식물 등록 버튼
             bottom: 30,
             right: 16,
-            child: _writeButton(),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.8),
+                borderRadius: BorderRadius.circular(30),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.25),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: _writeButton(),
+            ),
           ),
         ],
       ),
@@ -167,7 +194,7 @@ class _MapScreenState extends State<MapScreen> {
     return IconButton(
       icon: Icon(Icons.my_location),
       color: Colors.red,
-      iconSize: 45,
+      iconSize: 40,
       onPressed: _checkLocation,
       tooltip: '내 위치로 이동',
     );
@@ -193,7 +220,7 @@ class _MapScreenState extends State<MapScreen> {
       icon: const Icon(
         Icons.add_circle,
         color: Color(0xFF4B7E5B),
-        size: 45,
+        size: 40,
       ),
     );
   }

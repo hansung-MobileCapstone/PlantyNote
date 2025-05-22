@@ -2,10 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CADisableMinimumFrameDurationOnPhone</key>
+	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
-	<key>FLTEnableImpeller</key>
-	<false/>
 	<key>CFBundleDisplayName</key>
 	<string>PlantyNote</string>
 	<key>CFBundleExecutable</key>
@@ -24,7 +24,21 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<key>FLTEnableImpeller</key>
+	<false/>
 	<key>LSRequiresIPhoneOS</key>
+	<true/>
+	<key>NSCameraUsageDesciption</key>
+	<string>카메라 접근이 필요합니다.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>위치 정보가 필요합니다.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>위치 정보가 필요합니다.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>사진 저장을 위한 갤러리 접근이 필요합니다.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>사진 선택을 위한 갤러리 접근이 필요합니다.</string>
+	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
@@ -43,20 +57,5 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<key>CADisableMinimumFrameDurationOnPhone</key>
-	<true/>
-	<key>UIApplicationSupportsIndirectInputEvents</key>
-	<true/>
-	<key>NSLocationWhenInUseUsageDescription</key>
-    <string>위치 정보가 필요합니다.</string>
-    <key>NSLocationAlwaysUsageDescription</key>
-    <string>위치 정보가 필요합니다.</string>
-    <key>NSCameraUsageDesciption</key>
-    <string>카메라 접근이 필요합니다.</string>
-    <key>NSPhotoLibraryUsageDescription</key>
-    <string>사진 선택을 위한 갤러리 접근이 필요합니다.</string>
-    <key>NSPhotoLibraryAddUsageDescription</key>
-    <string>사진 저장을 위한 갤러리 접근이 필요합니다.</string>
-
 </dict>
 </plist>

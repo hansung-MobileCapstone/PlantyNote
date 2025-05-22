@@ -121,31 +121,30 @@ class _CycleSettingModalState extends State<CycleSettingModal> {
           ),
           const SizedBox(height: 8),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text(
-                '${min.toInt() != 0 ? min.toInt() : ""}${unit == "개월" ? "안함" : ""}',
-                style: const TextStyle(
-                  fontSize: 13,
-                  color: Color(0xFF697386),
+              SizedBox(
+                width: 25,
+                child: Text(
+                  '${min.toInt() != 0 ? min.toInt() : ""}${unit == "개월" ? "안함" : ""}',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: Color(0xFF697386),
+                  ),
                 ),
               ),
-              SizedBox(
-                width: 250,
+              const SizedBox(width: 8),
+              Expanded(
                 child: SliderTheme(
                   data: SliderThemeData(
-                    activeTrackColor: const Color(0xFF4B7E5B), // 활성
-                    inactiveTrackColor: const Color(0xFFE6E6E6), // 비활성
-                    thumbColor: const Color(0xFF4B7E5B), // 핸들
+                    activeTrackColor: const Color(0xFF4B7E5B),
+                    inactiveTrackColor: const Color(0xFFE6E6E6),
+                    thumbColor: const Color(0xFF4B7E5B),
                     trackHeight: 3.0,
-                    thumbShape: const RoundSliderThumbShape(
-                      enabledThumbRadius: 6.0,
-                    ),
+                    thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6.0),
                     valueIndicatorShape: const PaddleSliderValueIndicatorShape(),
                     valueIndicatorColor: const Color(0xFF4B7E5B),
-                    valueIndicatorTextStyle: const TextStyle(
-                      color: Colors.white,
-                    ),
+                    valueIndicatorTextStyle: const TextStyle(color: Colors.white),
                   ),
                   child: Slider(
                     value: value,
@@ -157,11 +156,15 @@ class _CycleSettingModalState extends State<CycleSettingModal> {
                   ),
                 ),
               ),
-              Text(
-                '${max.toInt()}',
-                style: const TextStyle(
-                  fontSize: 13,
-                  color: Color(0xFF697386),
+              const SizedBox(width: 8),
+              SizedBox(
+                width: 28,
+                child: Text(
+                  '${max.toInt()}',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: Color(0xFF697386),
+                  ),
                 ),
               ),
             ],

@@ -1,3 +1,4 @@
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import '../../widgets/inputs/emoji_selector.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -39,7 +40,21 @@ class _MemoCreateModalState extends State<MemoCreateModal> {
         throw Exception("로그인된 사용자가 없습니다.");
       }
 
-      // Firestore에 저장
+      String imageUrl = '';
+
+      // 1. 이미지가 선택된 경우 Storage에 업로드
+      if (_image != null) {
+        final file = File(_image!.path);
+        final fileName = '${DateTime.now().millisecondsSinceEpoch}_${_image!.name}';
+        final storageRef = FirebaseStorage.instance
+            .ref()
+            .child('users/${user.uid}/memos/$fileName');
+
+        final uploadTask = await storageRef.putFile(file);
+        imageUrl = await uploadTask.ref.getDownloadURL(); // 다운로드 URL 받기
+      }
+
+      // 2. Firestore에 저장
       await FirebaseFirestore.instance
           .collection('users')
           .doc(user.uid)
@@ -47,9 +62,9 @@ class _MemoCreateModalState extends State<MemoCreateModal> {
           .doc(widget.plantId)
           .collection('memos')
           .add({
-        'emoji': selectedEmojiIndex, // 선택한 이모지
-        'content': _memoController.text.trim(), // 메모 텍스트
-        'imageUrl': _image?.path ?? '', // 이미지
+        'emoji': selectedEmojiIndex,
+        'content': _memoController.text.trim(),
+        'imageUrl': imageUrl, // 다운로드 URL 저장
         'createdAt': FieldValue.serverTimestamp(),
       });
 
@@ -63,7 +78,7 @@ class _MemoCreateModalState extends State<MemoCreateModal> {
       );
 
       if (!mounted) return;
-      context.pop(); // 내식물타임라인페이지페이지로 이동
+      context.pop();
 
     } catch (e) {
       Fluttertoast.showToast(
@@ -73,6 +88,7 @@ class _MemoCreateModalState extends State<MemoCreateModal> {
         backgroundColor: Color(0xFFE81010),
         textColor: Colors.white,
       );
+      print('에러: $e');
     }
   }
 

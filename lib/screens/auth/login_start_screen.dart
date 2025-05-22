@@ -36,7 +36,7 @@ class LoginStartScreen extends StatelessWidget {
   Widget _logoImage() {
     return Positioned(
       top: -25, // 텍스트 박스 위로 띄움
-      right: -20, // 텍스트 박스 오른쪽으로 띄움
+      right: -15, // 텍스트 박스 오른쪽으로 띄움
       child: Image.asset(
         'assets/images/logo.png',
         width: 60,
@@ -49,7 +49,7 @@ class LoginStartScreen extends StatelessWidget {
   // 트리 이미지
   Widget _treeImage(double screenWidth) {
     return Positioned(
-      bottom: 0,
+      bottom: -10,
       left: 100,
       right: 0,
       child: Opacity(
@@ -77,7 +77,7 @@ class LoginStartScreen extends StatelessWidget {
         ),
       ),
       child: const Text(
-        'The best\nApp for\nyour plants',
+        'The Best\nApp for\nYour Plants',
         textAlign: TextAlign.left,
         style: TextStyle(
           fontSize: 50,

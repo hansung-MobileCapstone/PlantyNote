@@ -14,37 +14,6 @@ class SearchScreenResult extends StatelessWidget {
     return text.toLowerCase().contains(keyword.toLowerCase());
   }
 
-  // 키워드 강조 (볼드체 처리)
-  InlineSpan _highlightText(String text) {
-    final lowerText = text.toLowerCase();
-    final lowerKeyword = keyword.toLowerCase();
-
-    if (!lowerText.contains(lowerKeyword)) {
-      return TextSpan(text: text);
-    }
-
-    final spans = <TextSpan>[];
-    int start = 0;
-    int index;
-
-    while ((index = lowerText.indexOf(lowerKeyword, start)) != -1) {
-      if (start < index) {
-        spans.add(TextSpan(text: text.substring(start, index)));
-      }
-      spans.add(TextSpan(
-        text: text.substring(index, index + keyword.length),
-        style: const TextStyle(fontWeight: FontWeight.bold),
-      ));
-      start = index + keyword.length;
-    }
-
-    if (start < text.length) {
-      spans.add(TextSpan(text: text.substring(start)));
-    }
-
-    return TextSpan(children: spans);
-  }
-
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;

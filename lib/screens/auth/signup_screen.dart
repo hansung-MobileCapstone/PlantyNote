@@ -93,7 +93,7 @@ class SignupScreenState extends State<SignupScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const SizedBox(height: 55),
+                    const SizedBox(height: 5),
                     _iDInput(),
                     const SizedBox(height: 10),
                     _eMailInput(),
@@ -124,7 +124,7 @@ class SignupScreenState extends State<SignupScreen> {
   // 트리 이미지
   Widget _treeImage(double screenWidth) {
     return Positioned(
-      bottom: 120,
+      bottom: 125,
       left: screenWidth * 0.32,
       child: Opacity(
         opacity: 0.7,
@@ -141,7 +141,7 @@ class SignupScreenState extends State<SignupScreen> {
   Widget _logoImage() {
     return Positioned(
       top: -25,
-      right: -20,
+      right: -10,
       child: Image.asset(
         'assets/images/logo.png',
         width: 60,

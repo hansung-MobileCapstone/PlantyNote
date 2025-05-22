@@ -577,7 +577,7 @@ class _MyPlantRegisterScreenState extends State<MyPlantRegisterScreen> {
   Widget _bottomButton() {
     return Container(
       color: Colors.white,
-      padding: EdgeInsets.symmetric(vertical: 10, horizontal: 18),
+      padding: EdgeInsets.symmetric(vertical: 25, horizontal: 18),
       child: Row(
         children: [
           Expanded(
@@ -687,7 +687,7 @@ class CalendarModalButton extends StatelessWidget {
         );
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 35),
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 22),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(50),
